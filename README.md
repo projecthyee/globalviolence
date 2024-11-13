@@ -1,6 +1,6 @@
-# P8105 FINAL PROJECT PROPOSAL
+# P8105 Final Project: Determinants of Global Violence
 
-## MEMBERS:
+## Members:
 
 * My An Huynh (mh4589)
 * Jeffrey Lin (jl7035)
