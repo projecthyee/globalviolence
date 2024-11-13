@@ -1,15 +1,51 @@
-P8105 Final Project: Determinants of Violence
+P8105 Final Project: Determinants of Global Violence
 ================
 My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top
 
-# Import, Tidy & Merge Project Data
+# Data: Source, Scraping Method & Cleaning
 
-## Economic Determinants
+## Source
+
+Since there are many determinants and indicators of violence, we chose
+the indicators and outcomes that we thought were most interesting and
+relevant in exploring violence from the following sources:
+
+- International Monetary Fund (IMF)
+  - Unemployment Rate
+- United Nations Development Program (UNDP):
+  - Human Development Index
+- United Nations Office of Drugs and Crime (UNODC)
+  - Corruption and Economic Crime
+  - Criminal Justice Personnel
+  - Drug Seizure (2018 - 2022)
+  - Firearms Trafficking
+  - Human Trafficking
+  - Intentional Homicide
+  - Violent and Sexual Crimes
+- World Bank
+  - Gross Domestic Product (GDP)
+  - Inflation Rate (Measured by Consumer Price Index)
+- World Health Organization (WHO)
+  - Alcohol Consumption
+
+Intentional homicide, and violent and sexual crimes were chosen as the
+outcome variable to quantify violence.
+
+## Scraping Method
+
+The datasets were downloaded from the official websites of the sources
+above. The names of the files were also changed accordingly for clarity
+and to avoid confusion. For example, the alcohol consumption data file
+was renamed from “data.csv” to “alcohol_consumption.csv”.
+
+## Cleaning
+
+### Economic Determinants
 
 ``` r
 gdp_df = 
   read_excel(
-    path = "data/worldbank/API_NY.GDP.MKTP.CD_DS2_en_excel_v2_10034.xls",
+    path = "data/worldbank/gdp.xls",
     sheet = "Data",
     skip = 3,
     na = ""
@@ -24,7 +60,7 @@ gdp_df =
   mutate(year = as.numeric(year),
          country = countrycode(country, origin = "iso3c", 
                                destination = "country.name")) |>
-  drop_na()
+  drop_na(country)
 ```
 
     ## Warning: There was 1 warning in `mutate()`.
@@ -36,7 +72,7 @@ gdp_df =
 ``` r
 inflation_df = 
   read_excel(
-    path = "data/worldbank/API_FP.CPI.TOTL.ZG_DS2_en_excel_v2_9839.xls",
+    path = "data/worldbank/inflation_rate.xls",
     sheet = "Data",
     skip = 3,
     na = ""
@@ -50,8 +86,7 @@ inflation_df =
   janitor::clean_names() |>
   mutate(year = as.numeric(year),
          country = countrycode(country, origin = "iso3c", 
-                               destination = "country.name")) |>
-  drop_na()
+                               destination = "country.name"))
 ```
 
     ## Warning: There was 1 warning in `mutate()`.
@@ -63,7 +98,7 @@ inflation_df =
 ``` r
 unemployment_df =
   read_excel(
-    path = "data/imf/imf-dm-export-20241108.xls",
+    path = "data/imf/unemployment_rate.xls",
     range = "A1:AY116",
     na = "no data"
   ) |>
@@ -77,12 +112,11 @@ unemployment_df =
   janitor::clean_names() |>
   mutate(year = as.numeric(year),
          country = countrycode(country, origin = "country.name", 
-                               destination = "country.name")) |>
-  drop_na()
+                               destination = "country.name"))
 
 hdi_index_df =
   read_csv(
-    file = "data/undp/HDR23-24_Composite_indices_complete_time_series.csv",
+    file = "data/undp/human_development_index.csv",
     na = "") |>
   head(-11) |>
   pivot_longer(
@@ -107,12 +141,12 @@ hdi_index_df =
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-## Social Determinants
+### Social Determinants
 
 ``` r
 crime_df = 
   read_excel(
-    path = "data/unodc/data_cts_corruption_and_economic_crime.xlsx",
+    path = "data/unodc/corruption_economic_crime.xlsx",
     skip = 2
   ) |>
   janitor::clean_names() |>
@@ -135,9 +169,74 @@ crime_df =
     ## the `.groups` argument.
 
 ``` r
+justice_personnel_df =
+  read_excel(
+    path = "data/unodc/criminal_justice_personnel.xlsx",
+    skip = 2
+  ) |>
+  janitor::clean_names() |>
+  mutate(year = as.numeric(year), 
+         country = countrycode(iso3_code, origin = "iso3c", 
+                              destination = "country.name")) |>
+  filter(indicator == "Criminal Justice Personnel",
+         unit_of_measurement == "Rate per 100,000 population",
+         between(year, 2015, 2023),
+         sex == "Total") |>
+  group_by(country, region, year) |>
+  summarize(avg_personnel_rate = mean(value))
+```
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(iso3_code, origin = "iso3c", destination
+    ##   = "country.name")`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: GBR_E_W, GBR_NI, GBR_S, IRQ_C, IRQ_KRI, XKX
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
+
+``` r
+drugs_2018_2022_df =
+  read_excel(
+    path = "data/unodc/drug_seizures_2018_2022.xlsx",
+    skip = 1
+  ) |>
+  janitor::clean_names() |>
+  rename(year = reference_year) |>
+  mutate(year = as.numeric(year), 
+         country = countrycode(ms_code, origin = "iso3c",  
+                              destination = "country.name")) |>
+  group_by(country, region, year) |>
+  summarize(total_drug_seizures = sum(kilograms))
+```
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
+
+``` r
+firearms_df = 
+    read_excel(
+    path = "data/unodc/firearms_trafficking.xlsx",
+    skip = 2
+  ) |>
+  janitor::clean_names() |>
+  mutate(year = as.numeric(year), 
+         country = countrycode(iso3_code, origin = "iso3c",  
+                              destination = "country.name")) |>
+  filter(indicator == "Arms seized",
+         between(year, 2015, 2023),
+         category == "Total") |>
+  group_by(country, region, year) |>
+  summarize(total_arms_seized = sum(value))
+```
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
+
+``` r
 trafficking_df =
   read_excel(
-    path = "data/unodc/data_glotip.xlsx",
+    path = "data/unodc/human_trafficking.xlsx",
     skip = 2
   ) |>
   janitor::clean_names() |>
@@ -164,47 +263,9 @@ trafficking_df =
     ## the `.groups` argument.
 
 ``` r
-drugs_2018_2022_df =
-  read_excel(
-    path = "data/unodc/7.1._Drug_seizures_2018-2022.xlsx",
-    skip = 1
-  ) |>
-  janitor::clean_names() |>
-  rename(year = reference_year) |>
-  mutate(year = as.numeric(year), 
-         country = countrycode(ms_code, origin = "iso3c",  
-                              destination = "country.name")) |>
-  group_by(country, region, year) |>
-  summarize(total_drug_seizures = sum(kilograms))
-```
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
-
-``` r
-firearms_df = 
-    read_excel(
-    path = "data/unodc/data_iafq_firearms_trafficking.xlsx",
-    skip = 2
-  ) |>
-  janitor::clean_names() |>
-  mutate(year = as.numeric(year), 
-         country = countrycode(iso3_code, origin = "iso3c",  
-                              destination = "country.name")) |>
-  filter(indicator == "Arms seized",
-         between(year, 2015, 2023),
-         category == "Total") |>
-  group_by(country, region, year) |>
-  summarize(total_arms_seized = sum(value))
-```
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
-
-``` r
 alcohol_consumption_df =
   read_csv(
-    file = "data/who/data.csv", 
+    file = "data/who/alcohol_consumption.csv", 
     na = ""
   ) |>
   janitor::clean_names() |>
@@ -228,39 +289,12 @@ alcohol_consumption_df =
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-``` r
-justice_personnel_df =
-  read_excel(
-    path = "data/unodc/data_cts_access_and_functioning_of_justice.xlsx",
-    skip = 2
-  ) |>
-  janitor::clean_names() |>
-  mutate(year = as.numeric(year), 
-         country = countrycode(iso3_code, origin = "iso3c", 
-                              destination = "country.name")) |>
-  filter(indicator == "Criminal Justice Personnel",
-         unit_of_measurement == "Rate per 100,000 population",
-         between(year, 2015, 2023),
-         sex == "Total") |>
-  group_by(country, region, year) |>
-  summarize(avg_personnel_rate = mean(value))
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(iso3_code, origin = "iso3c", destination
-    ##   = "country.name")`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: GBR_E_W, GBR_NI, GBR_S, IRQ_C, IRQ_KRI, XKX
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
-
-## Outcomes of Violence
+### Outcomes of Violence
 
 ``` r
 homicide_rate_df = 
     readxl::read_excel(
-    path = "data/unodc/data_cts_intentional_homicide.xlsx",
+    path = "data/unodc/intentional_homicide.xlsx",
     skip = 2
   ) |>
   janitor::clean_names() |>
@@ -284,7 +318,7 @@ homicide_rate_df =
 ``` r
 violence_rate_df = 
     readxl::read_excel(
-    path = "data/unodc/data_cts_violent_and_sexual_crime.xlsx",
+    path = "data/unodc/violent_sexual_crime.xlsx",
     skip = 2
   ) |>
   janitor::clean_names() |>
@@ -311,26 +345,37 @@ violence_rate_df =
     ## `summarise()` has grouped output by 'country'. You can override using the
     ## `.groups` argument.
 
-## Merge Datasets
+### Merge Datasets
 
 ``` r
 merged_violence_df =
-  left_join(homicide_rate_df, gdp_df) |>
+  left_join(homicide_rate_df, violence_rate_df) |>
+  left_join(gdp_df) |>
   left_join(inflation_df) |>
   left_join(unemployment_df) |>
   left_join(hdi_index_df) |>
   left_join(crime_df) |>
-  left_join(trafficking_df) |>
+  left_join(justice_personnel_df) |>
   left_join(drugs_2018_2022_df) |>
   left_join(firearms_df) |>
-  left_join(justice_personnel_df) |>
+  left_join(trafficking_df) |>
   left_join(alcohol_consumption_df) |>
-  mutate(country = as.factor(country))
+  mutate(country = as.factor(country),
+         region = as.factor(region)) |>
+  drop_na(country, region)
 ```
 
     ## Joining with `by = join_by(country, year)`
     ## Joining with `by = join_by(country, year)`
     ## Joining with `by = join_by(country, year)`
+
+    ## Warning in left_join(left_join(left_join(homicide_rate_df, violence_rate_df), : Detected an unexpected many-to-many relationship between `x` and `y`.
+    ## ℹ Row 46 of `x` matches multiple rows in `y`.
+    ## ℹ Row 10 of `y` matches multiple rows in `x`.
+    ## ℹ If a many-to-many relationship is expected, set `relationship =
+    ##   "many-to-many"` to silence this warning.
+
+    ## Joining with `by = join_by(country, year)`
     ## Joining with `by = join_by(country, year)`
     ## Joining with `by = join_by(country, region, year)`
     ## Joining with `by = join_by(country, region, year)`
@@ -338,3 +383,35 @@ merged_violence_df =
     ## Joining with `by = join_by(country, region, year)`
     ## Joining with `by = join_by(country, region, year)`
     ## Joining with `by = join_by(country, year)`
+
+``` r
+str(merged_violence_df)
+```
+
+    ## tibble [8,180 × 15] (S3: tbl_df/tbl/data.frame)
+    ##  $ country            : Factor w/ 165 levels "Afghanistan",..: 1 6 2 5 157 8 9 4 10 11 ...
+    ##  $ region             : Factor w/ 5 levels "Africa","Americas",..: 3 1 4 4 3 2 3 5 5 4 ...
+    ##  $ year               : num [1:8180] 2015 2015 2015 2015 2015 ...
+    ##  $ homicide_rate      : num [1:8180] 9.975 4.458 2.22 0 0.673 ...
+    ##  $ avg_violence_rate  : num [1:8180] NA NA 5.51 41.26 2.16 ...
+    ##  $ gdp                : num [1:8180] 1.91e+10 9.05e+10 1.14e+10 2.79e+09 3.70e+11 ...
+    ##  $ inflation_rate     : num [1:8180] -0.662 9.356 1.896 NA 4.07 ...
+    ##  $ unemployment_rate  : num [1:8180] NA NA 17.1 3.9 NA 6.5 18.5 NA 6.1 6.2 ...
+    ##  $ hdi_index          : num [1:8180] 0.479 0.591 0.797 0.856 0.86 0.85 0.769 NA 0.933 0.91 ...
+    ##  $ avg_crime_rate     : num [1:8180] NA NA 25.9 784.7 31.9 ...
+    ##  $ avg_personnel_rate : num [1:8180] NA NA 165 148 NA ...
+    ##  $ total_drug_seizures: num [1:8180] NA NA NA NA NA NA NA NA NA NA ...
+    ##  $ total_arms_seized  : num [1:8180] NA NA NA NA NA NA NA NA NA NA ...
+    ##  $ total_trafficking  : num [1:8180] NA NA 109 NA 34 ...
+    ##  $ alcohol_consumption: num [1:8180] 0.009 7.76 5.04 10.76 2.37 ...
+
+The final merged dataset includes 8180 rows and 15 columns, including
+country, region, year, homicide rate, gdp, inflation rate, unemployment
+rate, average crime rate, average (criminal justice) personnel rate,
+total drug seized (2018 - 2022), total arm seized, total trafficking and
+alcohol consumption as variables.
+
+After merging the datasets, country and region were converted as a
+categorical variables. Also, countries and regions with NA values were
+dropped since we are interested in exploring violence by country and
+region.
