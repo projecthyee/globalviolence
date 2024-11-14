@@ -357,6 +357,21 @@ violence_rate_df =
     ## `summarise()` has grouped output by 'country'. You can override using the
     ## `.groups` argument.
 
+For the economic determinants, all the datasets had years organized as
+different columns, where each column represented values for that
+specific year. Therefore, pivot_longer() was applied to pivot years and
+their respective values into two columns.
+
+For rates of all social determinants, we filtered and chose the data to
+be rates per 100,000 people since it allows standardization for
+comparability by adjusting for differences in population size.
+
+The countrycode() function from the countrycode package was also
+implemented in order to standardize the country names of each dataset
+since some of the country names were represented inconsistently across
+datasets. For example, South Korea was represented as “Korea (Republic
+of)” and “Korea, Rep.”
+
 ### Merge Datasets
 
 ``` r
@@ -416,7 +431,7 @@ country, region, year, homicide rate, average violence offence rate,
 gdp, inflation rate, unemployment rate, average crime rate, average
 (criminal justice) personnel rate, total drug seized (2018 - 2022),
 total arm seized, total trafficking and alcohol consumption as
-variables.
+variables. There is a total of 163 distinct countries.
 
 After merging the datasets, country and region were converted to
 categorical variables. Rows with NA values for country and region were
