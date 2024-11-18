@@ -1,0 +1,140 @@
+---
+title: "Regression"
+author: "My An Huynh"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(countrycode)
+library(MASS)
+```
+
+
+## Regression 
+
+Split data into training and testing + visualize distributions 
+```{r train/test + visualization}
+train_df = sample_frac(merged_violence_df, size = 0.8)
+test_df = anti_join(merged_violence_df, train_df, by = "gdp")
+
+train_df |> 
+  ggplot(aes(x = homicide_rate)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = avg_violence_rate)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = gdp)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = inflation_rate)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = unemployment_rate)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = avg_crime_rate)) +
+  geom_density()
+
+
+train_df |> 
+  ggplot(aes(x = human_development_index)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = avg_crime_rate)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = avg_personnel_rate)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = total_drug_seizures)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = total_arms_seized)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = total_trafficking)) +
+  geom_density()
+
+train_df |> 
+  ggplot(aes(x = alcohol_consumption)) +
+  geom_density()
+```
+
+
+After looking at the distributions of all variables, all variables are skewed right, except for human development index which is slightly skewed left. I will apply ln transformations and box-cox transformations to these variables, and use the Shapiro-Wilk test to test for normality. Even though it is not necessary to normalize the predictors, this step will stablize variance and reduce heteroscedasticity. I think it will be helpful for further steps with model.
+
+Transformation step involves writing a function for ln transformation and a function for box_cox transformation. The functions will be mapped into the nested listcol which includes all continuous variables in the train_df dataset. 
+
+```{r transformations}
+ln_transform = function(df) {
+  df |> 
+    mutate(across(everything(), ~ {
+      if(any(!is.na(.) & . <= 0)) {
+      . = . + abs(min(., na.rm = TRUE) + 0.0000000001)
+    }
+      log(.)
+    }))
+}
+
+
+nested_train_df =
+  train_df |> 
+  nest(data = c(homicide_rate:alcohol_consumption)) |> 
+  mutate(
+    ln_transformed_data = map(data, ln_transform)
+  ) |> 
+  unnest(ln_transformed_data) |> 
+  rename_with(~ paste0("ln_", .), where(is.numeric)) |> 
+  rename(
+    year = ln_year
+  ) 
+
+str(nested_train_df)
+nested_train_df =
+  nested_train_df |> 
+  select(country, year, region, starts_with("ln"))
+
+```
+
+Working on box cox but the code doesn't work ....
+
+```{r eval = FALSE}
+box_cox_transform = function(df) {
+  df |> 
+    mutate(across(where(is.numeric), ~ {
+      if (any(!is.na(.) & . <= 0)) {
+        . <- . + min(., na.rm = TRUE) + 0.0000000001  
+      }
+
+      box_cox_result <- boxcox(. ~ 1, lambda = "all", plotit = FALSE)
+
+      box_cox_tidy <- tidy(box_cox_result)
+      
+      optimal_lambda <- box_cox_tidy |> 
+        filter(logLik == max(logLik)) |> 
+        pull(lambda) 
+      
+      if (optimal_lambda == 0) {
+        log(.) 
+      } else {
+        ((.)^optimal_lambda - 1) / optimal_lambda  
+      }
+    }))
+}
+
+```
+
