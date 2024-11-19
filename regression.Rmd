@@ -20,20 +20,18 @@ Split data into training and testing + visualize distributions
 train_df = sample_frac(merged_violence_df, size = 0.8)
 test_df = anti_join(merged_violence_df, train_df, by = "gdp")
 
-plot_distributions = function(column) {
+plot_distributions = function(column, name) {
   
-  data = pull(train_df, column)
-  
-  if(is.numeric(data)) {
-    ggplot(train_df, aes_string(x = column)) +
+  if(is.numeric(column) & name != "year") {
+    ggplot(train_df, aes(x = column)) +
     geom_density() +
-    labs(title = paste("Distribution of ", column))
+    labs(title = paste("Distribution of", name))
   }
+  
 }
 
 train_list = colnames(train_df)
-map(train_list, plot_distributions)
-
+map(train_list, \(x) plot_distributions(pull(train_df, x), x))
 ```
 
 After looking at the distributions of all variables, all variables are skewed 
@@ -49,33 +47,16 @@ function for box_cox transformation. The functions will be mapped into the
 nested listcol which includes all continuous variables in the train_df dataset. 
 
 ```{r transformations}
-ln_transform = function(df) {
-  df |> 
-    mutate(across(everything(), ~ {
-      if(any(!is.na(.) & . <= 0)) {
-      . = . + abs(min(., na.rm = TRUE) + 0.0000000001)
-    }
-      log(.)
-    }))
+ln_transform = function(value) {
+  return(log(abs(value)))
 }
 
-nested_train_df =
-  train_df |> 
-  nest(data = c(homicide_rate:alcohol_consumption)) |> 
-  mutate(
-    ln_transformed_data = map(data, ln_transform)
-  ) |> 
-  unnest(ln_transformed_data) |> 
-  rename_with(~ paste0("ln_", .), where(is.numeric)) |> 
-  rename(
-    year = ln_year
-  ) 
+ln_train_df = 
+  train_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption), 
+                ln_transform))
 
-str(nested_train_df)
-nested_train_df =
-  nested_train_df |> 
-  select(country, year, region, starts_with("ln"))
-
+map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
 ```
 
 Working on box cox but the code doesn't work ....
