@@ -437,3 +437,441 @@ After merging the datasets, country and region were converted to
 categorical variables. Rows with NA values for country and region were
 dropped, and the dataset was filtered for the years between 2015 and
 2023.
+
+# EDA
+
+## Visualization
+
+``` r
+merged_violence_df |>
+  group_by(region, year) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = year, color = region)) +
+  geom_line()
+```
+
+    ## `summarise()` has grouped output by 'region'. You can override using the
+    ## `.groups` argument.
+
+![](p8105_fp_report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+## Data Transformation
+
+## Regression
+
+Split data into training and testing + visualize distributions
+
+``` r
+train_df = sample_frac(merged_violence_df, size = 0.8)
+test_df = anti_join(merged_violence_df, train_df, by = "gdp")
+
+plot_distributions = function(column, name) {
+  
+  if(is.numeric(column) & name != "year") {
+    ggplot(train_df, aes(x = column)) +
+    geom_density() +
+    labs(title = paste("Distribution of", name))
+  }
+  
+}
+
+train_list = colnames(train_df)
+map(train_list, \(x) plot_distributions(pull(train_df, x), x))
+```
+
+    ## [[1]]
+    ## NULL
+    ## 
+    ## [[2]]
+    ## NULL
+    ## 
+    ## [[3]]
+    ## NULL
+    ## 
+    ## [[4]]
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-1.png)<!-- -->
+
+    ## 
+    ## [[5]]
+
+    ## Warning: Removed 191 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-2.png)<!-- -->
+
+    ## 
+    ## [[6]]
+
+    ## Warning: Removed 16 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-3.png)<!-- -->
+
+    ## 
+    ## [[7]]
+
+    ## Warning: Removed 74 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-4.png)<!-- -->
+
+    ## 
+    ## [[8]]
+
+    ## Warning: Removed 241 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-5.png)<!-- -->
+
+    ## 
+    ## [[9]]
+
+    ## Warning: Removed 49 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-6.png)<!-- -->
+
+    ## 
+    ## [[10]]
+
+    ## Warning: Removed 205 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-7.png)<!-- -->
+
+    ## 
+    ## [[11]]
+
+    ## Warning: Removed 368 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-8.png)<!-- -->
+
+    ## 
+    ## [[12]]
+
+    ## Warning: Removed 490 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-9.png)<!-- -->
+
+    ## 
+    ## [[13]]
+
+    ## Warning: Removed 562 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-10.png)<!-- -->
+
+    ## 
+    ## [[14]]
+
+    ## Warning: Removed 344 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-11.png)<!-- -->
+
+    ## 
+    ## [[15]]
+
+    ## Warning: Removed 239 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-12.png)<!-- -->
+
+After looking at the distributions of all variables, all variables are
+skewed right, except for human development index which is bimodal and
+slightly left-skewed. I will apply ln transformations and box-cox
+transformations to these variables, and use the Shapiro-Wilk test to
+test for normality. Even though it is not necessary to normalize the
+predictors, this step will stablize variance and reduce
+heteroscedasticity. I think it will be helpful for further steps with
+model.
+
+Transformation step involves writing a function for ln transformation
+and a function for box_cox transformation. The functions will be mapped
+into the nested listcol which includes all continuous variables in the
+train_df dataset.
+
+``` r
+ln_transform = function(value) {
+  return(log(abs(value)))
+}
+
+ln_train_df = 
+  train_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption), 
+                ln_transform))
+
+map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
+```
+
+    ## [[1]]
+    ## NULL
+    ## 
+    ## [[2]]
+    ## NULL
+    ## 
+    ## [[3]]
+    ## NULL
+    ## 
+    ## [[4]]
+
+    ## Warning: Removed 15 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-1.png)<!-- -->
+
+    ## 
+    ## [[5]]
+
+    ## Warning: Removed 194 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-2.png)<!-- -->
+
+    ## 
+    ## [[6]]
+
+    ## Warning: Removed 16 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-3.png)<!-- -->
+
+    ## 
+    ## [[7]]
+
+    ## Warning: Removed 74 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-4.png)<!-- -->
+
+    ## 
+    ## [[8]]
+
+    ## Warning: Removed 241 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-5.png)<!-- -->
+
+    ## 
+    ## [[9]]
+
+    ## Warning: Removed 49 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-6.png)<!-- -->
+
+    ## 
+    ## [[10]]
+
+    ## Warning: Removed 212 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-7.png)<!-- -->
+
+    ## 
+    ## [[11]]
+
+    ## Warning: Removed 368 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-8.png)<!-- -->
+
+    ## 
+    ## [[12]]
+
+    ## Warning: Removed 491 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-9.png)<!-- -->
+
+    ## 
+    ## [[13]]
+
+    ## Warning: Removed 566 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-10.png)<!-- -->
+
+    ## 
+    ## [[14]]
+
+    ## Warning: Removed 344 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-11.png)<!-- -->
+
+    ## 
+    ## [[15]]
+
+    ## Warning: Removed 245 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/ln_transform-12.png)<!-- -->
+
+``` r
+library(MASS)
+```
+
+    ## 
+    ## Attaching package: 'MASS'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     select
+
+``` r
+boxcox_transform = function(value) {
+  value = value + abs(min(value, na.rm = TRUE)) + 0.00001
+  
+  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]
+  return((value^lambda - 1) / lambda)
+}
+
+boxcox_train_df = 
+  train_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption), 
+                boxcox_transform))
+
+map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
+```
+
+    ## [[1]]
+    ## NULL
+    ## 
+    ## [[2]]
+    ## NULL
+    ## 
+    ## [[3]]
+    ## NULL
+    ## 
+    ## [[4]]
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-1.png)<!-- -->
+
+    ## 
+    ## [[5]]
+
+    ## Warning: Removed 191 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-2.png)<!-- -->
+
+    ## 
+    ## [[6]]
+
+    ## Warning: Removed 822 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-3.png)<!-- -->
+
+    ## 
+    ## [[7]]
+
+    ## Warning: Removed 74 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-4.png)<!-- -->
+
+    ## 
+    ## [[8]]
+
+    ## Warning: Removed 241 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-5.png)<!-- -->
+
+    ## 
+    ## [[9]]
+
+    ## Warning: Removed 49 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-6.png)<!-- -->
+
+    ## 
+    ## [[10]]
+
+    ## Warning: Removed 205 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-7.png)<!-- -->
+
+    ## 
+    ## [[11]]
+
+    ## Warning: Removed 368 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-8.png)<!-- -->
+
+    ## 
+    ## [[12]]
+
+    ## Warning: Removed 490 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-9.png)<!-- -->
+
+    ## 
+    ## [[13]]
+
+    ## Warning: Removed 562 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-10.png)<!-- -->
+
+    ## 
+    ## [[14]]
+
+    ## Warning: Removed 344 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-11.png)<!-- -->
+
+    ## 
+    ## [[15]]
+
+    ## Warning: Removed 239 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+![](p8105_fp_report_files/figure-gfm/boxcox_transform-12.png)<!-- -->
+
+## Stepwise Regression
+
+``` r
+model = lm(homicide_rate ~ year + gdp + inflation_rate + unemployment_rate 
+           + human_development_index + avg_crime_rate + avg_personnel_rate 
+           + total_drug_seizures + total_arms_seized + total_trafficking 
+           + alcohol_consumption, data = na.omit(merged_violence_df))
+
+step_model = step(model, direction = "both", trace = 0)
+summary(step_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = homicide_rate ~ gdp + unemployment_rate + human_development_index + 
+    ##     avg_personnel_rate + total_arms_seized, data = na.omit(merged_violence_df))
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -13.2360  -4.3080   0.3352   2.0792  30.7240 
+    ## 
+    ## Coefficients:
+    ##                           Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)              7.775e+01  1.007e+01   7.719 7.73e-11 ***
+    ## gdp                     -1.626e-12  6.655e-13  -2.443  0.01722 *  
+    ## unemployment_rate       -5.061e-01  2.372e-01  -2.134  0.03653 *  
+    ## human_development_index -8.697e+01  1.211e+01  -7.179 7.23e-10 ***
+    ## avg_personnel_rate       5.504e-02  1.834e-02   3.002  0.00377 ** 
+    ## total_arms_seized        1.143e-04  3.732e-05   3.062  0.00317 ** 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 7.233 on 67 degrees of freedom
+    ## Multiple R-squared:  0.5363, Adjusted R-squared:  0.5017 
+    ## F-statistic:  15.5 on 5 and 67 DF,  p-value: 4.148e-10

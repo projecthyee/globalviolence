@@ -323,6 +323,16 @@ dataset was filtered for the years between 2015 and 2023.
 
 # EDA
 
+## Visualization
+
+```{r}
+merged_violence_df |>
+  group_by(region, year) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = year, color = region)) +
+  geom_line()
+```
+
 ## Data Transformation 
 
 ## Regression 
@@ -372,6 +382,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
 ```
 
 ```{r boxcox_transform}
+library(MASS)
 boxcox_transform = function(value) {
   value = value + abs(min(value, na.rm = TRUE)) + 0.00001
   
