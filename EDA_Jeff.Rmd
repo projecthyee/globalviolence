@@ -108,6 +108,18 @@ merged_violence_df %>%
   ggtitle("Average Rate of Violence by Human Development Index") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+### Scatter plot of HDI against homicide rate
+```{r}
+merged_violence_df %>% 
+  ggplot(aes(x = human_development_index, homicide_rate, color = region)) +
+  geom_point() +
+  facet_grid(.~region) +
+  xlab("Human Development Index") +
+  ylab("Homicide Rate") +
+  ggtitle("Homicide Rate by Human Development Index") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
 
 
 
