@@ -23,7 +23,6 @@ head(merged_violence_df)
 
 ##  Global
 
-
 ### Visualize Distribution
 ```{r}
 merged_violence_df %>% 
@@ -54,25 +53,27 @@ lambda <- box_cox_MLE %>%
 
 merged_violence_df <- merged_violence_df %>% 
   mutate(
-    box_cox_HDI = (human_development_df ^ (lambda - 1)) / lambda  
+    box_cox_HDI = (human_development_index ^ (lambda - 1)) / lambda  
   )
 
 ```
-Distribution after Box Cox Transformation
 
+Distribution after Box Cox Transformation
 ```{r}
 
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index)) +
+  ggplot(aes(x = box_cox_HDI)) +
   geom_density() +
-  xlab("Human Development Index") + 
+  xlab("Box Cox Transformed Human Development Index") + 
   ylab("Density") +
   ggtitle("Distribution of Global HDI Scores") +
   theme(plot.title = element_text(hjust = 0.5))
 
 
 ```
+### Scatter plot of HDI against homicide rate
 
+### Scatter plot of HDI against average violence rate
 
 
 ## By Region
