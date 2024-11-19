@@ -97,6 +97,21 @@ merged_violence_df %>%
 
 ## By Region
 
+# Distribution of HDI by Region
+
+```{r}
+merged_violence_df %>% 
+  ggplot(aes(x = human_development_index, color = region)) +
+  geom_density() +
+  facet_grid(.~region) +
+  xlab("Human Development Index") + 
+  ylab("Density") +
+  ggtitle("Distribution of HDI Scores by Region") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
 ### Scatter plot of HDI against average violence rate
 ```{r}
 merged_violence_df %>% 
