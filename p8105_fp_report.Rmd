@@ -320,3 +320,84 @@ consumption as variables. There is a total of
 After merging the datasets, country and region were converted to categorical 
 variables. Rows with NA values for country and region were dropped, and the 
 dataset was filtered for the years between 2015 and 2023. 
+
+# EDA
+
+## Data Transformation 
+
+## Regression 
+
+Split data into training and testing + visualize distributions 
+```{r train/test + distribution}
+train_df = sample_frac(merged_violence_df, size = 0.8)
+test_df = anti_join(merged_violence_df, train_df, by = "gdp")
+
+plot_distributions = function(column, name) {
+  
+  if(is.numeric(column) & name != "year") {
+    ggplot(train_df, aes(x = column)) +
+    geom_density() +
+    labs(title = paste("Distribution of", name))
+  }
+  
+}
+
+train_list = colnames(train_df)
+map(train_list, \(x) plot_distributions(pull(train_df, x), x))
+```
+
+After looking at the distributions of all variables, all variables are skewed 
+right, except for human development index which is bimodal and slightly 
+left-skewed. I will apply ln transformations and box-cox transformations to 
+these variables, and use the Shapiro-Wilk test to test for normality. Even 
+though it is not necessary to normalize the predictors, this step will stablize 
+variance and reduce heteroscedasticity. I think it will be helpful for further 
+steps with model.
+
+Transformation step involves writing a function for ln transformation and a 
+function for box_cox transformation. The functions will be mapped into the 
+nested listcol which includes all continuous variables in the train_df dataset. 
+
+```{r ln_transform}
+ln_transform = function(value) {
+  return(log(abs(value)))
+}
+
+ln_train_df = 
+  train_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption), 
+                ln_transform))
+
+map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
+```
+
+```{r boxcox_transform}
+boxcox_transform = function(value) {
+  value = value + abs(min(value, na.rm = TRUE)) + 0.00001
+  
+  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]
+  return((value^lambda - 1) / lambda)
+}
+
+boxcox_train_df = 
+  train_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption), 
+                boxcox_transform))
+
+map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
+```
+
+## Stepwise Regression
+
+```{r}
+model = lm(homicide_rate ~ year + gdp + inflation_rate + unemployment_rate 
+           + human_development_index + avg_crime_rate + avg_personnel_rate 
+           + total_drug_seizures + total_arms_seized + total_trafficking 
+           + alcohol_consumption, data = na.omit(merged_violence_df))
+
+step_model = step(model, direction = "both", trace = 0)
+summary(step_model)
+```
+
+
