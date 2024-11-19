@@ -100,10 +100,11 @@ merged_violence_df %>%
 ### Scatter plot of HDI against average violence rate
 ```{r}
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index, avg_violence_rate)) +
+  ggplot(aes(x = human_development_index, avg_violence_rate, color = region)) +
   geom_point() +
-  xlab("Average Violence Rate") +
-  ylab("Human Development Index") +
+  facet_grid(.~region) +
+  xlab("Human Development Index") +
+  ylab("Average Violence Rate") +
   ggtitle("Average Rate of Violence by Human Development Index") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
