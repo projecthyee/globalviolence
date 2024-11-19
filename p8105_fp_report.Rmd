@@ -326,11 +326,40 @@ dataset was filtered for the years between 2015 and 2023.
 ## Visualization
 
 ```{r}
-merged_violence_df |>
+homicide_visual_df = 
+    readxl::read_excel(
+    path = "data/unodc/intentional_homicide.xlsx",
+    skip = 2
+  ) |>
+  janitor::clean_names() |>
+  filter(indicator == "Victims of intentional homicide",
+         unit_of_measurement == "Rate per 100,000 population",
+         category != "Total",
+         sex != "Total",
+         between(year, 2015, 2023)) |>
+  select(country, region, category, sex, year, homicide_rate = value)
+```
+
+```{r}
+homicide_visual_df |>
   group_by(region, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = year, color = region)) +
-  geom_line()
+  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = region)) +
+  geom_col(position = "dodge", bin = 3.0) + 
+  labs(x = "Year",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Across Region")
+```
+```{r}
+homicide_visual_df |>
+  group_by(region, sex, year) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = year, color = sex)) +
+  geom_smooth(se = FALSE) +
+  facet_grid(~region) + 
+  labs(x = "Year",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Trend")
 ```
 
 ## Data Transformation 
@@ -402,16 +431,5 @@ boxcox_train_df =
 map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
 ```
 
-## Stepwise Regression
-
-```{r}
-model = lm(homicide_rate ~ year + gdp + inflation_rate + unemployment_rate 
-           + human_development_index + avg_crime_rate + avg_personnel_rate 
-           + total_drug_seizures + total_arms_seized + total_trafficking 
-           + alcohol_consumption, data = na.omit(merged_violence_df))
-
-step_model = step(model, direction = "both", trace = 0)
-summary(step_model)
-```
 
 

@@ -443,17 +443,56 @@ dropped, and the dataset was filtered for the years between 2015 and
 ## Visualization
 
 ``` r
-merged_violence_df |>
+homicide_visual_df = 
+    readxl::read_excel(
+    path = "data/unodc/intentional_homicide.xlsx",
+    skip = 2
+  ) |>
+  janitor::clean_names() |>
+  filter(indicator == "Victims of intentional homicide",
+         unit_of_measurement == "Rate per 100,000 population",
+         category != "Total",
+         sex != "Total",
+         between(year, 2015, 2023)) |>
+  select(country, region, category, sex, year, homicide_rate = value)
+```
+
+``` r
+homicide_visual_df |>
   group_by(region, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = year, color = region)) +
-  geom_line()
+  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = region)) +
+  geom_col(position = "dodge", bin = 3.0) + 
+  labs(x = "Year",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Across Region")
 ```
 
     ## `summarise()` has grouped output by 'region'. You can override using the
     ## `.groups` argument.
 
-![](p8105_fp_report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+    ## Warning in geom_col(position = "dodge", bin = 3): Ignoring unknown parameters:
+    ## `bin`
+
+![](p8105_fp_report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+``` r
+homicide_visual_df |>
+  group_by(region, sex, year) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = year, color = sex)) +
+  geom_smooth(se = FALSE) +
+  facet_grid(~region) + 
+  labs(x = "Year",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Trend")
+```
+
+    ## `summarise()` has grouped output by 'region', 'sex'. You can override using the
+    ## `.groups` argument.
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](p8105_fp_report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ## Data Transformation
 
@@ -495,7 +534,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[5]]
 
-    ## Warning: Removed 199 rows containing non-finite outside the scale range
+    ## Warning: Removed 208 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-2.png)<!-- -->
@@ -503,7 +542,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[6]]
 
-    ## Warning: Removed 18 rows containing non-finite outside the scale range
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-3.png)<!-- -->
@@ -511,7 +550,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[7]]
 
-    ## Warning: Removed 83 rows containing non-finite outside the scale range
+    ## Warning: Removed 80 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-4.png)<!-- -->
@@ -519,7 +558,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[8]]
 
-    ## Warning: Removed 249 rows containing non-finite outside the scale range
+    ## Warning: Removed 237 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-5.png)<!-- -->
@@ -527,7 +566,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[9]]
 
-    ## Warning: Removed 51 rows containing non-finite outside the scale range
+    ## Warning: Removed 53 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-6.png)<!-- -->
@@ -535,7 +574,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[10]]
 
-    ## Warning: Removed 215 rows containing non-finite outside the scale range
+    ## Warning: Removed 221 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-7.png)<!-- -->
@@ -543,7 +582,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[11]]
 
-    ## Warning: Removed 378 rows containing non-finite outside the scale range
+    ## Warning: Removed 382 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-8.png)<!-- -->
@@ -551,7 +590,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[12]]
 
-    ## Warning: Removed 484 rows containing non-finite outside the scale range
+    ## Warning: Removed 477 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-9.png)<!-- -->
@@ -559,7 +598,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[13]]
 
-    ## Warning: Removed 554 rows containing non-finite outside the scale range
+    ## Warning: Removed 572 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-10.png)<!-- -->
@@ -567,7 +606,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[14]]
 
-    ## Warning: Removed 343 rows containing non-finite outside the scale range
+    ## Warning: Removed 346 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-11.png)<!-- -->
@@ -575,7 +614,7 @@ map(train_list, \(x) plot_distributions(pull(train_df, x), x))
     ## 
     ## [[15]]
 
-    ## Warning: Removed 239 rows containing non-finite outside the scale range
+    ## Warning: Removed 242 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/train/test%20+%20distribution-12.png)<!-- -->
@@ -626,7 +665,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[5]]
 
-    ## Warning: Removed 201 rows containing non-finite outside the scale range
+    ## Warning: Removed 210 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-2.png)<!-- -->
@@ -634,7 +673,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[6]]
 
-    ## Warning: Removed 18 rows containing non-finite outside the scale range
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-3.png)<!-- -->
@@ -642,7 +681,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[7]]
 
-    ## Warning: Removed 83 rows containing non-finite outside the scale range
+    ## Warning: Removed 80 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-4.png)<!-- -->
@@ -650,7 +689,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[8]]
 
-    ## Warning: Removed 249 rows containing non-finite outside the scale range
+    ## Warning: Removed 237 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-5.png)<!-- -->
@@ -658,7 +697,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[9]]
 
-    ## Warning: Removed 51 rows containing non-finite outside the scale range
+    ## Warning: Removed 53 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-6.png)<!-- -->
@@ -666,7 +705,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[10]]
 
-    ## Warning: Removed 221 rows containing non-finite outside the scale range
+    ## Warning: Removed 226 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-7.png)<!-- -->
@@ -674,7 +713,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[11]]
 
-    ## Warning: Removed 378 rows containing non-finite outside the scale range
+    ## Warning: Removed 382 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-8.png)<!-- -->
@@ -682,7 +721,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[12]]
 
-    ## Warning: Removed 485 rows containing non-finite outside the scale range
+    ## Warning: Removed 478 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-9.png)<!-- -->
@@ -690,7 +729,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[13]]
 
-    ## Warning: Removed 555 rows containing non-finite outside the scale range
+    ## Warning: Removed 574 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-10.png)<!-- -->
@@ -698,7 +737,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[14]]
 
-    ## Warning: Removed 343 rows containing non-finite outside the scale range
+    ## Warning: Removed 346 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-11.png)<!-- -->
@@ -706,7 +745,7 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
     ## 
     ## [[15]]
 
-    ## Warning: Removed 247 rows containing non-finite outside the scale range
+    ## Warning: Removed 248 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/ln_transform-12.png)<!-- -->
@@ -758,7 +797,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[5]]
 
-    ## Warning: Removed 199 rows containing non-finite outside the scale range
+    ## Warning: Removed 208 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-2.png)<!-- -->
@@ -766,7 +805,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[6]]
 
-    ## Warning: Removed 18 rows containing non-finite outside the scale range
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-3.png)<!-- -->
@@ -774,7 +813,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[7]]
 
-    ## Warning: Removed 83 rows containing non-finite outside the scale range
+    ## Warning: Removed 80 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-4.png)<!-- -->
@@ -782,7 +821,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[8]]
 
-    ## Warning: Removed 249 rows containing non-finite outside the scale range
+    ## Warning: Removed 237 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-5.png)<!-- -->
@@ -790,7 +829,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[9]]
 
-    ## Warning: Removed 51 rows containing non-finite outside the scale range
+    ## Warning: Removed 53 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-6.png)<!-- -->
@@ -798,7 +837,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[10]]
 
-    ## Warning: Removed 215 rows containing non-finite outside the scale range
+    ## Warning: Removed 221 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-7.png)<!-- -->
@@ -806,7 +845,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[11]]
 
-    ## Warning: Removed 378 rows containing non-finite outside the scale range
+    ## Warning: Removed 382 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-8.png)<!-- -->
@@ -814,7 +853,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[12]]
 
-    ## Warning: Removed 484 rows containing non-finite outside the scale range
+    ## Warning: Removed 477 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-9.png)<!-- -->
@@ -822,7 +861,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[13]]
 
-    ## Warning: Removed 554 rows containing non-finite outside the scale range
+    ## Warning: Removed 572 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-10.png)<!-- -->
@@ -830,7 +869,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[14]]
 
-    ## Warning: Removed 343 rows containing non-finite outside the scale range
+    ## Warning: Removed 346 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-11.png)<!-- -->
@@ -838,43 +877,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
     ## 
     ## [[15]]
 
-    ## Warning: Removed 239 rows containing non-finite outside the scale range
+    ## Warning: Removed 242 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 ![](p8105_fp_report_files/figure-gfm/boxcox_transform-12.png)<!-- -->
-
-## Stepwise Regression
-
-``` r
-model = lm(homicide_rate ~ year + gdp + inflation_rate + unemployment_rate 
-           + human_development_index + avg_crime_rate + avg_personnel_rate 
-           + total_drug_seizures + total_arms_seized + total_trafficking 
-           + alcohol_consumption, data = na.omit(merged_violence_df))
-
-step_model = step(model, direction = "both", trace = 0)
-summary(step_model)
-```
-
-    ## 
-    ## Call:
-    ## lm(formula = homicide_rate ~ gdp + unemployment_rate + human_development_index + 
-    ##     avg_personnel_rate + total_arms_seized, data = na.omit(merged_violence_df))
-    ## 
-    ## Residuals:
-    ##      Min       1Q   Median       3Q      Max 
-    ## -13.2360  -4.3080   0.3352   2.0792  30.7240 
-    ## 
-    ## Coefficients:
-    ##                           Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)              7.775e+01  1.007e+01   7.719 7.73e-11 ***
-    ## gdp                     -1.626e-12  6.655e-13  -2.443  0.01722 *  
-    ## unemployment_rate       -5.061e-01  2.372e-01  -2.134  0.03653 *  
-    ## human_development_index -8.697e+01  1.211e+01  -7.179 7.23e-10 ***
-    ## avg_personnel_rate       5.504e-02  1.834e-02   3.002  0.00377 ** 
-    ## total_arms_seized        1.143e-04  3.732e-05   3.062  0.00317 ** 
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 7.233 on 67 degrees of freedom
-    ## Multiple R-squared:  0.5363, Adjusted R-squared:  0.5017 
-    ## F-statistic:  15.5 on 5 and 67 DF,  p-value: 4.148e-10
