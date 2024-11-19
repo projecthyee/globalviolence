@@ -164,4 +164,15 @@ merged_violence_df <- merged_violence_df %>%
   )
 ```
 
+### Distribution of Development Status
+```{r}
+merged_violence_df %>% 
+  drop_na(development_status) %>% 
+  ggplot(aes(x = development_status, fill = development_status)) +
+  geom_bar() +
+  xlab("Development Status") + 
+  ggtitle("Distribution of Development Status") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
 
