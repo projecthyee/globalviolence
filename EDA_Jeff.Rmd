@@ -149,10 +149,19 @@ merged_violence_df %>%
 
 ```
 
-
-
-
 ## By Development Status
 
 ### Add Development Variable
+
+```{r}
+merged_violence_df <- merged_violence_df %>% 
+  mutate(development_status = factor(case_when(
+    human_development_index < 0.550 ~ "low",
+    human_development_index >= 0.550 & human_development_index < 0.700 ~ "medium",
+    human_development_index >= 0.700 & human_development_index < 0.800 ~ "high",
+    human_development_index >= 0.800 ~ "very high"
+    ))
+  )
+```
+
 
