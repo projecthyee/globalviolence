@@ -76,8 +76,8 @@ merged_violence_df %>%
 merged_violence_df %>% 
   ggplot(aes(x = human_development_index, avg_violence_rate)) +
   geom_point() +
-  xlab("Average Violence Rate") +
-  ylab("Human Development Index") +
+  xlab("Human Development Index") +
+  ylab("Average Violence Rate") +
   ggtitle("Average Rate of Violence by Human Development Index") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
@@ -88,8 +88,8 @@ merged_violence_df %>%
 merged_violence_df %>% 
   ggplot(aes(x = human_development_index, homicide_rate)) +
   geom_point() +
-  xlab("Homicide Rate") +
-  ylab("Human Development Index") +
+  xlab("Human Developmetn Index") +
+  ylab("Homicide Rate") +
   ggtitle("Homicide Rate by Human Development Index") +
   theme(plot.title = element_text(hjust = 0.5))
 
