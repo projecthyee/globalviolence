@@ -62,28 +62,19 @@ map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
 Working on box cox but the code doesn't work ....
 
 ```{r eval = FALSE}
-box_cox_transform = function(df) {
-  df |> 
-    mutate(across(where(is.numeric), ~ {
-      if (any(!is.na(.) & . <= 0)) {
-        . <- . + min(., na.rm = TRUE) + 0.0000000001  
-      }
-
-      box_cox_result <- boxcox(. ~ 1, lambda = "all", plotit = FALSE)
-
-      box_cox_tidy <- tidy(box_cox_result)
-      
-      optimal_lambda <- box_cox_tidy |> 
-        filter(logLik == max(logLik)) |> 
-        pull(lambda) 
-      
-      if (optimal_lambda == 0) {
-        log(.) 
-      } else {
-        ((.)^optimal_lambda - 1) / optimal_lambda  
-      }
-    }))
+boxcox_transform = function(value) {
+  value = value + abs(min(value, na.rm = TRUE)) + 0.00001
+  
+  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]
+  return((value^lambda - 1) / lambda)
 }
 
+boxcox_train_df = 
+  train_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption), 
+                boxcox_transform))
+
+map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
 ```
 
