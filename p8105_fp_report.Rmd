@@ -39,6 +39,23 @@ exploring violence from the following sources:
 Intentional homicide, and violent and sexual crimes were chosen as the outcome 
 variable to quantify violence. 
 
+* Intentional homicide:
+  - counting unit: individual victim of homicide
+  - classification:
+    - situational context: organized crime, interpersonal (excluding familial/intimate),
+    socio-political
+    - relationship to perpetrator: intimate partner, family member, friend, colleague, etc.
+    - mechanism: firearm, weapon, physical force
+
+* Violent and sexual crimes:
+  - counting unit: number of individual offences per 100,000 population
+  - classification of offenses:
+    - rape
+    - serious assault
+    - kidnapping
+    - sexual violence
+  - NOTE: some countries used other counting unit (a series of offenses to form a case, or multiple cases to form an investigation)
+
 ## Scraping Method
 
 The datasets were downloaded from the official websites of the sources above. 
@@ -320,3 +337,9 @@ consumption as variables. There is a total of
 After merging the datasets, country and region were converted to categorical 
 variables. Rows with NA values for country and region were dropped, and the 
 dataset was filtered for the years between 2015 and 2023. 
+
+### Limitations
+* Comparability: "functioning of the criminal justice system, the state in the investigation
+during which the data are recorded (e.g., when it is reported or after investigation) and the adoption
+of international statistical definition at the national level can impact the comparability of these data
+between countries" (Taken from metadata **to be reworded**)
