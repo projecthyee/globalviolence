@@ -1,0 +1,83 @@
+---
+title: "EDA"
+author: "Jeffrey Lin"
+date: "2024-11-13"
+output: html_document
+---
+
+# Load Libraries
+```{r}
+library(tidyverse)
+library(readxl)
+
+```
+
+
+# Examine Merged Violence Dataframe
+```{r}
+head(merged_violence_df)
+
+```
+
+# Explore HDI Variable
+
+##  Global
+
+
+### Visualize Distribution
+```{r}
+merged_violence_df %>% 
+  ggplot(aes(x = human_development_index)) +
+  geom_density() +
+  xlab("Human Development Index") + 
+  ylab("Density") +
+  ggtitle("Distribution of Global HDI Scores") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+### Box Cox Transformation
+```{r}
+merged_violence_df <- merged_violence_df %>%
+  mutate(
+    human_development_index = human_development_index + 0.0001
+  )
+
+HDI <- merged_violence_df %>% 
+  pull(human_development_index)
+
+box_cox_MLE <- as.data.frame(MASS::boxcox(HDI ~ 1)) 
+
+lambda <- box_cox_MLE %>%
+  filter(y == max(y)) %>% 
+  pull(x)
+
+merged_violence_df <- merged_violence_df %>% 
+  mutate(
+    box_cox_HDI = (human_development_df ^ (lambda - 1)) / lambda  
+  )
+
+```
+Distribution after Box Cox Transformation
+
+```{r}
+
+merged_violence_df %>% 
+  ggplot(aes(x = human_development_index)) +
+  geom_density() +
+  xlab("Human Development Index") + 
+  ylab("Density") +
+  ggtitle("Distribution of Global HDI Scores") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+```
+
+
+
+## By Region
+
+## By Development Status
+
+### Add Development Variable
+
