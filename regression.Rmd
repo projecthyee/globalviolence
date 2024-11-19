@@ -20,64 +20,33 @@ Split data into training and testing + visualize distributions
 train_df = sample_frac(merged_violence_df, size = 0.8)
 test_df = anti_join(merged_violence_df, train_df, by = "gdp")
 
-train_df |> 
-  ggplot(aes(x = homicide_rate)) +
-  geom_density()
+plot_distributions = function(column) {
+  
+  data = pull(train_df, column)
+  
+  if(is.numeric(data)) {
+    ggplot(train_df, aes_string(x = column)) +
+    geom_density() +
+    labs(title = paste("Distribution of ", column))
+  }
+}
 
-train_df |> 
-  ggplot(aes(x = avg_violence_rate)) +
-  geom_density()
+train_list = colnames(train_df)
+map(train_list, plot_distributions)
 
-train_df |> 
-  ggplot(aes(x = gdp)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = inflation_rate)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = unemployment_rate)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = avg_crime_rate)) +
-  geom_density()
-
-
-train_df |> 
-  ggplot(aes(x = human_development_index)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = avg_crime_rate)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = avg_personnel_rate)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = total_drug_seizures)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = total_arms_seized)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = total_trafficking)) +
-  geom_density()
-
-train_df |> 
-  ggplot(aes(x = alcohol_consumption)) +
-  geom_density()
 ```
 
+After looking at the distributions of all variables, all variables are skewed 
+right, except for human development index which is bimodal and slightly 
+left-skewed. I will apply ln transformations and box-cox transformations to 
+these variables, and use the Shapiro-Wilk test to test for normality. Even 
+though it is not necessary to normalize the predictors, this step will stablize 
+variance and reduce heteroscedasticity. I think it will be helpful for further 
+steps with model.
 
-After looking at the distributions of all variables, all variables are skewed right, except for human development index which is slightly skewed left. I will apply ln transformations and box-cox transformations to these variables, and use the Shapiro-Wilk test to test for normality. Even though it is not necessary to normalize the predictors, this step will stablize variance and reduce heteroscedasticity. I think it will be helpful for further steps with model.
-
-Transformation step involves writing a function for ln transformation and a function for box_cox transformation. The functions will be mapped into the nested listcol which includes all continuous variables in the train_df dataset. 
+Transformation step involves writing a function for ln transformation and a 
+function for box_cox transformation. The functions will be mapped into the 
+nested listcol which includes all continuous variables in the train_df dataset. 
 
 ```{r transformations}
 ln_transform = function(df) {
@@ -89,7 +58,6 @@ ln_transform = function(df) {
       log(.)
     }))
 }
-
 
 nested_train_df =
   train_df |> 
