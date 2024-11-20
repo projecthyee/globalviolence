@@ -44,12 +44,15 @@ head(EDA_var_interest)
 
 ## Generalized Plotting Function
 ```{r}
-make_plot = function(data, geom_type, title, ...) {
+make_plot = function(data, geom_type, title, grouping = "none", ...) {
   plt <- data %>% 
     ggplot(aes(...)) +
     geom_type() + 
     ggtitle(title) +
     theme(plot.title = element_text(hjust = 0.5))
+  
+  if (grouping != )
+  
   print(plt)
 }
 
@@ -69,10 +72,10 @@ var_interest <- EDA_var_interest %>%
   select(c(human_development_index:development_status)) %>% 
   colnames()
 
-for (var in var_interest) {
-  make_plot(EDA_var_interest, geom_point, str_c("Homicide Rate by ", var), 
-            x = !!sym(var), y = homicide_rate)
-}
+
+map(var_interest, \(x) make_plot(EDA_var_interest, geom_point, 
+    str_c("Homicide Rate by ", x), x = .data[[x]], y = homicide_rate
+    ))
 
 ```
 
@@ -256,9 +259,6 @@ merged_violence_df %>%
 # Scrap Code
 ```{r}
 
-map(var_interest, \(x) make_plot(EDA_var_interest, geom_point, 
-    str_c("Homicide Rate by ", x), x = (x), y = homicide_rate
-    ))
 
 ```
 
