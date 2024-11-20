@@ -29,8 +29,6 @@ exploring violence from the following sources:
 * United Nations Office of Drugs and Crime (UNODC)
   - Corruption and Economic Crime
   - Criminal Justice Personnel
-  - Drug Seizure (2018 - 2022)
-  - Firearms Trafficking
   - Human Trafficking
   - Intentional Homicide
   - Violent and Sexual Crimes
@@ -186,37 +184,6 @@ justice_personnel_df =
   group_by(country, region, year) |>
   summarize(avg_personnel_rate = mean(value))
 
-drugs_2018_2022_df =
-  read_excel(
-    path = "data/unodc/drug_seizures_2018_2022.xlsx",
-    skip = 1
-  ) |>
-  janitor::clean_names() |>
-  rename(year = reference_year) |>
-  mutate(year = as.numeric(year),
-         country = countrycode(ms_code, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  group_by(country, region, year) |>
-  summarize(total_drug_seizures = sum(kilograms))
-
-firearms_df = 
-    read_excel(
-    path = "data/unodc/firearms_trafficking.xlsx",
-    skip = 2
-  ) |>
-  janitor::clean_names() |>
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
-         iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-         country = countrycode(iso3_code, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  filter(indicator == "Arms seized",
-         category == "Total") |>
-  group_by(country, region, year) |>
-  summarize(total_arms_seized = sum(value))
-
 trafficking_df =
   read_excel(
     path = "data/unodc/human_trafficking.xlsx",
@@ -319,8 +286,6 @@ merged_violence_df =
   left_join(human_development_df) |>
   left_join(crime_rate_df) |>
   left_join(justice_personnel_df) |>
-  left_join(drugs_2018_2022_df) |>
-  left_join(firearms_df) |>
   left_join(trafficking_df) |>
   left_join(alcohol_consumption_df) |>
   mutate(country = as.factor(country),

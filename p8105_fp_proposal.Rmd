@@ -29,7 +29,8 @@ exploratory data analysis and linear models.
 ### Anticipated Data Sources
 
 Since we are exploring the various determinants of global violence, we have 
-chosen the United Nations Office on Drugs and Crime (UNODC) database (https://dataunodc.un.org/) to be our primary data source, which includes key 
+chosen the United Nations Office on Drugs and Crime (UNODC) database 
+(https://dataunodc.un.org/) to be our primary data source, which includes key 
 indicators and data of violence. We will also be using the World Bank Dataset 
 to include socioeconomic indicators. 
 
