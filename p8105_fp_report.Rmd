@@ -70,7 +70,6 @@ confusion. For example, the alcohol consumption data file was renamed from
 
 ### Economic Determinants
 ```{r tidy_econ_determinants}
-
 gdp_df = 
   read_excel(
     path = "data/worldbank/gdp.xls",
@@ -106,10 +105,9 @@ human_develop_df =
   select(country = 1, "2015":"2022")
 ```
 
-### Function to pivot data
-
+### Function to pivot data and clean country names
 ```{r pivot_data}
-pivot_df = function(data, name, value) {
+pivot_df = function(data, name, value = "iso3c") {
   
   data |>
     pivot_longer(
@@ -119,35 +117,28 @@ pivot_df = function(data, name, value) {
     ) |>
     janitor::clean_names() |>
     mutate(year = as.numeric(year),
-          country = countrycode(country, origin = value,
-                               destination = "country.name",
-                               nomatch = NA)) |>
+          country = countrycode(country, 
+                                origin = value,
+                                destination = "country.name",
+                                nomatch = NA)) |>
     drop_na()
 }
 
-gdp_df = pivot_df(gdp_df, "gdp", "iso3c")
-inflation_df = pivot_df(inflation_df, "inflation", "iso3c")
-human_develop_index_df = pivot_df(human_develop_df, "hdi", "iso3c")
+gdp_df = pivot_df(gdp_df, "gdp")
+inflation_df = pivot_df(inflation_df, "inflation_rate")
+human_develop_index_df = pivot_df(human_develop_df, "hdi")
 unemployment_df = pivot_df(unemployment_df, "unemployment_rate", "country.name")
 ```
 
 ### Social Determinants
 ```{r tidy_social_determinants}
-crime_rate_df = 
+econ_crime_df = 
   read_excel(
     path = "data/unodc/corruption_economic_crime.xlsx",
     skip = 2
   ) |>
   janitor::clean_names() |>
-  filter(unit_of_measurement == "Rate per 100,000 population") |>
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
-         iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-         country = countrycode(iso3_code, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  group_by(country, region, year) |>
-  summarize(avg_crime_rate = mean(value))
+  filter(unit_of_measurement == "Rate per 100,000 population")
 
 justice_personnel_df =
   read_excel(
@@ -156,16 +147,8 @@ justice_personnel_df =
   ) |>
   janitor::clean_names() |>
   filter(indicator == "Criminal Justice Personnel",
-         unit_of_measurement == "Rate per 100,000 population",
          sex == "Total") |>
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
-         iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-         country = countrycode(iso3_code, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  group_by(country, region, year) |>
-  summarize(avg_personnel_rate = mean(value))
+      filter(unit_of_measurement == "Rate per 100,000 population")
 
 trafficking_df =
   read_excel(
@@ -177,14 +160,8 @@ trafficking_df =
          sex == "Total",
          age == "Total",
          txt_value != "<5") |>
-  mutate(txt_value = str_replace_all(txt_value, ",", ""),
-         txt_value = as.numeric(txt_value), 
-         year = as.numeric(year), 
-         country = countrycode(iso3_code, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  group_by(country, region, year) |>
-  summarize(total_trafficking = sum(txt_value))
+  mutate(value = str_replace_all(txt_value, ",", ""),
+         value = as.numeric(value))
 
 alcohol_consumption_df =
   read_csv(
@@ -193,13 +170,42 @@ alcohol_consumption_df =
   ) |>
   janitor::clean_names() |>
   filter(dim1 == "Both sexes") |>
-  select(country = spatial_dim_value_code, year = period, 
-         alcohol_consumption = fact_value_numeric) |>
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA))
+  select(iso3_code = spatial_dim_value_code, 
+         year = period, value = fact_value_numeric)
 ```
+
+### Function to pivot data and clean country names
+```{r}
+clean_country_names = function(data, rate) {
+  
+  data = 
+    data |>
+    mutate(year = as.numeric(year),
+           iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
+           iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
+           country = countrycode(iso3_code, origin = "iso3c",
+                                 destination = "country.name",
+                                 nomatch = NA))
+
+  if("region" %in% colnames(data)) {
+    data |>
+      group_by(country, region, year) |>
+      summarize(rate = mean(value))
+  }
+  
+  else {
+    data |>
+      group_by(country, year) |>
+      summarize(rate = mean(value))
+  }
+}
+
+econ_crime_df = clean_country_names(econ_crime_df, "avg_crime_rate")
+justice_personnel_df = clean_country_names(justice_personnel_df, "avg_personnel_rate")
+trafficking_df = clean_country_names(trafficking_df, "avg_trafficking_rate")
+alcohol_consumption_df = clean_country_names(alcohol_consumption_df, "avg_consumption_rate")
+```
+
 
 ### Outcomes of Violence
 ```{r tidy_violence_outcomes}
@@ -213,14 +219,7 @@ homicide_rate_df =
          unit_of_measurement == "Rate per 100,000 population",
          dimension == "Total",
          sex == "Total",
-         age == "Total") |>
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
-         iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-         country = countrycode(iso3_code, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  select(country, region, year, homicide_rate = value)
+         age == "Total")
 
 violence_rate_df = 
     readxl::read_excel(
@@ -229,20 +228,10 @@ violence_rate_df =
   ) |>
   janitor::clean_names() |>
   filter(indicator == "Violent offences",
-         unit_of_measurement == "Rate per 100,000 population") |>
-  pivot_wider(
-    names_from = indicator,
-    values_from = value
-  ) |>
-  rename(violence_rate = "Violent offences") |>
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
-         iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-         country = countrycode(iso3_code, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  group_by(country, year) |>
-  summarize(avg_violence_rate = mean(violence_rate)) 
+         unit_of_measurement == "Rate per 100,000 population")
+
+homicide_rate_df = clean_country_names(homicide_rate_df, "avg_homicide_rate")
+violence_rate_df = clean_country_names(violence_rate_df, "avg_violence_rate")
 ```
 
 For the economic determinants, all the datasets had years organized as different
@@ -266,8 +255,8 @@ merged_violence_df =
   left_join(gdp_df) |>
   left_join(inflation_df) |>
   left_join(unemployment_df) |>
-  left_join(human_development_df) |>
-  left_join(crime_rate_df) |>
+  left_join(human_develop_df) |>
+  left_join(econ_crime_df) |>
   left_join(justice_personnel_df) |>
   left_join(trafficking_df) |>
   left_join(alcohol_consumption_df) |>
@@ -336,70 +325,8 @@ homicide_visual_df |>
 
 ## Regression 
 
-Split data into training and testing + visualize distributions 
-```{r train/test + distribution}
-train_df = sample_frac(merged_violence_df, size = 0.8)
-test_df = anti_join(merged_violence_df, train_df, by = "gdp")
 
-plot_distributions = function(column, name) {
-  
-  if(is.numeric(column) & name != "year") {
-    ggplot(train_df, aes(x = column)) +
-    geom_density() +
-    labs(title = paste("Distribution of", name))
-  }
-  
-}
 
-train_list = colnames(train_df)
-map(train_list, \(x) plot_distributions(pull(train_df, x), x))
-```
-
-After looking at the distributions of all variables, all variables are skewed 
-right, except for human development index which is bimodal and slightly 
-left-skewed. I will apply ln transformations and box-cox transformations to 
-these variables, and use the Shapiro-Wilk test to test for normality. Even 
-though it is not necessary to normalize the predictors, this step will stablize 
-variance and reduce heteroscedasticity. I think it will be helpful for further 
-steps with model.
-
-Transformation step involves writing a function for ln transformation and a 
-function for box_cox transformation. The functions will be mapped into the 
-nested listcol which includes all continuous variables in the train_df dataset. 
-
-```{r ln_transform}
-ln_transform = function(value) {
-  return(log(abs(value)))
-}
-
-ln_train_df = 
-  train_df |>
-  mutate(across(c(homicide_rate:alcohol_consumption), 
-                ln_transform))
-
-map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
-```
-
-```{r boxcox_transform}
-library(MASS)
-boxcox_transform = function(value) {
-  value = value + abs(min(value, na.rm = TRUE)) + 0.00001
-  
-  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
-  lambda = boxcox_result$x[which.max(boxcox_result$y)]
-  if(lambda == 0) {
-    return(log(value))
-  }
-  return((value^lambda - 1) / lambda)
-}
-
-boxcox_train_df = 
-  train_df |>
-  mutate(across(c(homicide_rate:alcohol_consumption), 
-                boxcox_transform))
-
-map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
-```
 
 
 
