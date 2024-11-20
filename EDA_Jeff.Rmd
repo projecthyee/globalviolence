@@ -13,11 +13,41 @@ library(readxl)
 ```
 
 
-# Examine Merged Violence Dataframe
+# Data Pre-Processing 
+
+## Examine Merged Violence Dataframe
 ```{r}
 head(merged_violence_df)
 
 ```
+
+
+## Create Separate Dataframe for Variables of Interest
+
+```{r}
+
+EDA_var_interest <- merged_violence_df %>% 
+  select(c(country:avg_violence_rate), human_development_index, 
+         inflation_rate, avg_personnel_rate, total_arms_seized) %>% 
+  mutate(development_status = factor(case_when(
+    human_development_index < 0.550 ~ "low",
+    human_development_index >= 0.550 & human_development_index < 0.700 ~ "medium",
+    human_development_index >= 0.700 & human_development_index < 0.800 ~ "high",
+    human_development_index >= 0.800 ~ "very high"
+    ))
+  )
+
+head(EDA_var_interest)
+
+```
+
+## Generalized Plotting Function
+```{r}
+
+
+
+```
+
 
 # Explore HDI Variable
 
@@ -88,7 +118,7 @@ merged_violence_df %>%
 merged_violence_df %>% 
   ggplot(aes(x = human_development_index, homicide_rate)) +
   geom_point() +
-  xlab("Human Developmetn Index") +
+  xlab("Human Development Index") +
   ylab("Homicide Rate") +
   ggtitle("Homicide Rate by Human Development Index") +
   theme(plot.title = element_text(hjust = 0.5))
