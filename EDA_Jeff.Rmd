@@ -48,15 +48,15 @@ var_names <- EDA_var_interest %>%
 
 ## Generalized Plotting Function
 ```{r}
-make_plot = function(data, geom_type, title, grouping = "None", ...) {
+make_plot = function(data, geom_type, title, grouping = NULL, ...) {
   plt <- data %>% 
     ggplot(aes(...)) +
     geom_type() + 
     ggtitle(title) +
     theme(plot.title = element_text(hjust = 0.5))
   
-  if (grouping != "None") {
-    plt + facet_grid(.~grouping)
+  if (!is.null(grouping)) {
+    plt <- plt + facet_grid( .~grouping)
   }
   
   return(plt)
@@ -73,7 +73,9 @@ make_plot(EDA_var_interest, geom_point, title = "Average Violence Rate by HDI",
 
 # Scatter Plots
 
-## Outcome Variable: Homicide Rate
+## Global
+
+### Outcome Variable: Homicide Rate
 ```{r}
 
 map(var_names, \(x) make_plot(EDA_var_interest, geom_point, 
@@ -83,7 +85,7 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 ```
 
 
-## Outcome Variable: Average Violence Rate
+### Outcome Variable: Average Violence Rate
 ```{r}
 map(var_names, \(x) make_plot(EDA_var_interest, geom_point, 
     str_c("Average Violence Rate by ", x), x = .data[[x]], y = avg_violence_rate
@@ -92,13 +94,33 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 ```
 
 
+## Regional
+
+
+### Outcome Variable: Average Violence Rate
+```{r}
+map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
+    str_c("Average Violence Rate by ", x, " and Region"), region, 
+    x = .data[[x]], y = avg_violence_rate)
+    )
+
+```
+
+
+# Density Plots 
+
+## Global Scale
+
+```{r}
 
 
 
+```
 
 
+## Regional 
 
-
+## by HDI
 
 
 
