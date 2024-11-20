@@ -142,11 +142,30 @@ EDA_var_interest %>%
 
 ```
 
+# Box Plots
+
+## Average Violence Rate by Development Status
+```{r}
+EDA_var_interest %>% 
+  drop_na(development_status) %>% 
+  make_plot(geom_boxplot, title = "Average Violence Rate by Development Status", 
+            x = development_status, y = avg_violence_rate)
+
+```
+## Homicide Rate
+```{r}
+EDA_var_interest %>% 
+  drop_na(development_status) %>% 
+  make_plot(geom_boxplot, title = "Homicide Rate by Development Status", 
+            x = development_status, y = homicide_rate)
+
+
+```
 
 
 
 
-# Explore HDI Variable
+# Old Code
 
 ##  Global
 
