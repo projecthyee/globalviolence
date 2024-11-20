@@ -10,6 +10,10 @@ library(readxl)
 library(countrycode)
 ```
 
+## Motivation
+
+## Initial Questions
+
 # Data: Source, Scraping Method & Cleaning
 
 ## Source
@@ -38,6 +42,24 @@ exploring violence from the following sources:
 
 Intentional homicide, and violent and sexual crimes were chosen as the outcome 
 variable to quantify violence. 
+
+* Intentional homicide:
+  - counting unit: individual victim of homicide
+  - classification:
+    - situational context: organized crime, interpersonal (excluding familial/intimate),
+    socio-political
+    - relationship to perpetrator: intimate partner, family member, friend, colleague, etc.
+    - mechanism: firearm, weapon, physical force
+
+* Violent and sexual crimes:
+  - counting unit: number of individual offences per 100,000 population
+  - classification of offenses:
+    - rape
+    - serious assault
+    - kidnapping
+    - sexual violence
+  - NOTE: some countries used other counting unit (a series of offenses to form a case, or multiple cases to form an investigation)
+
 
 ## Scraping Method
 

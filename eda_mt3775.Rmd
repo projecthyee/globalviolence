@@ -1,0 +1,46 @@
+---
+title: "EDA"
+author: "Malika Top"
+date: "2024-11-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(readxl)
+```
+
+### Exploring Outcome Data
+```{r}
+violent_offences_df = 
+  read_excel("data/unodc/data_cts_violent_and_sexual_crime.xlsx", skip = 2) |> 
+  janitor::clean_names() |> 
+  filter(unit_of_measurement == "Rate per 100,000 population") |>
+  mutate(year = as.numeric(year),
+         iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
+         iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
+         country = countrycode(iso3_code, origin = "iso3c",
+                               destination = "country.name",
+                               nomatch = NA)) 
+
+violent_wide = 
+  violent_offences_df |> 
+  group_by(category, country) |> 
+  summarise(category_count = n()) |> 
+  pivot_wider(
+    names_from = category,
+    values_from = category_count
+  )
+
+violent_offences_df |> 
+  group_by(category) |> 
+  summarise(count = n()) |> 
+  arrange(desc(count))
+```
+
+```{r}
+
+```
+
