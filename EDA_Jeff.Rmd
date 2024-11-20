@@ -108,18 +108,16 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 
 ```
 
-
-## By HDI Level and Region
-
 # Density Plots 
-
 
 ## Global Scale
 
-# Density of
+# Distribution of Variables of Interest by Region
 ```{r}
 
-
+map(var_names, \(x) make_plot(EDA_var_interest, geom_density, 
+    str_c("Distribution of ", x, " based on Region"), "region",
+    x = .data[[x]], color = region))
 
 ```
 
