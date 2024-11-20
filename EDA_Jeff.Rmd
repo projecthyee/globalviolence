@@ -35,15 +35,20 @@ EDA_var_interest <- merged_violence_df %>%
     human_development_index >= 0.700 & human_development_index < 0.800 ~ "high",
     human_development_index >= 0.800 ~ "very high"
     ))
-  )
+  )  
 
-head(EDA_var_interest)
+head(EDA_var_interest)  
 
 ```
 
 ## Generalized Plotting Function
 ```{r}
-
+make_plot = function(data, geom_type, ...) {
+  data %>% 
+    ggplot(aes(...)) +
+    geom_type()
+  
+}
 
 
 ```
