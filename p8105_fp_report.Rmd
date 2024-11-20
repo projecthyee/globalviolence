@@ -69,7 +69,8 @@ confusion. For example, the alcohol consumption data file was renamed from
 ## Cleaning
 
 ### Economic Determinants
-```{r tidy_economic_determinants}
+```{r tidy_econ_determinants}
+
 gdp_df = 
   read_excel(
     path = "data/worldbank/gdp.xls",
@@ -77,18 +78,7 @@ gdp_df =
     skip = 3,
     na = ""
   ) |>
-  select(country = "Country Code", "2015":"2023") |>
-  pivot_longer(
-    "2015":"2023",
-    names_to = "year",
-    values_to = "gdp"
-  ) |>
-  janitor::clean_names() |>
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  drop_na()
+  select(country = 2, "2015":"2023")
 
 inflation_df = 
   read_excel(
@@ -97,18 +87,7 @@ inflation_df =
     skip = 3,
     na = ""
   ) |>
-  select(country = "Country Code", "2015":"2023") |>
-  pivot_longer(
-    "2015":"2023",
-    names_to = "year",
-    values_to = "inflation_rate"
-  ) |>
-  janitor::clean_names() |>
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = "iso3c",
-                               destination = "country.name",
-                               nomatch = NA)) |>
-  drop_na()
+  select(country = 2, "2015":"2023") 
 
 unemployment_df =
   read_excel(
@@ -116,36 +95,40 @@ unemployment_df =
     range = "A1:AY116",
     na = "no data"
   ) |>
-  select(country = "Unemployment rate (Percent)", "2015":"2023") |>
-  drop_na(country) |>
-  pivot_longer(
-    "2015":"2023",
-    names_to = "year",
-    values_to = "unemployment_rate"
-  ) |>
-  janitor::clean_names() |>
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = "country.name",
-                               destination = "country.name",
-                               nomatch = NA)) 
+  select(country = 1, "2015":"2023") 
 
-human_development_df =
+human_develop_df =
   read_csv(
     file = "data/undp/human_development_index.csv",
     na = "") |>
   head(-11) |>
-  pivot_longer(
-    "hdi_2015":"hdi_2022",
-    names_to = "year",
-    values_to = "human_development_index"
-  ) |>
-  janitor::clean_names() |>
-  select(country = "iso3", year, human_development_index) |>
-  mutate(year = str_replace_all(year, "hdi_", ""),
-         year = as.numeric(year),
-         country = countrycode(country, origin = "iso3c",
+  rename_with(gsub, pattern = "^hdi_", replacement = "") |>
+  select(country = 1, "2015":"2022")
+```
+
+### Function to pivot data
+
+```{r pivot_data}
+pivot_df = function(data, name, value) {
+  
+  data |>
+    pivot_longer(
+      cols = -country,
+      names_to = "year",
+      values_to = paste(name)
+    ) |>
+    janitor::clean_names() |>
+    mutate(year = as.numeric(year),
+          country = countrycode(country, origin = value,
                                destination = "country.name",
-                               nomatch = NA))
+                               nomatch = NA)) |>
+    drop_na()
+}
+
+gdp_df = pivot_df(gdp_df, "gdp", "iso3c")
+inflation_df = pivot_df(inflation_df, "inflation", "iso3c")
+human_develop_index_df = pivot_df(human_develop_df, "hdi", "iso3c")
+unemployment_df = pivot_df(unemployment_df, "unemployment_rate", "country.name")
 ```
 
 ### Social Determinants
