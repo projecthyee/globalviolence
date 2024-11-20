@@ -44,16 +44,18 @@ head(EDA_var_interest)
 
 ## Generalized Plotting Function
 ```{r}
-make_plot = function(data, geom_type, title, grouping = "none", ...) {
+make_plot = function(data, geom_type, title, grouping = "None", ...) {
   plt <- data %>% 
     ggplot(aes(...)) +
     geom_type() + 
     ggtitle(title) +
     theme(plot.title = element_text(hjust = 0.5))
   
-  if (grouping != none) {
+  if (grouping != "None") {
     plt + facet_grid(.~grouping)
   }
+  
+  return(plt)
   
 }
 
@@ -70,7 +72,7 @@ make_plot(EDA_var_interest, geom_point, title = "Average Violence Rate by HDI",
 ## Outcome Variable: Homicide Rate
 ```{r}
 var_interest <- EDA_var_interest %>% 
-  select(c(human_development_index:development_status)) %>% 
+  select(c(human_development_index:total_arms_seized)) %>% 
   colnames()
 
 
