@@ -64,12 +64,8 @@ make_plot = function(data, geom_type, title, grouping = NULL, ...) {
   
 }
 
-make_plot(EDA_var_interest, geom_point, title = "Average Violence Rate by HDI", 
-          x = human_development_index, y =avg_violence_rate)
 
 ```
-
-
 
 # Scatter Plots
 
@@ -100,8 +96,8 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 ### Outcome Variable: Average Violence Rate
 ```{r}
 map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
-    str_c("Average Violence Rate by ", x, " and Region"), region, 
-    x = .data[[x]], y = avg_violence_rate)
+    str_c("Average Violence Rate by ", x, " and Region"), "region", 
+    x = .data[[x]], y = avg_violence_rate, color = region)
     )
 
 ```
