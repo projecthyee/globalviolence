@@ -107,10 +107,14 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 ```
 
 
+## By HDI Level and Region
+
 # Density Plots 
+
 
 ## Global Scale
 
+# Density of
 ```{r}
 
 
@@ -123,6 +127,20 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 ## by HDI
 
 
+
+
+# Bar Charts
+
+## Count of Development Statuses 
+
+```{r}
+
+EDA_var_interest %>% 
+  drop_na(development_status) %>% 
+  make_plot(geom_bar, "Distribution of Development Status",
+            x = development_status, fill = development_status)
+
+```
 
 
 
