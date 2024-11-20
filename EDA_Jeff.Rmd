@@ -62,6 +62,8 @@ make_plot = function(data, geom_type, title, grouping = NULL, ...) {
   
 }
 
+make_plotly = function()
+
 ```
 
 # Scatter Plots
@@ -121,7 +123,7 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_density,
 ## Distribution of Variables of Interest by Development Status
 ```{r}
 map(var_names, \(x) make_plot(EDA_var_interest, geom_density, 
-    str_c("Distribution of ", x, " based on Region"), "development_status",
+    str_c("Distribution of ", x, " based on Development Status"), "development_status",
     x = .data[[x]], color = development_status))
 ```
 
