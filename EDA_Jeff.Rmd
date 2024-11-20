@@ -29,7 +29,7 @@ head(merged_violence_df)
 
 EDA_var_interest <- merged_violence_df %>% 
   select(c(country:avg_violence_rate), human_development_index, 
-         inflation_rate, avg_personnel_rate, total_arms_seized) %>% 
+         inflation_rate, avg_personnel_rate) %>% 
   mutate(development_status = factor(case_when(
     human_development_index < 0.550 ~ "low",
     human_development_index >= 0.550 & human_development_index < 0.700 ~ "medium",
@@ -41,8 +41,8 @@ EDA_var_interest <- merged_violence_df %>%
 head(EDA_var_interest)
 
 var_names <- EDA_var_interest %>% 
-  select(c(human_development_index:total_arms_seized)) %>% 
-  colnames()
+  select(c(human_development_index:development_status)) %>% 
+  colnames() 
 
 ```
 
@@ -56,13 +56,13 @@ make_plot = function(data, geom_type, title, grouping = NULL, ...) {
     theme(plot.title = element_text(hjust = 0.5))
   
   if (!is.null(grouping)) {
-    plt <- plt + facet_grid( .~grouping)
+    grouping = sym(grouping)
+    plt <- plt + facet_grid(as.formula(paste("~", grouping)))
   }
   
   return(plt)
   
 }
-
 
 make_plot(EDA_var_interest, geom_point, title = "Average Violence Rate by HDI", 
           x = human_development_index, y =avg_violence_rate)
