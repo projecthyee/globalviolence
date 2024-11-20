@@ -43,13 +43,17 @@ head(EDA_var_interest)
 
 ## Generalized Plotting Function
 ```{r}
-make_plot = function(data, geom_type, ...) {
+make_plot = function(data, geom_type, title, ...) {
   data %>% 
     ggplot(aes(...)) +
-    geom_type()
-  
+    geom_type() + 
+    ggtitle(title) +
+    theme(plot.title = element_text(hjust = 0.5))
 }
 
+
+make_plot(EDA_var_interest, geom_point, title = "Average Violence Rate by HDI", 
+          x = human_development_index, y =avg_violence_rate)
 
 ```
 
