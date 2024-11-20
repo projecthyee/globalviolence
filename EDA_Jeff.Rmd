@@ -38,7 +38,11 @@ EDA_var_interest <- merged_violence_df %>%
     ))
   )  
 
-head(EDA_var_interest)  
+head(EDA_var_interest)
+
+var_interest <- EDA_var_interest %>% 
+  select(c(human_development_index:total_arms_seized)) %>% 
+  colnames()
 
 ```
 
@@ -71,10 +75,6 @@ make_plot(EDA_var_interest, geom_point, title = "Average Violence Rate by HDI",
 
 ## Outcome Variable: Homicide Rate
 ```{r}
-var_interest <- EDA_var_interest %>% 
-  select(c(human_development_index:total_arms_seized)) %>% 
-  colnames()
-
 
 map(var_interest, \(x) make_plot(EDA_var_interest, geom_point, 
     str_c("Homicide Rate by ", x), x = .data[[x]], y = homicide_rate
