@@ -53,6 +53,10 @@ make_plot = function(data, geom_type, title, ...) {
   print(plt)
 }
 
+
+make_plot(EDA_var_interest, geom_point, title = "Average Violence Rate by HDI", 
+          x = human_development_index, y =avg_violence_rate)
+
 ```
 
 
@@ -62,12 +66,12 @@ make_plot = function(data, geom_type, title, ...) {
 ## Outcome Variable: Homicide Rate
 ```{r}
 var_interest <- EDA_var_interest %>% 
-  select(c(inflation_rate:development_status)) %>% 
+  select(c(human_development_index:development_status)) %>% 
   colnames()
 
 for (var in var_interest) {
   make_plot(EDA_var_interest, geom_point, str_c("Homicide Rate by ", var), 
-            x = var, y = homicide_rate)
+            x = !!sym(var), y = homicide_rate)
 }
 
 ```
