@@ -60,42 +60,89 @@ was renamed from “data.csv” to “alcohol_consumption.csv”.
 
 ## Cleaning
 
+### Function to pivot data, average rates across category and clean country names
+
+``` r
+tidy_df = function(data, name, format = "iso3c", 
+                   pivot = FALSE, average = FALSE) {
+  
+  if(pivot) {
+    data = data |>
+      pivot_longer(cols = -iso3_code,
+                   names_to = "year",
+                   values_to = name) |>
+      janitor::clean_names()
+  }
+  
+  data = data |>
+    mutate(year = as.numeric(year),
+           iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
+           iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
+           country = countrycode(iso3_code, origin = format,
+                                 destination = "country.name",
+                                 nomatch = NA)) |> drop_na()
+  
+  if(average) {
+    
+    if("region" %in% colnames(data)) {
+      data = data |>
+        group_by(country, region, year) |>
+        summarize(!!name := mean(value))
+    }
+    
+    else {
+        data = data |>
+          group_by(country, year) |>
+          summarize(!!name := mean(value))
+    }
+    
+  }
+  
+  return(data)
+}
+```
+
 ### Economic Determinants
 
 ``` r
 gdp_df = 
-  read_excel(
-    path = "data/worldbank/gdp.xls",
-    sheet = "Data",
-    skip = 3,
-    na = ""
-  ) |>
-  select(iso3_code = 2, "2015":"2023")
+  read_excel(path = "data/worldbank/gdp.xls",
+             sheet = "Data", skip = 3, na = "") |>
+  select(iso3_code = 2, "2015":"2023") |>
+  tidy_df("gdp", pivot = TRUE)
+```
 
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(...)`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX
+
+``` r
 inflation_df = 
-  read_excel(
-    path = "data/worldbank/inflation_rate.xls",
-    sheet = "Data",
-    skip = 3,
-    na = ""
-  ) |>
-  select(iso3_code = 2, "2015":"2023") 
+  read_excel(path = "data/worldbank/inflation_rate.xls", 
+             sheet = "Data", skip = 3, na = "") |>
+  select(iso3_code = 2, "2015":"2023") |>
+  tidy_df("inflation_rate", pivot = TRUE)
+```
 
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(...)`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX
+
+``` r
 unemployment_df =
-  read_excel(
-    path = "data/imf/unemployment_rate.xls",
-    range = "A1:AY116",
-    na = "no data"
-  ) |>
-  select(iso3_code = 1, "2015":"2023") 
+  read_excel(path = "data/imf/unemployment_rate.xls", 
+             range = "A1:AY116", na = "no data") |>
+  select(iso3_code = 1, "2015":"2023")|>
+  tidy_df("unemployment_rate", format = "country.name", pivot = TRUE)
 
 human_develop_df =
-  read_csv(
-    file = "data/undp/human_development_index.csv",
-    na = "") |>
+  read_csv(file = "data/undp/human_development_index.csv", na = "") |>
   head(-11) |>
   rename_with(gsub, pattern = "^hdi_", replacement = "") |>
-  select(iso3_code = 1, "2015":"2022")
+  select(iso3_code = 1, "2015":"2022") |>
+  tidy_df("hdi", pivot = TRUE)
 ```
 
     ## Rows: 206 Columns: 1076
@@ -111,45 +158,65 @@ human_develop_df =
 
 ``` r
 econ_crime_df = 
-  read_excel(
-    path = "data/unodc/corruption_economic_crime.xlsx",
-    skip = 2
-  ) |>
+  read_excel(path = "data/unodc/corruption_economic_crime.xlsx", skip = 2) |>
   janitor::clean_names() |>
-  filter(unit_of_measurement == "Rate per 100,000 population") 
+  filter(unit_of_measurement == "Rate per 100,000 population") |>
+  tidy_df("crime_rate",  average = TRUE)
+```
 
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(...)`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: XKX
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
+
+``` r
 personnel_df =
-  read_excel(
-    path = "data/unodc/criminal_justice_personnel.xlsx",
-    skip = 2
-  ) |>
+  read_excel(path = "data/unodc/criminal_justice_personnel.xlsx", skip = 2) |>
   janitor::clean_names() |>
-  filter(indicator == "Criminal Justice Personnel",
-         sex == "Total",
-         unit_of_measurement == "Rate per 100,000 population")
+  filter(unit_of_measurement == "Rate per 100,000 population",
+         indicator == "Criminal Justice Personnel", 
+         sex == "Total") |>
+  tidy_df("personnel_rate", average = TRUE)
+```
 
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(...)`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: XKX
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
+
+``` r
 trafficking_df =
-  read_excel(
-    path = "data/unodc/human_trafficking.xlsx",
-    skip = 2
-  ) |>
+  read_excel(path = "data/unodc/human_trafficking.xlsx", skip = 2) |>
   janitor::clean_names() |>
-  filter(category == "Total",
-         sex == "Total",
-         age == "Total",
+  filter(category == "Total", sex == "Total", age == "Total",
          txt_value != "<5") |>
   mutate(value = str_replace_all(txt_value, ",", ""),
-         value = as.numeric(value))
+         value = as.numeric(value)) |>
+  tidy_df("trafficking_rate", average = TRUE)
+```
 
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(...)`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: CAR, CAS, EEU, MCA, MCN, SAF, SAM
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
+
+``` r
 alcohol_df =
-  read_csv(
-    file = "data/who/alcohol_consumption.csv", 
-    na = ""
-  ) |>
+  read_csv(file = "data/who/alcohol_consumption.csv", na = "") |>
   janitor::clean_names() |>
   filter(dim1 == "Both sexes") |>
   select(iso3_code = spatial_dim_value_code, 
-         year = period, value = fact_value_numeric)
+         year = period, value = fact_value_numeric) |>
+  tidy_df("alcohol_consumption_rate", average = TRUE)
 ```
 
     ## Rows: 11799 Columns: 34
@@ -162,31 +229,44 @@ alcohol_df =
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    ## `summarise()` has grouped output by 'country'. You can override using the `.groups` argument.
 
 ### Outcomes of Violence
 
 ``` r
 homicide_df = 
-    readxl::read_excel(
-    path = "data/unodc/intentional_homicide.xlsx",
-    skip = 2
-  ) |>
+  read_excel(path = "data/unodc/intentional_homicide.xlsx", skip = 2) |>
   janitor::clean_names() |>
   filter(indicator == "Victims of intentional homicide",
          unit_of_measurement == "Rate per 100,000 population",
-         dimension == "Total",
-         sex == "Total",
-         age == "Total")
+         dimension == "Total", sex == "Total", age == "Total") |>
+  tidy_df("homicide_rate", average = TRUE)
+```
 
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(...)`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: XKX
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
+
+``` r
 violence_df = 
-    readxl::read_excel(
-    path = "data/unodc/violent_sexual_crime.xlsx",
-    skip = 2
-  ) |>
+  read_excel(path = "data/unodc/violent_sexual_crime.xlsx", skip = 2) |>
   janitor::clean_names() |>
   filter(indicator == "Violent offences",
-         unit_of_measurement == "Rate per 100,000 population")
+         unit_of_measurement == "Rate per 100,000 population") |>
+  tidy_df("violence_rate", average = TRUE)
 ```
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `country = countrycode(...)`.
+    ## Caused by warning:
+    ## ! Some values were not matched unambiguously: XKX
+
+    ## `summarise()` has grouped output by 'country', 'region'. You can override using
+    ## the `.groups` argument.
 
 For the economic determinants, all the datasets had years organized as
 different columns, where each column represented values for that
@@ -202,143 +282,6 @@ implemented in order to standardize the country names of each dataset
 since some of the country names were represented inconsistently across
 datasets. For example, South Korea was represented as “Korea (Republic
 of)” and “Korea, Rep.”
-
-### Function to pivot data, average rates across category and clean country names
-
-``` r
-tidy_df = function(data, name, format = "iso3c", pivot = FALSE, average = FALSE) {
-  
-  if(pivot) {
-    data = 
-      data |>
-      pivot_longer(
-        cols = -iso3_code,
-        names_to = "year",
-        values_to = name
-      ) |>
-      janitor::clean_names()
-  }
-  
-  data = 
-    data |>
-    mutate(year = as.numeric(year),
-           iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
-           iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-           country = countrycode(iso3_code, origin = format,
-                                 destination = "country.name",
-                                 nomatch = NA)) |> drop_na()
-  
-  if(average) {
-    if("region" %in% colnames(data)) {
-      data = 
-        data |>
-        group_by(country, region, year) |>
-        summarize(!!name := mean(value))
-    }
-    
-    else {
-        data = 
-          data |>
-          group_by(country, year) |>
-          summarize(!!name := mean(value))
-    }
-    
-  }
-  
-  return(data)
-}
-```
-
-### Tidy
-
-``` r
-gdp_df = tidy_df(gdp_df, "gdp", pivot = TRUE)
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX
-
-``` r
-inflation_df = tidy_df(inflation_df, "inflation_rate", pivot = TRUE)
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX
-
-``` r
-human_develop_df = tidy_df(human_develop_df, "hdi", pivot = TRUE)
-unemployment_df = tidy_df(unemployment_df, "unemployment_rate", 
-                           format = "country.name", pivot = TRUE)
-
-econ_crime_df = tidy_df(econ_crime_df, "crime_rate",  average = TRUE)
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
-
-``` r
-personnel_df = tidy_df(personnel_df, "personnel_rate", average = TRUE)
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
-
-``` r
-trafficking_df = tidy_df(trafficking_df, "trafficking_rate", average = TRUE)
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: CAR, CAS, EEU, MCA, MCN, SAF, SAM
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
-
-``` r
-alcohol_df = tidy_df(alcohol_df, "alcohol_consumption_rate", average = TRUE)
-```
-
-    ## `summarise()` has grouped output by 'country'. You can override using the
-    ## `.groups` argument.
-
-``` r
-homicide_df = tidy_df(homicide_df, "homicide_rate", average = TRUE)
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
-
-``` r
-violence_df = tidy_df(violence_df, "violence_rate", average = TRUE)
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
-
-    ## `summarise()` has grouped output by 'country', 'region'. You can override using
-    ## the `.groups` argument.
 
 ### Merge Datasets
 
@@ -436,7 +379,7 @@ homicide_visual_df |>
     ## Warning in geom_col(position = "dodge", bin = 3): Ignoring unknown parameters:
     ## `bin`
 
-![](p8105_fp_report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](p8105_fp_report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
 homicide_visual_df |>
@@ -454,7 +397,7 @@ homicide_visual_df |>
     ## `.groups` argument.
     ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 
-![](p8105_fp_report_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](p8105_fp_report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ## Data Transformation
 
