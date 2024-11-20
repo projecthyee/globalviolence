@@ -77,7 +77,7 @@ gdp_df =
     skip = 3,
     na = ""
   ) |>
-  select(country = 2, "2015":"2023")
+  select(iso3_code = 2, "2015":"2023")
 
 inflation_df = 
   read_excel(
@@ -86,7 +86,7 @@ inflation_df =
     skip = 3,
     na = ""
   ) |>
-  select(country = 2, "2015":"2023") 
+  select(iso3_code = 2, "2015":"2023") 
 
 unemployment_df =
   read_excel(
@@ -94,7 +94,7 @@ unemployment_df =
     range = "A1:AY116",
     na = "no data"
   ) |>
-  select(country = 1, "2015":"2023") 
+  select(iso3_code = 1, "2015":"2023") 
 
 human_develop_df =
   read_csv(
@@ -102,32 +102,7 @@ human_develop_df =
     na = "") |>
   head(-11) |>
   rename_with(gsub, pattern = "^hdi_", replacement = "") |>
-  select(country = 1, "2015":"2022")
-```
-
-### Function to pivot data and clean country names
-```{r pivot_data}
-pivot_df = function(data, name, value = "iso3c") {
-  
-  data |>
-    pivot_longer(
-      cols = -country,
-      names_to = "year",
-      values_to = paste(name)
-    ) |>
-    janitor::clean_names() |>
-    mutate(year = as.numeric(year),
-          country = countrycode(country, 
-                                origin = value,
-                                destination = "country.name",
-                                nomatch = NA)) |>
-    drop_na()
-}
-
-gdp_df = pivot_df(gdp_df, "gdp")
-inflation_df = pivot_df(inflation_df, "inflation_rate")
-human_develop_index_df = pivot_df(human_develop_df, "hdi")
-unemployment_df = pivot_df(unemployment_df, "unemployment_rate", "country.name")
+  select(iso3_code = 1, "2015":"2022")
 ```
 
 ### Social Determinants
@@ -138,17 +113,17 @@ econ_crime_df =
     skip = 2
   ) |>
   janitor::clean_names() |>
-  filter(unit_of_measurement == "Rate per 100,000 population")
+  filter(unit_of_measurement == "Rate per 100,000 population") 
 
-justice_personnel_df =
+personnel_df =
   read_excel(
     path = "data/unodc/criminal_justice_personnel.xlsx",
     skip = 2
   ) |>
   janitor::clean_names() |>
   filter(indicator == "Criminal Justice Personnel",
-         sex == "Total") |>
-      filter(unit_of_measurement == "Rate per 100,000 population")
+         sex == "Total",
+         unit_of_measurement == "Rate per 100,000 population")
 
 trafficking_df =
   read_excel(
@@ -163,7 +138,7 @@ trafficking_df =
   mutate(value = str_replace_all(txt_value, ",", ""),
          value = as.numeric(value))
 
-alcohol_consumption_df =
+alcohol_df =
   read_csv(
     file = "data/who/alcohol_consumption.csv", 
     na = ""
@@ -174,42 +149,9 @@ alcohol_consumption_df =
          year = period, value = fact_value_numeric)
 ```
 
-### Function to pivot data and clean country names
-```{r}
-clean_country_names = function(data, rate) {
-  
-  data = 
-    data |>
-    mutate(year = as.numeric(year),
-           iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
-           iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-           country = countrycode(iso3_code, origin = "iso3c",
-                                 destination = "country.name",
-                                 nomatch = NA))
-
-  if("region" %in% colnames(data)) {
-    data |>
-      group_by(country, region, year) |>
-      summarize(rate = mean(value))
-  }
-  
-  else {
-    data |>
-      group_by(country, year) |>
-      summarize(rate = mean(value))
-  }
-}
-
-econ_crime_df = clean_country_names(econ_crime_df, "avg_crime_rate")
-justice_personnel_df = clean_country_names(justice_personnel_df, "avg_personnel_rate")
-trafficking_df = clean_country_names(trafficking_df, "avg_trafficking_rate")
-alcohol_consumption_df = clean_country_names(alcohol_consumption_df, "avg_consumption_rate")
-```
-
-
 ### Outcomes of Violence
 ```{r tidy_violence_outcomes}
-homicide_rate_df = 
+homicide_df = 
     readxl::read_excel(
     path = "data/unodc/intentional_homicide.xlsx",
     skip = 2
@@ -221,7 +163,7 @@ homicide_rate_df =
          sex == "Total",
          age == "Total")
 
-violence_rate_df = 
+violence_df = 
     readxl::read_excel(
     path = "data/unodc/violent_sexual_crime.xlsx",
     skip = 2
@@ -229,9 +171,6 @@ violence_rate_df =
   janitor::clean_names() |>
   filter(indicator == "Violent offences",
          unit_of_measurement == "Rate per 100,000 population")
-
-homicide_rate_df = clean_country_names(homicide_rate_df, "avg_homicide_rate")
-violence_rate_df = clean_country_names(violence_rate_df, "avg_violence_rate")
 ```
 
 For the economic determinants, all the datasets had years organized as different
@@ -248,24 +187,87 @@ order to standardize the country names of each dataset since some of the
 country names were represented inconsistently across datasets. For example, 
 South Korea was represented as "Korea (Republic of)" and "Korea, Rep."
 
+### Function to pivot data, average rates across category and clean country names
+```{r pivot_data}
+tidy_df = function(data, name, format = "iso3c", pivot = FALSE, average = FALSE) {
+  
+  if(pivot) {
+    data = 
+      data |>
+      pivot_longer(
+        cols = -iso3_code,
+        names_to = "year",
+        values_to = name
+      ) |>
+      janitor::clean_names()
+  }
+  
+  data = 
+    data |>
+    mutate(year = as.numeric(year),
+           iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
+           iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
+           country = countrycode(iso3_code, origin = format,
+                                 destination = "country.name",
+                                 nomatch = NA)) |> drop_na()
+  
+  if(average) {
+    if("region" %in% colnames(data)) {
+      data = 
+        data |>
+        group_by(country, region, year) |>
+        summarize(!!name := mean(value))
+    }
+    
+    else {
+        data = 
+          data |>
+          group_by(country, year) |>
+          summarize(!!name := mean(value))
+    }
+    
+  }
+  
+  return(data)
+}
+```
+
+### Tidy
+```{r}
+gdp_df = tidy_df(gdp_df, "gdp", pivot = TRUE)
+inflation_df = tidy_df(inflation_df, "inflation_rate", pivot = TRUE)
+human_develop_df = tidy_df(human_develop_df, "hdi", pivot = TRUE)
+unemployment_df = tidy_df(unemployment_df, "unemployment_rate", 
+                           format = "country.name", pivot = TRUE)
+
+econ_crime_df = tidy_df(econ_crime_df, "crime_rate",  average = TRUE)
+personnel_df = tidy_df(personnel_df, "personnel_rate", average = TRUE)
+trafficking_df = tidy_df(trafficking_df, "trafficking_rate", average = TRUE)
+alcohol_df = tidy_df(alcohol_df, "alcohol_consumption_rate", average = TRUE)
+homicide_df = tidy_df(homicide_df, "homicide_rate", average = TRUE)
+violence_df = tidy_df(violence_df, "violence_rate", average = TRUE)
+
+```
+
 ### Merge Datasets
 ```{r merge_datasets}
 merged_violence_df =
-  left_join(homicide_rate_df, violence_rate_df) |>
+  left_join(homicide_df, violence_df) |>
   left_join(gdp_df) |>
   left_join(inflation_df) |>
   left_join(unemployment_df) |>
   left_join(human_develop_df) |>
   left_join(econ_crime_df) |>
-  left_join(justice_personnel_df) |>
+  left_join(personnel_df) |>
   left_join(trafficking_df) |>
-  left_join(alcohol_consumption_df) |>
+  left_join(alcohol_df) |>
   mutate(country = as.factor(country),
          region = as.factor(region)) |>
   filter(between(year, 2015, 2023)) |>
-  drop_na(country, region)
+  drop_na(country, region) |>
+  relocate(iso3_code)
 
-str(merged_violence_df)
+head(merged_violence_df)
 ```
 
 The final merged dataset includes `r nrow(merged_violence_df)` rows and 
@@ -283,7 +285,6 @@ dataset was filtered for the years between 2015 and 2023.
 # EDA
 
 ## Visualization
-
 ```{r}
 homicide_visual_df = 
     readxl::read_excel(
