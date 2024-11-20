@@ -110,15 +110,19 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 
 # Density Plots 
 
-## Global Scale
-
-# Distribution of Variables of Interest by Region
+## Distribution of Variables of Interest by Region
 ```{r}
-
 map(var_names, \(x) make_plot(EDA_var_interest, geom_density, 
     str_c("Distribution of ", x, " based on Region"), "region",
     x = .data[[x]], color = region))
 
+```
+
+## Distribution of Variables of Interest by Development Status
+```{r}
+map(var_names, \(x) make_plot(EDA_var_interest, geom_density, 
+    str_c("Distribution of ", x, " based on Region"), "development_status",
+    x = .data[[x]], color = development_status))
 ```
 
 
