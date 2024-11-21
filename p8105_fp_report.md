@@ -4,7 +4,11 @@ My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top
 
 ## Motivation
 
+(ONE OR TWO PARAGRAPHS)
+
 ## Initial Questions
+
+(ONE PARAGRAPH WITH LIST OF QUESTIONS)
 
 # Data: Source, Scraping Method & Cleaning
 
@@ -14,8 +18,6 @@ Since there are many determinants and indicators of violence, we chose
 the indicators and outcomes that we thought were most interesting and
 relevant in exploring violence from the following sources:
 
-- International Monetary Fund (IMF)
-  - Unemployment Rate
 - United Nations Development Program (UNDP):
   - Human Development Index
 - United Nations Office of Drugs and Crime (UNODC)
@@ -27,6 +29,7 @@ relevant in exploring violence from the following sources:
 - World Bank
   - Gross Domestic Product (GDP)
   - Inflation Rate (Measured by Consumer Price Index)
+  - Unemployment Rate
 - World Health Organization (WHO)
   - Alcohol Consumption
 
@@ -34,7 +37,7 @@ Intentional homicide, and violent and sexual crimes were chosen as the
 outcome variable to quantify violence.
 
 - Intentional homicide:
-  - counting unit: individual victim of homicide
+  - counting unit: number of homicide victims per 100,000 population
   - classification:
     - situational context: organized crime, interpersonal (excluding
       familial/intimate), socio-political
@@ -60,17 +63,16 @@ was renamed from “data.csv” to “alcohol_consumption.csv”.
 
 ## Cleaning
 
-### Function to pivot data, average rates across category and clean country names
+### Function to Tidy Datasets
 
 ``` r
-tidy_df = function(data, name, format = "iso3c", 
-                   pivot = FALSE, average = FALSE) {
+tidy_df = function(data, variable, pivot = FALSE, average = FALSE) {
   
   if(pivot) {
     data = data |>
       pivot_longer(cols = -iso3_code,
                    names_to = "year",
-                   values_to = name) |>
+                   values_to = variable) |>
       janitor::clean_names()
   }
   
@@ -78,29 +80,56 @@ tidy_df = function(data, name, format = "iso3c",
     mutate(year = as.numeric(year),
            iso3_code = str_replace_all(iso3_code, "^GBR.*", "GBR"),
            iso3_code = str_replace_all(iso3_code, "^IRQ.*", "IRQ"),
-           country = countrycode(iso3_code, origin = format,
+           country = countrycode(iso3_code, origin = "iso3c",
                                  destination = "country.name",
-                                 nomatch = NA)) |> drop_na()
+                                 nomatch = NA, warn = FALSE)) |> drop_na()
   
   if(average) {
     
     if("region" %in% colnames(data)) {
       data = data |>
         group_by(country, region, year) |>
-        summarize(!!name := mean(value))
+        summarize(!!variable := mean(value))
     }
     
     else {
         data = data |>
           group_by(country, year) |>
-          summarize(!!name := mean(value))
+          summarize(!!variable := mean(value))
     }
     
   }
   
   return(data)
+  
 }
 ```
+
+For the data cleaning process, we defined a function to pipe after
+importing each dataset to automatically tidy the datasets. The
+countrycode() function standardizes the country names of each dataset
+since some of the country names are represented inconsistently across
+dataset files. For example, South Korea was represented as “Korea
+(Republic of)” and “Korea, Rep.”
+
+Moreover, for the countrycode() function, NA is returned if no matches
+are found and warnings are also suppressed by `nomatch = NA` and
+`warn = FALSE` respectively since some datasets include iso3 codes for
+entities that are not countries. For example, EUU represents the
+European Union; however, the countrycode() function only recognizes iso3
+codes for countries and returns a warning, but we are interested in
+countries and regions. A boolean parameter called `pivot` was included
+to indicate if a dataset needs to be pivoted and subsequently perform
+pivot_longer(), since some datasets had years organized as different
+columns, where each column represented values for that year.
+
+Also, some of the datasets include rates for different categories. For
+example, the data for economic crime includes crime rates for fraud,
+burglary and more. Therefore, another boolean parameter called “average”
+was included to pass an option to group by and summarize rates across
+categories and genders of different datasets, which will then be merged
+into a single dataset to be used for EDA and especially regresion
+analysis.
 
 ### Economic Determinants
 
@@ -110,37 +139,24 @@ gdp_df =
              sheet = "Data", skip = 3, na = "") |>
   select(iso3_code = 2, "2015":"2023") |>
   tidy_df("gdp", pivot = TRUE)
-```
 
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX
-
-``` r
 inflation_df = 
   read_excel(path = "data/worldbank/inflation_rate.xls", 
              sheet = "Data", skip = 3, na = "") |>
   select(iso3_code = 2, "2015":"2023") |>
   tidy_df("inflation_rate", pivot = TRUE)
-```
 
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX
-
-``` r
 unemployment_df =
-  read_excel(path = "data/imf/unemployment_rate.xls", 
-             range = "A1:AY116", na = "no data") |>
-  select(iso3_code = 1, "2015":"2023")|>
-  tidy_df("unemployment_rate", format = "country.name", pivot = TRUE)
+  read_excel(path = "data/worldbank/unemployment_rate.xlsx",
+             range = "A1:BP437", na = "..") |>
+  rename_with(str_replace_all, pattern = " \\[.*", replacement = "") |>
+  select(iso3_code = 4, "2013":"2023") |>
+  tidy_df("unemployment_rate", pivot = TRUE)
 
 human_develop_df =
   read_csv(file = "data/undp/human_development_index.csv", na = "") |>
   head(-11) |>
-  rename_with(gsub, pattern = "^hdi_", replacement = "") |>
+  rename_with(str_replace_all, pattern = "hdi_", replacement = "") |>
   select(iso3_code = 1, "2015":"2022") |>
   tidy_df("hdi", pivot = TRUE)
 ```
@@ -164,11 +180,6 @@ econ_crime_df =
   tidy_df("crime_rate",  average = TRUE)
 ```
 
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
-
     ## `summarise()` has grouped output by 'country', 'region'. You can override using
     ## the `.groups` argument.
 
@@ -182,11 +193,6 @@ personnel_df =
   tidy_df("personnel_rate", average = TRUE)
 ```
 
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
-
     ## `summarise()` has grouped output by 'country', 'region'. You can override using
     ## the `.groups` argument.
 
@@ -194,17 +200,14 @@ personnel_df =
 trafficking_df =
   read_excel(path = "data/unodc/human_trafficking.xlsx", skip = 2) |>
   janitor::clean_names() |>
-  filter(category == "Total", sex == "Total", age == "Total",
+  filter(category == "Total", 
+         sex == "Total",
+         age == "Total",
          txt_value != "<5") |>
   mutate(value = str_replace_all(txt_value, ",", ""),
          value = as.numeric(value)) |>
   tidy_df("trafficking_rate", average = TRUE)
 ```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: CAR, CAS, EEU, MCA, MCN, SAF, SAM
 
     ## `summarise()` has grouped output by 'country', 'region'. You can override using
     ## the `.groups` argument.
@@ -215,7 +218,8 @@ alcohol_df =
   janitor::clean_names() |>
   filter(dim1 == "Both sexes") |>
   select(iso3_code = spatial_dim_value_code, 
-         year = period, value = fact_value_numeric) |>
+         year = period, 
+         value = fact_value_numeric) |>
   tidy_df("alcohol_consumption_rate", average = TRUE)
 ```
 
@@ -239,14 +243,11 @@ homicide_df =
   janitor::clean_names() |>
   filter(indicator == "Victims of intentional homicide",
          unit_of_measurement == "Rate per 100,000 population",
-         dimension == "Total", sex == "Total", age == "Total") |>
+         dimension == "Total", 
+         sex == "Total", 
+         age == "Total") |>
   tidy_df("homicide_rate", average = TRUE)
 ```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
 
     ## `summarise()` has grouped output by 'country', 'region'. You can override using
     ## the `.groups` argument.
@@ -260,28 +261,14 @@ violence_df =
   tidy_df("violence_rate", average = TRUE)
 ```
 
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `country = countrycode(...)`.
-    ## Caused by warning:
-    ## ! Some values were not matched unambiguously: XKX
-
     ## `summarise()` has grouped output by 'country', 'region'. You can override using
     ## the `.groups` argument.
 
-For the economic determinants, all the datasets had years organized as
-different columns, where each column represented values for that
-specific year. Therefore, pivot_longer() was applied to pivot years and
-their respective values into two columns.
-
-For rates of all social determinants, we filtered and chose the data to
-be rates per 100,000 people since it allows standardization for
-comparability by adjusting for differences in population size.
-
-The countrycode() function from the countrycode package was also
-implemented in order to standardize the country names of each dataset
-since some of the country names were represented inconsistently across
-datasets. For example, South Korea was represented as “Korea (Republic
-of)” and “Korea, Rep.”
+The datasets for economic crimes, criminal justice personnel, homicide
+and violence datasets provided data for both counts and rates per
+100,000 people. Therefore, we filtered to choose rates per 100,000
+people since it allows standardization for comparability by adjusting
+for differences in population size.
 
 ### Merge Datasets
 
@@ -299,7 +286,6 @@ merged_violence_df =
   mutate(country = as.factor(country),
          region = as.factor(region)) |>
   filter(between(year, 2015, 2023)) |>
-  drop_na(country, region) |>
   relocate(iso3_code)
 ```
 
@@ -332,16 +318,15 @@ head(merged_violence_df)
     ## #   alcohol_consumption_rate <dbl>
 
 The final merged dataset includes 1014 rows and 14 columns, including
-country, region, year, homicide rate, average violence offence rate,
-gdp, inflation rate, unemployment rate, average crime rate, average
-(criminal justice) personnel rate, total drug seized (2018 - 2022),
-total arm seized, total trafficking and alcohol consumption as
-variables. There is a total of 163 distinct countries.
+iso3 codes, country, region, year, homicide rate, average violence
+offence rate, gdp, inflation rate, unemployment rate, average crime
+rate, criminal justice personnel rate, total, human trafficking rate and
+alcohol consumption rate as variables. There is a total of 163 distinct
+countries.
 
 After merging the datasets, country and region were converted to
-categorical variables. Rows with NA values for country and region were
-dropped, and the dataset was filtered for the years between 2015 and
-2023.
+categorical variables and the dataset was filtered for the years between
+2015 and 2023.
 
 # EDA
 
