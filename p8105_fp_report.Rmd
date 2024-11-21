@@ -21,7 +21,10 @@ Globally, violence undermines social and economic development, with its impacts 
 ## Initial Questions
 
 
-(ONE PARAGRAPH WITH LIST OF QUESTIONS)
+(1) What are indicators of violence (which has most influence - answered by regression)?
+(2) How do rates of both indicator and outcome differ by region/country?
+(3) 
+
 
 
 # Data: Source, Scraping Method & Cleaning
