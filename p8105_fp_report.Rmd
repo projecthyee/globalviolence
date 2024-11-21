@@ -13,8 +13,9 @@ library(plotly)
 
 ## Motivation
 
+Globally, violence undermines social and economic development, with its impacts being more pronounced in "developing" countries. Communities lacking adequate resources or experiencing systemic inequities are more vulnerable to various health challenges, including violence. Factors that influence health also play a role in shaping violence, which in turn affects determinants such as housing, education, transportation, and economic conditions. This project seeks to explore the factors driving serious assault, sexual violence, and intentional homicide worldwide from 2015 to 2023. 
 
-(ONE OR TWO PARAGRAPHS)
+(I PARAPHRASED THE MOTIVATION IN OUT PROPOSAL DOCUMENT. MAYBE INCLUDE WHY WE CHOSE THIS TIME FRAME?)
 
 
 ## Initial Questions
@@ -28,7 +29,7 @@ library(plotly)
 ## Source
 
 Since there are many determinants and indicators of violence, we chose the 
-indicators and outcomes that we thought were most interesting and relevant in 
+indicators and outcomes that seem most relevant and interesting in 
 exploring violence from the following sources:
 
 * United Nations Development Program (UNDP): 
@@ -313,6 +314,22 @@ homicide_visual_df |>
        Title = "Average Homicide Rate Trend")
 ```
 
+```{r}
+# I took the average for each country and plotted using the choropleth. 
+merged_violence_df |>
+  group_by(iso3_code, country) |>
+  summarize(avg_homicide = mean(homicide_rate)) |>
+  drop_na(avg_homicide) |>
+  mutate(text_label = str_c("Country: ", country, 
+                            "\nViolance Rate: ", avg_homicide)) |>
+  plot_ly(type = 'choropleth', 
+          locations = ~iso3_code, 
+          z = ~avg_homicide, 
+          text = ~text_label, 
+          colorscale = "Viridis", 
+          hovertemplate = paste("%{text}<extra></extra>")) 
+```
+
 ## Violence Rate
 
 ## Global Prevalence of Violence 
@@ -331,19 +348,6 @@ merged_violence_df |>
           colorscale = "Viridis", 
           hovertemplate = paste("%{text}<extra></extra>")) 
 
-# For the homicide rate, I took the average from 2015-2021 for each country and plotted using the choropleth. 
-merged_violence_df |>
-  group_by(iso3_code, country) |>
-  summarize(avg_homicide = mean(homicide_rate)) |>
-  drop_na(avg_homicide) |>
-  mutate(text_label = str_c("Country: ", country, 
-                            "\nViolance Rate: ", avg_homicide)) |>
-  plot_ly(type = 'choropleth', 
-          locations = ~iso3_code, 
-          z = ~avg_homicide, 
-          text = ~text_label, 
-          colorscale = "Viridis", 
-          hovertemplate = paste("%{text}<extra></extra>")) 
 ```
 
 
