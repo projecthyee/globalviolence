@@ -303,6 +303,39 @@ homicide_visual_df |>
        Title = "Average Homicide Rate Trend")
 ```
 
+```{r choropleth}
+# Since there are a lot of missing data for violence rate, I dropped the NAs first and then took the average over the years that are available but I don't think this is a valid way to do it. We could choose a specific year maybe? 
+merged_violence_df |>
+  drop_na(violence_rate) |>
+  group_by(iso3_code, country) |>
+  summarize(avg_violence = mean(violence_rate)) |>
+  mutate(text_label = str_c("Country: ", country, 
+                            "\nViolance Rate: ", avg_violence) 
+  ) |>
+  plot_ly(type = 'choropleth', 
+          locations = ~iso3_code, 
+          z = ~avg_violence, 
+          text = ~text_label, 
+          colorscale = "Viridis", 
+          hovertemplate = paste("%{text}<extra></extra>")
+    ) 
+
+# For the homicide rate, I took the average from 2015-2021 for each country and plotted using the choropleth. 
+merged_violence_df |>
+  group_by(iso3_code, country) |>
+  summarize(avg_homicide = mean(homicide_rate)) |>
+  drop_na(avg_homicide) |>
+  mutate(text_label = str_c("Country: ", country, 
+                            "\nViolance Rate: ", avg_homicide) 
+  ) |>
+  plot_ly(type = 'choropleth', 
+          locations = ~iso3_code, 
+          z = ~avg_homicide, 
+          text = ~text_label, 
+          colorscale = "Viridis", 
+          hovertemplate = paste("%{text}<extra></extra>")
+    ) 
+```
 ## Data Transformation 
 
 ## Regression 
