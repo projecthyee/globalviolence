@@ -319,18 +319,7 @@ homicide_visual_df |>
 
 ```{r}
 # I took the average for each country and plotted using the choropleth. 
-merged_violence_df |>
-  group_by(iso3_code, country) |>
-  summarize(avg_homicide = mean(homicide_rate)) |>
-  drop_na(avg_homicide) |>
-  mutate(text_label = str_c("Country: ", country, 
-                            "\nViolance Rate: ", avg_homicide)) |>
-  plot_ly(type = 'choropleth', 
-          locations = ~iso3_code, 
-          z = ~avg_homicide, 
-          text = ~text_label, 
-          colorscale = "Viridis", 
-          hovertemplate = paste("%{text}<extra></extra>")) 
+
 ```
 
 ## Violence Rate
@@ -353,6 +342,39 @@ merged_violence_df |>
 
 ```
 
+Which rows have the least NA values?
+```{r}
+merged_violence_df |> 
+  rowwise() |> 
+  mutate(na_ct = sum(is.na(c_across(everything())))) |> 
+  ungroup()
+
+hist(merged_violence_df$violence_rate)
+hist(merged_violence_df$homicide_rate)
+```
+
+#### Which year(s) should be selected for violence rate analysis?
+```{r}
+merged_violence_df |> 
+  filter(is.na(violence_rate)) |> 
+  select(iso3_code, country, year, violence_rate) |> 
+  group_by(year) |> 
+  summarise(count = n())
+```
+We have the least NA values for the last 6 years or so (2017-2023), excluding 2019
+and 2020, which may be due to COVID. Based on this, what should we select?
+
+#### Which countries have the most NA values - should we keep them?
+```{r}
+merged_violence_df |> 
+  filter(is.na(violence_rate)) |> 
+  select(iso3_code, country, year, violence_rate) |> 
+  group_by(country) |> 
+  summarise(count = n()) |> 
+  arrange(desc(count))
+```
+Bahrain, India, Seychelles, China, Afghanistan, Rwanda have no violence data across 2015-2023 at all.
+Qatar (2021), Bermuda (2015-2027), Haiti (2018), Mauritius (2020-2021). 
 
 ## Regression 
 
