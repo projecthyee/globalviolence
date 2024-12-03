@@ -274,6 +274,8 @@ merged_violence_df =
   relocate(iso3_code)
 
 head(merged_violence_df)
+
+write.csv(merged_violence_df, file = "./data/merged_violence.csv")
 ```
 
 The final merged dataset includes `r nrow(merged_violence_df)` rows and 
