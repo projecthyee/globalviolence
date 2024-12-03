@@ -1,0 +1,122 @@
+---
+title: "Shiny Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+library(viridis)
+library(shiny)
+```
+
+```{r include=FALSE}
+merged_violence_outcome = 
+  read.csv("./data/merged_violence.csv")[-1] |> 
+  pivot_longer(
+    cols = c(homicide_rate:violence_rate), 
+    names_to = "outcome", 
+    values_to = "rate"
+  )
+```
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+region_choices = 
+  merged_violence_outcome |>
+  distinct(region) |>
+  pull(region) 
+
+selectInput(
+  inputId = "region_choice", 
+  label = h3("Select Region"), 
+  choices = region_choices, 
+  selected = "Asia"
+)
+```
+
+
+```{r}
+outcome_choices = 
+  merged_violence_outcome |>
+  distinct(outcome) |>
+  pull(outcome)
+
+radioButtons(
+  inputId = "outcome_choice", 
+  label = h3("Select Outcome Type"), 
+  choices = outcome_choices,
+  selected = "homicide_rate"
+)
+```
+
+
+```{r}
+year_choices = 
+  merged_violence_outcome |>
+  distinct(year) |> 
+  pull(year)
+
+sliderInput(
+  inputId = "year_range", 
+  label = h3("Select Year Range"), 
+  min = 2015, 
+  max = 2023, 
+  value = c(2020, 2022)
+)
+```
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+renderPlotly(
+  merged_violence_outcome |>
+    filter(
+      region == input[["region_choice"]], 
+      outcome == input[["outcome_choice"]],
+      year %in% input[["year_range"]][1]:input[["year_range"]][2], 
+    ) |>
+  plot_ly(type = 'choropleth', 
+          locations = ~iso3_code, 
+          z = ~rate, 
+          text = ~text_label)
+)
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+renderPlotly(
+  merged_violence_outcome |>
+    filter(
+      region == input[["region_choice"]], 
+      outcome == input[["outcome_choice"]]
+    ) |>
+    group_by(country) |>
+    summarize(avg_rate = mean(rate)) |>
+    mutate(country = fct_reorder(country, avg_rate)) |>
+    plot_ly(x = ~country, y = ~avg_rate, type = "bar")
+  )
+```
+
+
+### Chart C
+
+```{r}
+
+```
+

@@ -13,9 +13,20 @@ library(plotly)
 
 ## Motivation
 
-Globally, violence undermines social and economic development, with its impacts being more pronounced in "developing" countries. Communities lacking adequate resources or experiencing systemic inequities are more vulnerable to various health challenges, including violence. Factors that influence health also play a role in shaping violence, which in turn affects determinants such as housing, education, transportation, and economic conditions. This project seeks to explore the factors driving serious assault, sexual violence, and intentional homicide worldwide from 2015 to 2023. 
+Globally, violence undermines social and economic development, with its impacts 
+being more pronounced in "developing" countries. Communities lacking adequate 
+resources or experiencing systemic inequities are more vulnerable to various 
+health challenges, including violence. Factors that influence health also play 
+a role in shaping violence, which in turn affects determinants such as housing, 
+education, transportation, and economic conditions. This project seeks to 
+explore the factors driving serious assault, sexual violence, and intentional 
+homicide worldwide from 2015 to 2023. 
 
-(I PARAPHRASED THE MOTIVATION IN OUT PROPOSAL DOCUMENT. MAYBE INCLUDE WHY WE CHOSE THIS TIME FRAME?)
+We selected this time frame because it includes significant global events, 
+including the COVID-19 pandemic and various conflicts, which have greatly 
+influenced patterns of violence. Also, even though there are a lot of missing 
+data for year 2023, we decided to include the year because this time period 
+provides insight into the contemporary factors shaping violence worldwide. 
 
 
 ## Initial Questions
@@ -355,8 +366,10 @@ homicide_visual_df |>
        Title = "Average Homicide Rate Trend")
 ```
 
+I took the average for each country over the time frame and plotted using 
+the choropleth. 
+
 ```{r}
-# I took the average for each country and plotted using the choropleth. 
 merged_violence_df |>
   group_by(iso3_code, country) |>
   summarize(avg_homicide = mean(homicide_rate)) |>
@@ -412,9 +425,12 @@ violence_visual_df |>
        Title = "Average Violence Rate Trend")
 ```
 
-## Global Prevalence of Violence 
+Similar to the homicide rate, I took the average of the reported violence rate 
+for each country and plotted using choropleth. However, since there are a lot 
+of missing data for violence rate, I dropped the NAs first and then took the 
+average. 
+
 ```{r choropleth}
-# Since there are a lot of missing data for violence rate, I dropped the NAs first and then took the average over the years that are available but I don't think this is a valid way to do it. We could choose a specific year maybe? 
 merged_violence_df |>
   drop_na(violence_rate) |>
   group_by(iso3_code, country) |>
@@ -429,6 +445,32 @@ merged_violence_df |>
           hovertemplate = paste("%{text}<extra></extra>")) 
 
 ```
+
+
+## Global Prevalence of Violence 
+
+Across the time period from 2015 to 2023, the Americas consistently exhibited 
+a significantly higher homicide rate compared to other regions. The difference 
+in this region is pronounced, indicating a persistent and widespread issue with 
+violent crime. The homicide rate in Asia is also notable. There was a rising 
+trend in homicide rate from 2015 to 2021, but was followed by a sharp decrease 
+in 2022. However, it should be noted that not all countries that reported 
+homicide rate also reported the violence rate. 
+
+The drop in 2022 may imply that there was a potential shift or improvement in 
+the region, but it could also mean that there are some missing data in that 
+year, leading a bias or misinterpretation. 
+
+When examining violence rates, the Americas followed a similar trend to the 
+homicide rate, with rates significantly higher than the other regions. This 
+trend reflects the persistent issue of violence in the region, affecting not 
+only homicide rates but also broader forms of violence. 
+However, Oceania presented an extreme outlier in terms of violence rates, 
+surpassing even the Americas. In fact, Oceania's violence rate was nearly 
+double that of the Americas, which raises questions about the underlying causes.
+
+
+
 ## Jeff is confused, was this running before
 
 
