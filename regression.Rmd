@@ -199,14 +199,13 @@ summary(baseline_MLR_hom)
 
 ```{r}
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
-vif_baseline_hom_MLR <- vif_baseline_hom_MLR %>% 
+vif_baseline_hom_MLR %>% 
   tibble(
     variable = names(vif_baseline_hom_MLR),
     VIF = vif_baseline_hom_MLR
   ) %>% 
-  dplyr::select(variable, VIF)
-
-vif_baseline_hom_MLR %>% knitr::kable()
+  dplyr::select(variable, VIF) %>% 
+  knitr::kable()
 
 ```
 
@@ -223,15 +222,13 @@ summary(baseline_MLR_viol)
 ## Calculate VIF for baseline violence MLR
 ```{r}
 vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
-vif_baseline_viol_MLR <- vif_baseline_viol_MLR %>% 
+vif_baseline_viol_MLR %>% 
   tibble(
     variable = names(vif_baseline_viol_MLR),
     VIF = vif_baseline_viol_MLR
   ) %>% 
-  dplyr::select(variable, VIF)
-
-vif_baseline_viol_MLR %>% knitr::kable()
-
+  dplyr::select(variable, VIF) %>% 
+  knitr::kable()
 ```
 
 
@@ -258,13 +255,23 @@ I found that there is moderate correlation between `hdi` and `alcohol_consumptio
 
 Fit MLR for homicide rate 
 ```{r}
-linear_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + hdi + alcohol_consumption_rate, data = merged_violence_df) 
-summary(linear_model)
+hom_linear_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + hdi + alcohol_consumption_rate, data = merged_violence_df) 
+summary(hom_linear_model)
 
-interaction_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + alcohol_consumption_rate * hdi, data = merged_violence_df) 
+hom_interaction_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + alcohol_consumption_rate * hdi, data = merged_violence_df) 
 
-AIC(interaction_model)
-AIC(linear_model)
+AIC(hom_interaction_model)
+AIC(hom_linear_model)
+
+vif_hom_linear_model <- car::vif(hom_linear_model)
+vif_hom_linear_model %>% 
+  tibble(
+    variable = names(vif_hom_linear_model),
+    VIF = vif_hom_linear_model
+  ) %>% 
+  dplyr::select(variable, VIF) %>% 
+  knitr::kable()
+
 ```
 
 The adjusted R-squared for the linear model is 0.08781 and its AIC is 5015.024. The adjusted R-squared for the interaction model is 0.106429 and its AIC is 5002.571. This means that the interaction model explains the variation in homicide rate better than the linear model. 
@@ -279,6 +286,8 @@ summary(violence_interaction_model)
 
 AIC(violence_interaction_model)
 AIC(violence_linear_model)
+
+
 ```
 
 ## Criterion-based procedure
