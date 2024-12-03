@@ -16,6 +16,23 @@ library(leaps)
 set.seed(1)
 ```
 
+# Helpful Functions
+```{r}
+best_subset = function(predictor, outcome, criterion) {
+  
+  optimal_subset <- 
+    leaps(x = predictor, y = outcome, nbest = 3, 
+      method = criterion, names = names(predictors))
+  
+  optimal_rsq <- optimal_subset$criterion %>% max()
+  optimal_subset_idx <- optimal_subset$criterion %>% which.max()
+  
+  print(optimal_rsq) 
+  print(optimal_subset$which[optimal_subset_idx,]) %>% knitr::kable()
+  
+}
+
+```
 
 ## Regression 
 
@@ -299,6 +316,7 @@ vif_violence_linear_model %>%
 ```
 
 ## Criterion-based procedure
+
 Perform regsubset to predict violence_rate
 ```{r}
 violence_df =
@@ -318,6 +336,37 @@ best_subset_cp =
 print(best_subset_cp)
 
 ```
+
+Perform regsubset to predict violence_rate using r-squared as criterion
+```{r}
+violence_df =
+  merged_violence_df |> 
+  dplyr::ungroup() |> 
+  dplyr::select(
+    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
+    -iso3_code) |>
+  drop_na()
+
+violence_predictors <- violence_df %>% 
+  dplyr::select(-violence_rate)
+
+violence_outcome <- violence_df %>% 
+  pull(violence_rate)
+
+subset_rsq_violence <- 
+  leaps(x = violence_predictors, y = violence_outcome, nbest = 3, 
+        method = "adjr2", names = names(violence_predictors)) 
+
+
+subset_rsq_violence_max <- subset_rsq_violence$adjr2 %>% 
+  max()
+violence_selection_idx <- subset_rsq_violence$adjr2 %>% 
+  which.max()
+
+subset_rsq_violence_max
+subset_rsq_violence$which[violence_selection_idx,] %>% knitr::kable()
+```
+
 
 Perform regsubset to predict homicide_rate. 
 ```{r eval = FALSE}
