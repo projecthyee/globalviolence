@@ -190,22 +190,49 @@ summary(homicide_stepwise)
 
 ## Predict Homicide Rates
 ```{r}
-baseline_MLR <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
+baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR)
+summary(baseline_MLR_hom)
 ```
-
-## Predict Violence Rates
+## Check Baseline Homicide Prediction Model for Colinearity
 
 ```{r}
-baseline_MLR <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
-                    alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR)
+vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
+vif_baseline_hom_MLR <- vif_baseline_hom_MLR %>% 
+  tibble(
+    variable = names(vif_baseline_hom_MLR),
+    VIF = vif_baseline_hom_MLR
+  ) %>% 
+  dplyr::select(variable, VIF)
+
+vif_baseline_hom_MLR %>% knitr::kable()
 
 ```
 
+
+
+## Predict Violence Rates
+```{r}
+baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+summary(baseline_MLR_viol)
+
+```
+## Calculate VIF for baseline violence MLR
+```{r}
+vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
+vif_baseline_viol_MLR <- vif_baseline_viol_MLR %>% 
+  tibble(
+    variable = names(vif_baseline_viol_MLR),
+    VIF = vif_baseline_viol_MLR
+  ) %>% 
+  dplyr::select(variable, VIF)
+
+vif_baseline_viol_MLR %>% knitr::kable()
+
+```
 
 
 ## Heat map and MLR 
@@ -227,12 +254,6 @@ ggcorrplot(cor_matrix,
 
 ```
 I found that there is moderate correlation between `hdi` and `alcohol_consumption_rate`, corr = 0.5. I will fit 2 MLR models, one with and one without the interaction between these two covariates. 
-
-## Calculate VIF 
-
-```{r}
-
-```
 
 
 Fit MLR for homicide rate 
