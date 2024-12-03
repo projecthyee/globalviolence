@@ -10,6 +10,10 @@ library(tidyverse)
 library(readxl)
 library(countrycode)
 library(MASS)
+library(glmnet)
+library(GGally)
+library(leaps)
+set.seed(1)
 ```
 
 
@@ -38,7 +42,7 @@ After looking at the distributions of all variables, all variables are skewed
 right, except for human development index which is bimodal and slightly 
 left-skewed. I will apply ln transformations and box-cox transformations to 
 these variables, and use the Shapiro-Wilk test to test for normality. Even 
-though it is not necessary to normalize the predictors, this step will stablize 
+though it is not necessary to normalize the predictors, this step will stabilize 
 variance and reduce heteroscedasticity. I think it will be helpful for further 
 steps with model.
 
@@ -53,13 +57,13 @@ ln_transform = function(value) {
 
 ln_train_df = 
   train_df |>
-  mutate(across(c(homicide_rate:alcohol_consumption), 
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
                 ln_transform))
 
 map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
 ```
 
-```{r boxcox_transform}
+```{r boxcox_transform, eval = FALSE, include = FALSE}
 boxcox_transform = function(value) {
   value = value + abs(min(value, na.rm = TRUE)) + 0.00001
   
@@ -70,9 +74,196 @@ boxcox_transform = function(value) {
 
 boxcox_train_df = 
   train_df |>
-  mutate(across(c(homicide_rate:alcohol_consumption), 
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
                 boxcox_transform))
 
 map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
 ```
 
+## Lasso 
+Use lasso to find the most important variables in predicting homicide rate and violence rate. 
+
+### Predictors for violence rate:
+To prepare data for lasso (fitting violence rate), I removed variables that are not predictors including iso3_code, country, region, year and homicide rate. I then dropped NA values before performing lasso. 
+
+```{r violence}
+lasso_violence = 
+  merged_violence_df |> 
+  dplyr::select(-iso3_code, -country, -region, -year, -homicide_rate) |> 
+  drop_na()
+
+x = model.matrix(violence_rate ~. - country - region, data = lasso_violence)[, -1]
+y = lasso_violence |> pull(violence_rate)
+
+lambda = 10^(seq(-2, 2.75, 0.1))
+
+lasso_violence_fit = 
+  glmnet(x, y, lambda = lambda)
+
+lasso_violence_cv = 
+  cv.glmnet(x, y, lambda = lambda)
+
+lambda_violence_opt = 
+  lasso_violence_cv[["lambda.min"]]
+
+lasso_violence_fit = 
+  glmnet(x, y, lambda = lambda_violence_opt)
+
+lasso_violence_fit |> 
+  broom::tidy()
+```
+
+The optimal lambda for violence is 0.794. GDP has the least influence on the model, followed by `trafficked_victims`. These covariates will be removed from the model. 
+
+
+### Predictors for homicide rate. 
+```{r homicide}
+lasso_homicide = 
+  merged_violence_df |> 
+  dplyr::select(-iso3_code, -country, -region, -year, -violence_rate) |> 
+  drop_na()
+
+x = model.matrix(homicide_rate ~. - country - region, data = lasso_homicide)[, -1]
+y = lasso_homicide |> pull(homicide_rate)
+
+lambda = 10^(seq(-2, 2.75, 0.1))
+
+lasso_homicide_fit = 
+  glmnet(x, y, lambda = lambda)
+
+lasso_homicide_cv = 
+  cv.glmnet(x, y, lambda = lambda)
+
+lambda_homicide_opt = 
+  lasso_homicide_cv[["lambda.min"]]
+
+lasso_homicide_fit = 
+  glmnet(x, y, lambda = lambda_homicide_opt)
+
+lasso_homicide_fit |> 
+  broom::tidy()
+
+```
+
+The optimal lambda for homicide is 0.694.
+
+
+# Stepwise Regression Violence Rate
+
+```{r}
+stepwise_violence_df <- merged_violence_df %>% 
+  ungroup() %>% 
+  dplyr::select(-c(iso3_code:year, homicide_rate)) %>% 
+  drop_na()
+
+violence_initial_model <- lm(violence_rate ~., data = stepwise_violence_df)
+violence_stepwise <- step(violence_initial_model, direction = "both")
+summary(violence_stepwise)
+
+
+```
+
+# Stepwise Regression Homicide Rate
+
+```{r}
+stepwise_homicide_df <- merged_violence_df %>% 
+  ungroup() %>% 
+  dplyr::select(-c(iso3_code:year, violence_rate)) %>% 
+  drop_na()
+
+homicide_initial_model <- lm(homicide_rate ~. , data = stepwise_homicide_df)
+homicide_stepwise <- step(homicide_initial_model, direction = "both")
+summary(homicide_stepwise)
+
+
+```
+
+## Heat map and MLR 
+I will use cor() to find the correlation between the predictors of homicide rate and violence. 
+```{r}
+
+cor_matrix = 
+  cor(violence_predictors_df[, c("inflation_rate", "unemployment_rate", "hdi", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
+
+
+ggcorrplot(cor_matrix, 
+           method = "circle",  
+           type = "lower",  
+           lab = TRUE,        
+           lab_size = 3,      
+           colors = c("blue", "white", "red"), # Color scale (blue = negative, red = positive)
+           title = "Correlation Heatmap"
+)
+
+```
+I found that there is moderate correlation between `hdi` and `alcohol_consumption_rate`, corr = 0.5. I will fit 2 MLR models, one with and one without the interaction between these two covariates. 
+
+Fit MLR for homicide rate 
+```{r}
+linear_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + hdi + alcohol_consumption_rate, data = merged_violence_df) 
+summary(linear_model)
+
+interaction_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + alcohol_consumption_rate * hdi, data = merged_violence_df) 
+
+AIC(interaction_model)
+AIC(linear_model)
+```
+
+The adjusted R-squared for the linear model is 0.08781 and its AIC is 5015.024. The adjusted R-squared for the interaction model is 0.106429 and its AIC is 5002.571. This means that the interaction model explains the variation in homicide rate better than the linear model. 
+
+Fit MLR for violence rate 
+```{r}
+violence_linear_model = lm(violence_rate ~ inflation_rate + unemployment_rate + hdi + alcohol_consumption_rate, data = merged_violence_df) 
+summary(violence_linear_model)
+
+violence_interaction_model = lm(violence_rate ~ inflation_rate + unemployment_rate + alcohol_consumption_rate * hdi, data = merged_violence_df)
+summary(violence_interaction_model)
+
+AIC(violence_interaction_model)
+AIC(violence_linear_model)
+```
+
+## Criterion-based procedure
+Perform regsubset to predict violence_rate
+```{r}
+violence_df =
+  merged_violence_df |> 
+  dplyr::ungroup() |> 
+  dplyr::select(violence_rate, everything(), -year, -homicide_rate, -country, -region, -iso3_code) |> 
+  drop_na() |> 
+  as.data.frame()
+
+best_subset_rsq = 
+  leaps(x = violence_df[,-1], y = violence_df$violence_rate, nbest = 2, method = "adjr2")
+print(best_subset_rsq)
+
+best_subset_cp = 
+  leaps(x = violence_df[,-1], y = violence_df$violence_rate, nbest = 2, method = "Cp")
+
+print(best_subset_cp)
+
+```
+
+Perform regsubset to predict homicide_rate. 
+```{r eval = FALSE}
+#Make a matrix on homicide to perform regsubset
+homicide_df =
+  merged_violence_df |> 
+  dplyr::ungroup() |> 
+  dplyr::select(homicide_rate, everything(), -violence_rate, -year, -country, -region, -iso3_code) |> 
+  drop_na() |> 
+  as.data.frame()  
+
+best_subset_rsq = 
+  leaps(x = homicide_df[,-1], y = homicide_df$homicide_rate, nbest = 2, method = "adjr2")
+print(best_subset_rsq)
+
+best_subset_cp = 
+  leaps(x = homicide_df[,-1], y = homicide_df$homicide_rate, nbest = 2, method = "Cp")
+print(best_subset_cp)
+
+```
+
+The results from criterion-based procedures suggest that significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. This yields the most appropriate Cp value (6.131), which is approximately close to the number of predictors, and highest adjusted R-squared (0.510). 
+
+For homicide_rate, the results are not as straightforward. The best model based on Cp and R-squared seems to be the model with 4 predictors because it has the lowest Cp (6.36), and a decently high adjusted R-squared (0.331), indicating a good balance between fit and complexity. As more predictors are added, R-squared adjusts slightly but Cp levels off at around 6 predictors. The model with 4 predictors, which includes inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a better trade-off.
