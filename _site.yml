@@ -9,12 +9,10 @@ navbar:
       href: eda.html
     - text: "Regression"
       href: regression.html
-    - text: "Dashboard"
-      href: dashboard.html
     - text: "Shiny"
       href: shiny.html
     - text: "Project Report"
-    - href: report.html
+      href: report.html
     - icon: fa-github fa-lg
       href: https://github.com/projecthyee/p8105_fp_violence
 output:
