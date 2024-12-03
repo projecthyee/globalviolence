@@ -19,4 +19,4 @@ navbar:
       href: https://github.com/projecthyee/p8105_fp_violence
 output:
   html_document:
-    theme: black
+    theme: darkly
