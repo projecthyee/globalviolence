@@ -21,7 +21,8 @@ merged_violence_outcome =
   pivot_longer(
     cols = c(homicide_rate:violence_rate), 
     names_to = "outcome", 
-    values_to = "rate"
+    values_to = "rate", 
+    names_pattern = "(.*)_rate"
   )
 ```
 
@@ -53,7 +54,7 @@ radioButtons(
   inputId = "outcome_choice", 
   label = h3("Select Outcome Type"), 
   choices = outcome_choices,
-  selected = "homicide_rate"
+  selected = "homicide"
 )
 ```
 
@@ -85,14 +86,20 @@ renderPlotly(
     filter(
       region == input[["region_choice"]], 
       outcome == input[["outcome_choice"]],
-      year %in% input[["year_range"]][1]:input[["year_range"]][2], 
-    ) |>
-  plot_ly(type = 'choropleth', 
+      year %in% input[["year_range"]][1]:input[["year_range"]][2]
+      ) |>
+    group_by(country, iso3_code) |>
+    summarize(avg_rate = mean(rate)) |> 
+    mutate(text_label = str_c("Country: ", country, 
+                              "\nAvg Rate: ", avg_rate)) |>
+    plot_ly(type = 'choropleth', 
           locations = ~iso3_code, 
-          z = ~rate, 
+          z = ~avg_rate, 
           text = ~text_label)
 )
 ```
+
+
 
 Column {data-width=350}
 -----------------------------------------------------------------------
