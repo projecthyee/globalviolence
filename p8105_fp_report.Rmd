@@ -292,6 +292,10 @@ the period of our interest for analysis.
 
 ## Data Cleaning for Exploratory Data Analysis
 
+For EDA, we re-imported and tidied the homicide and violence datasets, since the 
+regression dataset only includes the rates averaged across category, but we are 
+also interested in exploring the two outcomes by different categories and 
+genders. 
 
 ## Homicide Rate
 ```{r}
@@ -322,11 +326,7 @@ violence_visual_df =
                 year, violence_rate = value)
 ```
 
-
 # EDA
-
-
-Reimport and retidy data for homicide and name it as `homicide_visual_df`
 
 ### Average Homicide Rate Across Region
 ```{r}
