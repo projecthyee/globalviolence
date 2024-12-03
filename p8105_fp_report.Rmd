@@ -337,11 +337,13 @@ violence_visual_df =
 homicide_visual_df |>
   group_by(region, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = region)) +
+  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = 
+               reorder(region, avg_homicide_rate))) +
   geom_col(position = "dodge", bin = 3.0) + 
   labs(x = "Year",
        y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Region")
+       Title = "Average Homicide Rate Across Region",
+       fill = "Region")
 ```
 
 ### Homicide Rate Across Category
@@ -349,10 +351,10 @@ homicide_visual_df |>
 homicide_visual_df |>
   group_by(category, sex) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = reorder(category, avg_homicide_rate), 
-             fill = category)) +
+  ggplot(aes(y = avg_homicide_rate, x = reorder(category, avg_homicide_rate),
+             fill = sex)) +
   geom_col(position = "dodge", bin = 3.0) + 
-  facet_grid(~sex)
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Category",
        y = "Average Homicide Rate",
        Title = "Average Homicide Rate Across Category")
@@ -394,11 +396,13 @@ merged_violence_df |>
 violence_visual_df |>
   group_by(region, year) |>
   summarize(avg_violence_rate = mean(violence_rate)) |>
-  ggplot(aes(y = avg_violence_rate, x = as.factor(year), fill = region)) +
+  ggplot(aes(y = avg_violence_rate, x = as.factor(year), 
+             fill = reorder(region, avg_violence_rate))) +
   geom_col(position = "dodge", bin = 3.0) + 
   labs(x = "Year",
        y = "Average Violence Rate",
-       Title = "Average Violence Rate Across Region")
+       Title = "Average Violence Rate Across Region",
+       fill = "Region")
 ```
 
 ### Cases of Violence Across Category
@@ -406,13 +410,15 @@ violence_visual_df |>
 violence_visual_df |>
   group_by(indicator, category, sex) |>
   summarize(avg_violence_rate = mean(violence_rate)) |>
-  ggplot(aes(y = avg_violence_rate, x = reorder(category, avg_violence_rate), 
-             fill = indicator)) +
+  ggplot(aes(y = avg_violence_rate, x = category, 
+             fill = reorder(indicator, avg_violence_rate))) +
   geom_col(position = "dodge", bin = 3.0) + 
-  facet_grid(~sex)
+  facet_grid(~sex) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Category",
        y = "Average Violence Rate",
-       Title = "Average Violence Rate Across Category")
+       Title = "Average Violence Rate Across Category",
+       fill = "Type")
 ```
 
 ### Violence Trend by Region
@@ -449,7 +455,6 @@ merged_violence_df |>
           hovertemplate = paste("%{text}<extra></extra>")) 
 
 ```
-
 
 ## Global Prevalence of Violence 
 
