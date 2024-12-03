@@ -147,8 +147,9 @@ lasso_homicide_fit |>
 
 The optimal lambda for homicide is 0.694.
 
+# Stepwise Regression 
 
-# Stepwise Regression Violence Rate
+## Stepwise Regression Violence Rate
 
 ```{r}
 stepwise_violence_df <- merged_violence_df %>% 
@@ -163,7 +164,7 @@ summary(violence_stepwise)
 
 ```
 
-# Stepwise Regression Homicide Rate
+## Stepwise Regression Homicide Rate
 
 ```{r}
 stepwise_homicide_df <- merged_violence_df %>% 
@@ -177,6 +178,22 @@ summary(homicide_stepwise)
 
 
 ```
+
+# Baseline MLR with additive effects from all possible predictor variables 
+
+## Predict Homicide Rates
+```{r}
+
+```
+
+
+## Predict Violence Rates
+
+```{r}
+
+```
+
+
 
 ## Heat map and MLR 
 I will use cor() to find the correlation between the predictors of homicide rate and violence. 
@@ -197,6 +214,13 @@ ggcorrplot(cor_matrix,
 
 ```
 I found that there is moderate correlation between `hdi` and `alcohol_consumption_rate`, corr = 0.5. I will fit 2 MLR models, one with and one without the interaction between these two covariates. 
+
+## Calculate VIF 
+
+```{r}
+
+```
+
 
 Fit MLR for homicide rate 
 ```{r}
