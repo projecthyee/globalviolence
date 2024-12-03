@@ -308,7 +308,7 @@ homicide_visual_df =
          sex != "Total",
          between(year, 2015, 2023)) |>
   dplyr::select(country, unit_of_measurement, region, category, sex, year, 
-                homicide_rate = value)
+                homicide  = value)
 ```
 
 ## Violence Rate
@@ -323,43 +323,47 @@ violence_visual_df =
          sex != "Total",
          between(year, 2015, 2023)) |>
   dplyr::select(country, indicator, unit_of_measurement, region, category, sex, 
-                year, violence_rate = value)
+                year, violence = value)
 ```
 
 # EDA
 
-### Average Homicide Rate Across Region
+## Homicide
+
+### Cases of Homicide Across Region
 ```{r}
 homicide_visual_df |>
-  filter(unit_of_measurement == "Rate per 100,000 population",) |>
+  filter(unit_of_measurement == "Counts") |>
   group_by(region, year) |>
-  summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = region)) +
+  summarize(num_homicide = sum(homicide)) |>
+  ggplot(aes(y = num_homicide, x = as.factor(year), fill = region)) +
   geom_col(position = "dodge", bin = 3.0) + 
   labs(x = "Year",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Region")
+       y = "Cases of Homicide",
+       Title = "Cases of Homicide Across Region")
 ```
 
+### Cases of Homicide Across Category
 ```{r}
 homicide_visual_df |>
   filter(unit_of_measurement == "Counts") |>
   group_by(category, sex) |>
-  summarize(num_homicide = sum(homicide_rate)) |>
+  summarize(num_homicide = sum(homicide)) |>
   ggplot(aes(y = num_homicide, x = reorder(category, num_homicide), 
              fill = category)) +
   geom_col(position = "dodge", bin = 3.0) + 
   facet_grid(~sex)
   labs(x = "Category",
-       y = "Number of Homicides",
-       Title = "Number of Homicides Across Category")
+       y = "Cases of Homicides",
+       Title = "Cases of Homicides Across Category")
 ```
 
+# Homicide Trend Across Region
 ```{r}
 homicide_visual_df |>
   filter(unit_of_measurement == "Rate per 100,000 population") |>
   group_by(region, sex, year) |>
-  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  summarize(avg_homicide_rate = mean(homicide)) |>
   ggplot(aes(y = avg_homicide_rate, x = year, color = sex)) +
   geom_smooth(se = FALSE) +
   facet_grid(~region) + 
@@ -386,24 +390,25 @@ merged_violence_df |>
           hovertemplate = paste("%{text}<extra></extra>")) 
 ```
 
-### Average Violence Rate Across Region
+### Cases of Violent Crimes Across Region
 ```{r}
 violence_visual_df |>
-  filter(unit_of_measurement == "Rate per 100,000 population",) |>
+  filter(unit_of_measurement == "Counts",) |>
   group_by(region, year) |>
-  summarize(avg_violence_rate = mean(violence_rate)) |>
-  ggplot(aes(y = avg_violence_rate, x = as.factor(year), fill = region)) +
+  summarize(total_violence = sum(violence)) |>
+  ggplot(aes(y = total_violence, x = as.factor(year), fill = region)) +
   geom_col(position = "dodge", bin = 3.0) + 
   labs(x = "Year",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Region")
+       y = "Cases of Violence",
+       Title = "Cases of Violence Across Region")
 ```
 
+### Cases of Violence Across Category
 ```{r}
 violence_visual_df |>
   filter(unit_of_measurement == "Counts") |>
   group_by(indicator, category, sex) |>
-  summarize(num_violence = sum(violence_rate)) |>
+  summarize(num_violence = sum(violence)) |>
   ggplot(aes(y = num_violence, x = reorder(category, num_violence), 
              fill = indicator)) +
   geom_col(position = "dodge", bin = 3.0) + 
@@ -413,12 +418,12 @@ violence_visual_df |>
        Title = "Cases of Violence Across Category")
 ```
 
-### Trend of Violence Rate
+### Violence Trend by Region
 ```{r}
 violence_visual_df |>
   filter(unit_of_measurement == "Rate per 100,000 population") |>
   group_by(region, sex, year) |>
-  summarize(avg_violence_rate = mean(violence_rate)) |>
+  summarize(avg_violence_rate = mean(violence)) |>
   ggplot(aes(y = avg_violence_rate, x = year, color = sex)) +
   geom_smooth(se = FALSE) +
   facet_grid(~region) + 
