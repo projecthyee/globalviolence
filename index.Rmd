@@ -1,0 +1,8 @@
+---
+title: "Global Violence"
+author: "My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
