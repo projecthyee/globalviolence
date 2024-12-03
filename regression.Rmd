@@ -287,6 +287,14 @@ summary(violence_interaction_model)
 AIC(violence_interaction_model)
 AIC(violence_linear_model)
 
+vif_violence_linear_model <- car::vif(violence_linear_model) 
+vif_violence_linear_model %>% 
+  tibble(
+    variable = names(vif_violence_linear_model),
+    VIF = vif_violence_linear_model
+  ) %>% 
+  dplyr::select(variable, VIF) %>% 
+  knitr::kable()
 
 ```
 
