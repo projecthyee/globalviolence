@@ -292,6 +292,10 @@ the period of our interest for analysis.
 
 ## Data Cleaning for Exploratory Data Analysis
 
+For EDA, we re-imported and tidied the homicide and violence datasets, since the 
+regression dataset only includes the rates averaged across category, but we are 
+also interested in exploring the two outcomes by different categories and 
+genders. 
 
 ## Homicide Rate
 ```{r}
@@ -299,7 +303,8 @@ homicide_visual_df =
     read_excel(path = "data/unodc/intentional_homicide.xlsx",
                skip = 2) |>
   janitor::clean_names() |>
-  filter(indicator == "Victims of intentional homicide",
+  filter(unit_of_measurement == "Rate per 100,000 population",
+         indicator == "Victims of intentional homicide",
          category != "Total",
          sex != "Total",
          between(year, 2015, 2023)) |>
@@ -314,7 +319,8 @@ violence_visual_df =
     read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
                skip = 2) |>
   janitor::clean_names() |>
-  filter(indicator %in% c("Victims of serious assault", 
+  filter(unit_of_measurement == "Rate per 100,000 population",
+         indicator %in% c("Victims of serious assault", 
                           "Victims of sexual violence"),
          sex != "Total",
          between(year, 2015, 2023)) |>
@@ -322,16 +328,13 @@ violence_visual_df =
                 year, violence_rate = value)
 ```
 
-
 # EDA
 
+## Homicide
 
-Reimport and retidy data for homicide and name it as `homicide_visual_df`
-
-### Average Homicide Rate Across Region
+### Homicide Rate Across Region
 ```{r}
 homicide_visual_df |>
-  filter(unit_of_measurement == "Rate per 100,000 population",) |>
   group_by(region, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
   ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = region)) +
@@ -341,23 +344,23 @@ homicide_visual_df |>
        Title = "Average Homicide Rate Across Region")
 ```
 
+### Homicide Rate Across Category
 ```{r}
 homicide_visual_df |>
-  filter(unit_of_measurement == "Counts") |>
   group_by(category, sex) |>
-  summarize(num_homicide = sum(homicide_rate)) |>
-  ggplot(aes(y = num_homicide, x = reorder(category, num_homicide), 
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = reorder(category, avg_homicide_rate), 
              fill = category)) +
   geom_col(position = "dodge", bin = 3.0) + 
   facet_grid(~sex)
   labs(x = "Category",
-       y = "Number of Homicides",
-       Title = "Number of Homicides Across Category")
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Across Category")
 ```
 
+# Homicide Trend Across Region
 ```{r}
 homicide_visual_df |>
-  filter(unit_of_measurement == "Rate per 100,000 population") |>
   group_by(region, sex, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
   ggplot(aes(y = avg_homicide_rate, x = year, color = sex)) +
@@ -386,39 +389,38 @@ merged_violence_df |>
           hovertemplate = paste("%{text}<extra></extra>")) 
 ```
 
-### Average Violence Rate Across Region
+### Cases of Violent Crimes Across Region
 ```{r}
 violence_visual_df |>
-  filter(unit_of_measurement == "Rate per 100,000 population",) |>
   group_by(region, year) |>
   summarize(avg_violence_rate = mean(violence_rate)) |>
   ggplot(aes(y = avg_violence_rate, x = as.factor(year), fill = region)) +
   geom_col(position = "dodge", bin = 3.0) + 
   labs(x = "Year",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Region")
+       y = "Average Violence Rate",
+       Title = "Average Violence Rate Across Region")
 ```
 
+### Cases of Violence Across Category
 ```{r}
 violence_visual_df |>
-  filter(unit_of_measurement == "Counts") |>
   group_by(indicator, category, sex) |>
-  summarize(num_violence = sum(violence_rate)) |>
-  ggplot(aes(y = num_violence, x = reorder(category, num_violence), 
+  summarize(avg_violence_rate = mean(violence_rate)) |>
+  ggplot(aes(y = avg_violence_rate, x = reorder(category, avg_violence_rate), 
              fill = indicator)) +
   geom_col(position = "dodge", bin = 3.0) + 
   facet_grid(~sex)
   labs(x = "Category",
-       y = "Cases of Violence",
-       Title = "Cases of Violence Across Category")
+       y = "Average Violence Rate",
+       Title = "Average Violence Rate Across Category")
 ```
 
-### Trend of Violence Rate
+### Violence Trend by Region
 ```{r}
 violence_visual_df |>
   filter(unit_of_measurement == "Rate per 100,000 population") |>
   group_by(region, sex, year) |>
-  summarize(avg_violence_rate = mean(violence_rate)) |>
+  summarize(avg_violence_rate = mean(violence)) |>
   ggplot(aes(y = avg_violence_rate, x = year, color = sex)) +
   geom_smooth(se = FALSE) +
   facet_grid(~region) + 
