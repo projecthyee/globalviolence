@@ -391,7 +391,7 @@ merged_violence_df |>
           hovertemplate = paste("%{text}<extra></extra>")) 
 ```
 
-### Cases of Violent Crimes Across Region
+### Average Violence Rate Across Region
 ```{r}
 violence_visual_df |>
   group_by(region, year) |>
@@ -405,7 +405,7 @@ violence_visual_df |>
        fill = "Region")
 ```
 
-### Cases of Violence Across Category
+### Average Violence Rate Across Category
 ```{r}
 violence_visual_df |>
   group_by(indicator, category, sex) |>
@@ -426,7 +426,7 @@ violence_visual_df |>
 violence_visual_df |>
   filter(unit_of_measurement == "Rate per 100,000 population") |>
   group_by(region, sex, year) |>
-  summarize(avg_violence_rate = mean(violence)) |>
+  summarize(avg_violence_rate = mean(violence_rate)) |>
   ggplot(aes(y = avg_violence_rate, x = year, color = sex)) +
   geom_smooth(se = FALSE) +
   facet_grid(~region) + 
