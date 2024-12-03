@@ -1,0 +1,28 @@
+---
+title: "plotly2"
+author: "Hyun Kim (hk3373)"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+## Plotly to work on by Country
+```{r}
+merged_violence_df |>
+  ggplot(aes(y = violence_rate, x = factor(year), group = country, 
+             fill = violence_rate)) +
+  geom_line(aes(color = country))
+
+
+merged_violence_df |>
+  ggplot(aes(y = homicide_rate, x = factor(year), group = country, 
+             fill = homicide_rate)) +
+  geom_line(aes(color = country))
+```
+
+

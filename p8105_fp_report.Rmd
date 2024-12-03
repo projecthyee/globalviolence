@@ -454,7 +454,6 @@ merged_violence_df |>
           text = ~text_label, 
           colorscale = "Viridis", 
           hovertemplate = paste("%{text}<extra></extra>")) 
-
 ```
 
 ## Global Prevalence of Violence 
@@ -479,6 +478,19 @@ However, Oceania presented an extreme outlier in terms of violence rates,
 surpassing even the Americas. In fact, Oceania's violence rate was nearly 
 double that of the Americas, which raises questions about the underlying causes.
 
+## Plotly to work on by Country
+```{r}
+merged_violence_df |>
+  ggplot(aes(y = violence_rate, x = factor(year), group = country, 
+             fill = violence_rate)) +
+  geom_line(aes(color = country))
+
+
+merged_violence_df |>
+  ggplot(aes(y = homicide_rate, x = factor(year), group = country, 
+             fill = homicide_rate)) +
+  geom_line(aes(color = country))
+```
 
 ## Missing Values
 
