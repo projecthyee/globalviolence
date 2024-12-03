@@ -5,10 +5,10 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-library(tidyverse)
 library(readxl)
 library(countrycode)
 library(plotly)
+library(tidyverse)
 ```
 
 ## Motivation
@@ -22,7 +22,7 @@ education, transportation, and economic conditions. This project seeks to
 explore the factors driving serious assault, sexual violence, and intentional 
 homicide worldwide from 2015 to 2023. 
 
-We selected this time frame because it includes significant global events, 
+We dplyr::selected this time frame because it includes significant global events, 
 including the COVID-19 pandemic and various conflicts, which have greatly 
 influenced patterns of violence. Also, even though there are a lot of missing 
 data for year 2023, we decided to include the year because this time period 
@@ -163,27 +163,27 @@ be merged for regression analysis.
 gdp_df = 
   read_excel(path = "data/worldbank/gdp.xls",
              sheet = "Data", skip = 3, na = "") |>
-  select(iso3_code = 2, "2015":"2023") |>
+  dplyr::select(iso3_code = 2, "2015":"2023") |>
   tidy_df("gdp", pivot = TRUE)
 
 inflation_df = 
   read_excel(path = "data/worldbank/inflation_rate.xls", 
              sheet = "Data", skip = 3, na = "") |>
-  select(iso3_code = 2, "2015":"2023") |>
+  dplyr::select(iso3_code = 2, "2015":"2023") |>
   tidy_df("inflation_rate", pivot = TRUE)
 
 unemployment_df =
   read_excel(path = "data/worldbank/unemployment_rate.xlsx",
              range = "A1:BP437", na = "..") |>
   rename_with(str_replace_all, pattern = " \\[.*", replacement = "") |>
-  select(iso3_code = 4, "2013":"2023") |>
+  dplyr::select(iso3_code = 4, "2013":"2023") |>
   tidy_df("unemployment_rate", pivot = TRUE)
 
 human_develop_df =
   read_csv(file = "data/undp/human_development_index.csv", na = "") |>
   head(-11) |>
   rename_with(str_replace_all, pattern = "hdi_", replacement = "") |>
-  select(iso3_code = 1, "2015":"2022") |>
+  dplyr::select(iso3_code = 1, "2015":"2022") |>
   tidy_df("hdi", pivot = TRUE)
 ```
 
@@ -213,14 +213,14 @@ trafficking_df =
          txt_value != "<5") |>
   mutate(value = str_replace_all(txt_value, ",", ""),
          value = as.numeric(value)) |>
-  select(iso3_code : region, year, trafficked_victims = value) |>
+  dplyr::select(iso3_code : region, year, trafficked_victims = value) |>
   tidy_df("trafficked_victims")
 
 alcohol_df =
   read_csv(file = "data/who/alcohol_consumption.csv", na = "") |>
   janitor::clean_names() |>
   filter(dim1 == "Both sexes") |>
-  select(iso3_code = spatial_dim_value_code, 
+  dplyr::select(iso3_code = spatial_dim_value_code, 
          year = period, 
          value = fact_value_numeric) |>
   tidy_df("alcohol_consumption_rate", average = TRUE)
@@ -271,7 +271,8 @@ merged_violence_df =
   mutate(country = as.factor(country),
          region = as.factor(region)) |>
   filter(between(year, 2015, 2023)) |>
-  relocate(iso3_code)
+  relocate(iso3_code) |>
+  drop_na(violence_rate, homicide_rate)
 
 head(merged_violence_df)
 
@@ -493,7 +494,7 @@ hist(merged_violence_df$violence_rate)
 hist(merged_violence_df$homicide_rate)
 ```
 
-#### Which year(s) should be selected for violence rate analysis?
+#### NA Values by Year
 ```{r}
 merged_violence_df |> 
   filter(is.na(violence_rate)) |> 
@@ -503,9 +504,9 @@ merged_violence_df |>
   knitr::kable()
 ```
 We have the least NA values for the last 6 years or so (2017-2023), excluding 2019
-and 2020, which may be due to COVID. Based on this, what should we select?
+and 2020, which may be due to COVID. Based on this, what should we dplyr::select?
 
-#### Which countries have the most NA values - should we keep them?
+#### NA Values by Country
 ```{r}
 merged_violence_df |> 
   filter(is.na(violence_rate)) |> 
@@ -513,7 +514,7 @@ merged_violence_df |>
   group_by(country) |> 
   summarise(count = n()) |> 
   arrange(desc(count)) |>
-  head(5) |>
+  head(10) |>
   knitr::kable()
 ```
 Bahrain, India, Seychelles, China, Afghanistan, Rwanda have no violence data across 2015-2023 at all.
