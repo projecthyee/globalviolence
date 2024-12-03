@@ -423,8 +423,10 @@ merged_violence_df |>
           hovertemplate = paste("%{text}<extra></extra>")) 
 
 ```
+## Jeff is confused, was this running before
 
-Which rows have the least NA values?
+
+Which rows have the least NA values? 
 ```{r}
 merged_violence_df |> 
   rowwise() |> 
