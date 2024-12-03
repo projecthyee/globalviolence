@@ -28,8 +28,14 @@ influenced patterns of violence. Also, even though there are a lot of missing
 data for year 2023, we decided to include the year because this time period 
 provides insight into the contemporary factors shaping violence worldwide. 
 
+## Related Work
+
+
+
+
 
 ## Initial Questions
+
 
 
 (1) What are indicators of violence (which has most influence - answered by regression)?
@@ -163,27 +169,27 @@ be merged for regression analysis.
 gdp_df = 
   read_excel(path = "data/worldbank/gdp.xls",
              sheet = "Data", skip = 3, na = "") |>
-  dplyr::select(iso3_code = 2, "2015":"2023") |>
+  select(iso3_code = 2, "2015":"2023") |>
   tidy_df("gdp", pivot = TRUE)
 
 inflation_df = 
   read_excel(path = "data/worldbank/inflation_rate.xls", 
              sheet = "Data", skip = 3, na = "") |>
-  dplyr::select(iso3_code = 2, "2015":"2023") |>
+  select(iso3_code = 2, "2015":"2023") |>
   tidy_df("inflation_rate", pivot = TRUE)
 
 unemployment_df =
   read_excel(path = "data/worldbank/unemployment_rate.xlsx",
              range = "A1:BP437", na = "..") |>
   rename_with(str_replace_all, pattern = " \\[.*", replacement = "") |>
-  dplyr::select(iso3_code = 4, "2013":"2023") |>
+  select(iso3_code = 4, "2013":"2023") |>
   tidy_df("unemployment_rate", pivot = TRUE)
 
 human_develop_df =
   read_csv(file = "data/undp/human_development_index.csv", na = "") |>
   head(-11) |>
   rename_with(str_replace_all, pattern = "hdi_", replacement = "") |>
-  dplyr::select(iso3_code = 1, "2015":"2022") |>
+  select(iso3_code = 1, "2015":"2022") |>
   tidy_df("hdi", pivot = TRUE)
 ```
 
@@ -213,14 +219,14 @@ trafficking_df =
          txt_value != "<5") |>
   mutate(value = str_replace_all(txt_value, ",", ""),
          value = as.numeric(value)) |>
-  dplyr::select(iso3_code : region, year, trafficked_victims = value) |>
+  select(iso3_code : region, year, trafficked_victims = value) |>
   tidy_df("trafficked_victims")
 
 alcohol_df =
   read_csv(file = "data/who/alcohol_consumption.csv", na = "") |>
   janitor::clean_names() |>
   filter(dim1 == "Both sexes") |>
-  dplyr::select(iso3_code = spatial_dim_value_code, 
+  select(iso3_code = spatial_dim_value_code, 
          year = period, 
          value = fact_value_numeric) |>
   tidy_df("alcohol_consumption_rate", average = TRUE)
@@ -309,8 +315,8 @@ homicide_visual_df =
          category != "Total",
          sex != "Total",
          between(year, 2015, 2023)) |>
-  dplyr::select(country, unit_of_measurement, region, category, sex, year, 
-                homicide_rate = value)
+  select(country, unit_of_measurement, region, category, sex, year, 
+         homicide_rate = value)
 ```
 
 ## Violence Rate
@@ -325,7 +331,7 @@ violence_visual_df =
                           "Victims of sexual violence"),
          sex != "Total",
          between(year, 2015, 2023)) |>
-  dplyr::select(country, indicator, unit_of_measurement, region, category, sex, 
+  select(country, indicator, unit_of_measurement, region, category, sex, 
                 year, violence_rate = value)
 ```
 
@@ -352,8 +358,8 @@ homicide_visual_df |>
 homicide_visual_df |>
   group_by(category, sex) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = reorder(category, avg_homicide_rate),
-             fill = sex)) +
+  ggplot(aes(y = avg_homicide_rate, x = reorder(sex, avg_homicide_rate),
+             fill = category)) +
   geom_col(position = "dodge", bin = 3.0) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Category",
@@ -479,7 +485,14 @@ surpassing even the Americas. In fact, Oceania's violence rate was nearly
 
 ## Missing Values
 
-Predictors
+Predictors. 
+
+```{r}
+merged_violence_df |> select(inflation_rate)
+
+```
+
+
 
 ## Regression 
 
