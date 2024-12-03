@@ -9,8 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-```{r cars}
 ## Plotly to work on by Country
 ```{r}
 merged_violence_df |>
@@ -24,5 +22,3 @@ merged_violence_df |>
              fill = homicide_rate)) +
   geom_line(aes(color = country))
 ```
-
-
