@@ -179,38 +179,6 @@ The optimal lambda for homicide is 0.694.
 ```
 
 
-# Stepwise Regression 
-
-## Stepwise Regression Violence Rate
-
-```{r}
-stepwise_violence_df <- merged_violence_df %>% 
-  ungroup() %>% 
-  dplyr::select(-c(iso3_code:year, homicide_rate)) %>% 
-  drop_na()
-
-violence_initial_model <- lm(violence_rate ~., data = stepwise_violence_df)
-violence_stepwise <- step(violence_initial_model, direction = "both")
-summary(violence_stepwise)
-
-
-```
-
-## Stepwise Regression Homicide Rate
-
-```{r}
-stepwise_homicide_df <- merged_violence_df %>% 
-  ungroup() %>% 
-  dplyr::select(-c(iso3_code:year, violence_rate)) %>% 
-  drop_na()
-
-homicide_initial_model <- lm(homicide_rate ~. , data = stepwise_homicide_df)
-homicide_stepwise <- step(homicide_initial_model, direction = "both")
-summary(homicide_stepwise)
-
-
-```
-
 # Baseline MLR with additive effects from all possible predictor variables 
 
 ## Predict Homicide Rates
