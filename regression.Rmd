@@ -38,6 +38,10 @@ best_subset = function(predictor, outcome, criterion) {
 }
 ```
 
+This function serves as a wrapper around the leaps function. It performs 
+best subset variable selection and then prints out the optimal model diagnostic 
+and the predictor variables included in the regression model. 
+
 ## Regression 
 
 Split data into training and testing + visualize distributions 
