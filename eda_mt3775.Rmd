@@ -15,7 +15,7 @@ library(plotly)
 library(GGally)
 ```
 
-### Exploring Outcome Data
+### Exploring Outcome Data Again
 ```{r}
 violent_offences_df = 
   read_excel("data/unodc/violent_sexual_crime.xlsx", skip = 2) |> 
