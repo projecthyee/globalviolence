@@ -22,16 +22,15 @@ best_subset = function(predictor, outcome, criterion) {
   
   optimal_subset <- 
     leaps(x = predictor, y = outcome, nbest = 3, 
-      method = criterion, names = names(predictors))
+      method = criterion, names = names(predictor))
   
-  optimal_rsq <- optimal_subset$criterion %>% max()
-  optimal_subset_idx <- optimal_subset$criterion %>% which.max()
+  optimal_rsq <- optimal_subset[[criterion]] %>% max()
+  optimal_subset_idx <- optimal_subset[[criterion]] %>% which.max()
   
   print(optimal_rsq) 
-  print(optimal_subset$which[optimal_subset_idx,]) %>% knitr::kable()
-  
-}
+  print(optimal_subset$which[optimal_subset_idx,])
 
+}
 ```
 
 ## Regression 
@@ -353,18 +352,10 @@ violence_predictors <- violence_df %>%
 violence_outcome <- violence_df %>% 
   pull(violence_rate)
 
-subset_rsq_violence <- 
-  leaps(x = violence_predictors, y = violence_outcome, nbest = 3, 
-        method = "adjr2", names = names(violence_predictors)) 
+best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+            criterion = "adjr2")
 
 
-subset_rsq_violence_max <- subset_rsq_violence$adjr2 %>% 
-  max()
-violence_selection_idx <- subset_rsq_violence$adjr2 %>% 
-  which.max()
-
-subset_rsq_violence_max
-subset_rsq_violence$which[violence_selection_idx,] %>% knitr::kable()
 ```
 
 
