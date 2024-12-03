@@ -494,43 +494,7 @@ merged_violence_df |>
 
 ## Missing Values
 
-## Jeff is confused, was this running before
-Which rows have the least NA values? 
-```{r}
-merged_violence_df |> 
-  rowwise() |> 
-  mutate(na_ct = sum(is.na(c_across(everything())))) |> 
-  ungroup()
-
-hist(merged_violence_df$violence_rate)
-hist(merged_violence_df$homicide_rate)
-```
-
-#### NA Values by Year
-```{r}
-merged_violence_df |> 
-  filter(is.na(violence_rate)) |> 
-  dplyr::select(iso3_code, country, year, violence_rate) |> 
-  group_by(year) |> 
-  summarise(count = n()) |>
-  knitr::kable()
-```
-We have the least NA values for the last 6 years or so (2017-2023), excluding 2019
-and 2020, which may be due to COVID. Based on this, what should we dplyr::select?
-
-#### NA Values by Country
-```{r}
-merged_violence_df |> 
-  filter(is.na(violence_rate)) |> 
-  dplyr::select(iso3_code, country, year, violence_rate) |> 
-  group_by(country) |> 
-  summarise(count = n()) |> 
-  arrange(desc(count)) |>
-  head(10) |>
-  knitr::kable()
-```
-Bahrain, India, Seychelles, China, Afghanistan, Rwanda have no violence data across 2015-2023 at all.
-Qatar (2021), Bermuda (2015-2027), Haiti (2018), Mauritius (2020-2021). 
+Predictors
 
 ## Regression 
 
