@@ -24,8 +24,13 @@ best_subset = function(predictor, outcome, criterion) {
     leaps(x = predictor, y = outcome, nbest = 3, 
       method = criterion, names = names(predictor))
   
-  optimal_rsq <- optimal_subset[[criterion]] %>% max()
-  optimal_subset_idx <- optimal_subset[[criterion]] %>% which.max()
+  if (criterion == "Cp") {
+    optimal_rsq <- optimal_subset[[criterion]] %>% min()
+    optimal_subset_idx <- optimal_subset[[criterion]] %>% which.min()
+  } else {
+    optimal_rsq <- optimal_subset[[criterion]] %>% max()
+    optimal_subset_idx <- optimal_subset[[criterion]] %>% which.max()
+  }
   
   print(optimal_rsq) 
   print(optimal_subset$which[optimal_subset_idx,])
@@ -356,20 +361,15 @@ violence_outcome <- violence_df %>%
 
 Perform regsubset to predict violence_rate using r-squared as criterion
 ```{r}
-violence_df =
-  merged_violence_df |> 
-  dplyr::ungroup() |> 
-  dplyr::select(
-    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
-    -iso3_code) |>
-  drop_na()
-
-
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "adjr2")
 ```
-Perform regsubset to predict violence_rate using cp as criterion
+Perform regsubset to predict violence_rate using Cp as criterion
 
+```{r}
+best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+            criterion = "Cp")
+```
 
 
 Perform regsubset to predict homicide_rate. 
@@ -392,9 +392,41 @@ print(best_subset_cp)
 
 ```
 
-The results from criterion-based procedures suggest that significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. This yields the most appropriate Cp value (6.131), which is approximately close to the number of predictors, and highest adjusted R-squared (0.510). 
+Select Data
+```{r}
+homicide_df =
+  merged_violence_df |> 
+  dplyr::ungroup() |> 
+  dplyr::select(
+    homicide_rate, everything(), -violence_rate, -year, -country, -region, 
+    -iso3_code) |> 
+  drop_na()
 
-For homicide_rate, the results are not as straightforward. The best model based on Cp and R-squared seems to be the model with 4 predictors because it has the lowest Cp (6.36), and a decently high adjusted R-squared (0.331), indicating a good balance between fit and complexity. As more predictors are added, R-squared adjusts slightly but Cp levels off at around 6 predictors. The model with 4 predictors, which includes inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a better trade-off.
+homicide_predictors <- homicide_df %>% 
+  dplyr::select(-homicide_rate)
+
+homicide_outcome <- homicide_df %>% 
+  pull(homicide_rate)
+
+```
+
+Predict Homicide Rates using R-squared as criterion
+```{r}
+best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+            criterion = "adjr2")
+```
+
+Predict Homicide Rates using Cp as criterion
+
+```{r}
+best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+            criterion = "Cp")
+```
+
+
+The results from criterion-based procedures suggest that significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. This yields the most appropriate Cp value (5.363), which is approximately close to the number of predictors, and highest adjusted R-squared (0.510). 
+
+For homicide_rate, the results are not as straightforward. The best model based on Cp and R-squared seems to be the model with 4 predictors because it has the lowest Cp (6.36), and a decently high adjusted R-squared (0.335), indicating a good balance between fit and complexity. As more predictors are added, R-squared adjusts slightly but Cp levels off at around 6 predictors. The model with 4 predictors, which includes inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a better trade-off.
 
 
 # Model Comparison
