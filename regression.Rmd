@@ -147,6 +147,13 @@ lasso_homicide_fit |>
 
 The optimal lambda for homicide is 0.694.
 
+# Ridge Regression 
+
+```{r}
+
+```
+
+
 # Stepwise Regression 
 
 ## Stepwise Regression Violence Rate
@@ -183,13 +190,19 @@ summary(homicide_stepwise)
 
 ## Predict Homicide Rates
 ```{r}
-
+baseline_MLR <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+summary(baseline_MLR)
 ```
-
 
 ## Predict Violence Rates
 
 ```{r}
+baseline_MLR <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+summary(baseline_MLR)
 
 ```
 
@@ -291,3 +304,14 @@ print(best_subset_cp)
 The results from criterion-based procedures suggest that significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. This yields the most appropriate Cp value (6.131), which is approximately close to the number of predictors, and highest adjusted R-squared (0.510). 
 
 For homicide_rate, the results are not as straightforward. The best model based on Cp and R-squared seems to be the model with 4 predictors because it has the lowest Cp (6.36), and a decently high adjusted R-squared (0.331), indicating a good balance between fit and complexity. As more predictors are added, R-squared adjusts slightly but Cp levels off at around 6 predictors. The model with 4 predictors, which includes inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a better trade-off.
+
+
+# Model Comparison
+
+## Cross-Validate
+```{r}
+
+```
+
+
+## Calculate RMSE 
