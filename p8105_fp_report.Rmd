@@ -143,8 +143,9 @@ Also, some of the datasets include rates for different categories. For example,
 the data for economic crime includes crime rates for fraud, burglary and more. 
 Therefore, another boolean parameter called "average" was included to pass an 
 option to group by and summarize rates across categories and genders of 
-different datasets, which will then be merged into a single dataset to be used 
-for regression analysis of the EDA. 
+different datasets, since the exact population for these categories were not 
+provided and each category presented equal importance. The datasets will then 
+be merged for regression analysis. 
 
 ### Economic Determinants
 ```{r tidy_econ_determinants}
@@ -319,7 +320,18 @@ homicide_visual_df |>
 
 ```{r}
 # I took the average for each country and plotted using the choropleth. 
-
+merged_violence_df |>
+  group_by(iso3_code, country) |>
+  summarize(avg_homicide = mean(homicide_rate)) |>
+  drop_na(avg_homicide) |>
+  mutate(text_label = str_c("Country: ", country, 
+                            "\nViolance Rate: ", avg_homicide)) |>
+  plot_ly(type = 'choropleth', 
+          locations = ~iso3_code, 
+          z = ~avg_homicide, 
+          text = ~text_label, 
+          colorscale = "Viridis", 
+          hovertemplate = paste("%{text}<extra></extra>")) 
 ```
 
 ## Violence Rate
