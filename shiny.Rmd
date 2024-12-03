@@ -116,7 +116,7 @@ renderPlotly(
     group_by(country) |>
     summarize(avg_rate = mean(rate)) |>
     mutate(country = fct_reorder(country, avg_rate)) |>
-    plot_ly(x = ~country, y = ~avg_rate, type = "bar")
+    plot_ly(x = ~country, y = ~avg_rate, color = ~country,type = "bar") 
   )
 ```
 
@@ -124,6 +124,18 @@ renderPlotly(
 ### Chart C
 
 ```{r}
-
+renderPlotly(
+  merged_violence_outcome |> 
+  group_by(region, year) |> 
+  summarize(avg_by_region = mean(rate)) |> 
+  plot_ly(x = ~as.factor(year), y = ~avg_by_region, color = ~region, type = "bar"
+          ) |> 
+  layout(title = "Average Violence Rate by World Region from 2003-2022",
+         xaxis = list(title = "Year"), 
+         yaxis = list(title = "Average Violence Rate (Cases per 100,000)")
+         )
+)
 ```
+
+
 
