@@ -286,17 +286,19 @@ homicide_visual_df =
                skip = 2) |>
   janitor::clean_names() |>
   filter(indicator == "Victims of intentional homicide",
-         unit_of_measurement == "Rate per 100,000 population",
          category != "Total",
          sex != "Total",
          between(year, 2015, 2023)) |>
-  dplyr::select(country, region, category, sex, year, homicide_rate = value)
+  dplyr::select(country, unit_of_measurement, region, category, sex, year, 
+                homicide_rate = value)
 ```
 
 Reimport and retidy data for homicide and name it as `homicide_visual_df`
 
+### Average Homicide Rate Across Region
 ```{r}
 homicide_visual_df |>
+  filter(unit_of_measurement == "Rate per 100,000 population",) |>
   group_by(region, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
   ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = region)) +
@@ -308,18 +310,21 @@ homicide_visual_df |>
 
 ```{r}
 homicide_visual_df |>
-  group_by(category) |>
-  summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = reorder(category, avg_homicide_rate), 
+  filter(unit_of_measurement == "Counts") |>
+  group_by(category, sex) |>
+  summarize(num_homicide = sum(homicide_rate)) |>
+  ggplot(aes(y = num_homicide, x = reorder(category, num_homicide), 
              fill = category)) +
   geom_col(position = "dodge", bin = 3.0) + 
+  facet_grid(~sex)
   labs(x = "Category",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Category")
+       y = "Number of Homicides",
+       Title = "Number of Homicides Across Category")
 ```
 
 ```{r}
 homicide_visual_df |>
+  filter(unit_of_measurement == "Rate per 100,000 population") |>
   group_by(region, sex, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
   ggplot(aes(y = avg_homicide_rate, x = year, color = sex)) +
@@ -347,6 +352,59 @@ merged_violence_df |>
 ```
 
 ## Violence Rate
+
+```{r}
+violence_visual_df = 
+    read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
+               skip = 2) |>
+  janitor::clean_names() |>
+  filter(indicator != "Violent offences",
+         sex != "Total",
+         between(year, 2015, 2023)) |>
+  dplyr::select(country, indicator, unit_of_measurement, region, category, sex, 
+                year, violence_rate = value)
+```
+
+### Average Violence Rate Across Region
+```{r}
+violence_visual_df |>
+  filter(unit_of_measurement == "Rate per 100,000 population",) |>
+  group_by(region, year) |>
+  summarize(avg_violence_rate = mean(violence_rate)) |>
+  ggplot(aes(y = avg_violence_rate, x = as.factor(year), fill = region)) +
+  geom_col(position = "dodge", bin = 3.0) + 
+  labs(x = "Year",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Across Region")
+```
+
+```{r}
+violence_visual_df |>
+  filter(unit_of_measurement == "Counts") |>
+  group_by(indicator, category, sex) |>
+  summarize(num_violence = sum(violence_rate)) |>
+  ggplot(aes(y = num_violence, x = reorder(category, num_violence), 
+             fill = indicator)) +
+  geom_col(position = "dodge", bin = 3.0) + 
+  facet_grid(~sex)
+  labs(x = "Category",
+       y = "Cases of Violence",
+       Title = "Cases of Violence Across Category")
+```
+
+### Trend of Violence Rate
+```{r}
+violence_visual_df |>
+  filter(unit_of_measurement == "Rate per 100,000 population") |>
+  group_by(region, sex, year) |>
+  summarize(avg_violence_rate = mean(violence_rate)) |>
+  ggplot(aes(y = avg_violence_rate, x = year, color = sex)) +
+  geom_smooth(se = FALSE) +
+  facet_grid(~region) + 
+  labs(x = "Year",
+       y = "Average Violence Rate",
+       Title = "Average Violence Rate Trend")
+```
 
 ## Global Prevalence of Violence 
 ```{r choropleth}
@@ -401,7 +459,6 @@ Bahrain, India, Seychelles, China, Afghanistan, Rwanda have no violence data acr
 Qatar (2021), Bermuda (2015-2027), Haiti (2018), Mauritius (2020-2021). 
 
 ## Regression 
-
 
 (IN PROGRESS)
 
