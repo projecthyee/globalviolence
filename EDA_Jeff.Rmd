@@ -29,17 +29,17 @@ head(merged_violence_df)
 
 EDA_var_interest <- merged_violence_df %>% 
   mutate(development_status = factor(case_when(
-    human_development_index < 0.550 ~ "low",
-    human_development_index >= 0.550 & human_development_index < 0.700 ~ "medium",
-    human_development_index >= 0.700 & human_development_index < 0.800 ~ "high",
-    human_development_index >= 0.800 ~ "very high"
+    hdi < 0.550 ~ "low",
+    hdi >= 0.550 & hdi < 0.700 ~ "medium",
+    hdi >= 0.700 & hdi < 0.800 ~ "high",
+    hdi >= 0.800 ~ "very high"
     ))
   )  
 
 head(EDA_var_interest)
 
 var_names <- EDA_var_interest %>% 
-  select(c(human_development_index:alcohol_consumption)) %>% 
+  dplyr::select(c(hdi:alcohol_consumption_rate)) %>% 
   colnames() 
 
 ```
@@ -62,15 +62,13 @@ make_plot = function(data, geom_type, title, grouping = NULL, ...) {
   
 }
 
-make_plotly = function()
-
 ```
 
 # Scatter Plots
 
 ## Global
 
-### Outcome Variable: Homicide Rate
+### Outcome Variable: homicide Rate
 ```{r}
 
 map(var_names, \(x) make_plot(EDA_var_interest, geom_point, 
@@ -83,7 +81,7 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 ### Outcome Variable: Average Violence Rate
 ```{r}
 map(var_names, \(x) make_plot(EDA_var_interest, geom_point, 
-    str_c("Average Violence Rate by ", x), x = .data[[x]], y = avg_violence_rate
+    str_c("Average Violence Rate by ", x), x = .data[[x]], y = violence_rate
     ))
 
 ```
@@ -96,7 +94,7 @@ map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
 ```{r}
 map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
     str_c("Average Violence Rate by ", x, " and Region"), "region", 
-    x = .data[[x]], y = avg_violence_rate, color = region)
+    x = .data[[x]], y = violence_rate, color = region)
     )
 
 ```
@@ -155,7 +153,7 @@ EDA_var_interest %>%
 EDA_var_interest %>% 
   drop_na(development_status) %>% 
   make_plot(geom_boxplot, title = "Average Violence Rate by Development Status", 
-            x = development_status, y = avg_violence_rate)
+            x = development_status, y = violence_rate)
 
 ```
 ## Homicide Rate
@@ -178,7 +176,7 @@ EDA_var_interest %>%
 ### Visualize Distribution
 ```{r}
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index)) +
+  ggplot(aes(x = hdi)) +
   geom_density() +
   xlab("Human Development Index") + 
   ylab("Density") +
@@ -191,11 +189,11 @@ merged_violence_df %>%
 ```{r}
 merged_violence_df <- merged_violence_df %>%
   mutate(
-    human_development_index = human_development_index + 0.0001
+    hdi = hdi + 0.0001
   )
 
 HDI <- merged_violence_df %>% 
-  pull(human_development_index)
+  pull(hdi)
 
 box_cox_MLE <- as.data.frame(MASS::boxcox(HDI ~ 1)) 
 
@@ -205,7 +203,7 @@ lambda <- box_cox_MLE %>%
 
 merged_violence_df <- merged_violence_df %>% 
   mutate(
-    box_cox_HDI = (human_development_index ^ (lambda - 1)) / lambda  
+    box_cox_HDI = (hdi ^ (lambda - 1)) / lambda  
   )
 
 ```
@@ -226,7 +224,7 @@ merged_violence_df %>%
 ### Scatter plot of HDI against average violence rate
 ```{r}
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index, avg_violence_rate)) +
+  ggplot(aes(x = hdi, violence_rate)) +
   geom_point() +
   xlab("Human Development Index") +
   ylab("Average Violence Rate") +
@@ -238,7 +236,7 @@ merged_violence_df %>%
 ### Scatter plot of HDI against homicide rate
 ```{r}
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index, homicide_rate)) +
+  ggplot(aes(x = hdi, homicide_rate)) +
   geom_point() +
   xlab("Human Development Index") +
   ylab("Homicide Rate") +
@@ -253,7 +251,7 @@ merged_violence_df %>%
 
 ```{r}
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index, color = region)) +
+  ggplot(aes(x = hdi, color = region)) +
   geom_density() +
   facet_grid(.~region) +
   xlab("Human Development Index") + 
@@ -280,7 +278,7 @@ merged_violence_df %>%
 ### Scatter plot of HDI against average violence rate
 ```{r}
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index, avg_violence_rate, color = region)) +
+  ggplot(aes(x = hdi, violence_rate, color = region)) +
   geom_point() +
   facet_grid(.~region) +
   xlab("Human Development Index") +
@@ -291,7 +289,7 @@ merged_violence_df %>%
 ### Scatter plot of HDI against homicide rate
 ```{r}
 merged_violence_df %>% 
-  ggplot(aes(x = human_development_index, homicide_rate, color = region)) +
+  ggplot(aes(x = hdi, homicide_rate, color = region)) +
   geom_point() +
   facet_grid(.~region) +
   xlab("Human Development Index") +
@@ -308,10 +306,10 @@ merged_violence_df %>%
 ```{r}
 merged_violence_df <- merged_violence_df %>% 
   mutate(development_status = factor(case_when(
-    human_development_index < 0.550 ~ "low",
-    human_development_index >= 0.550 & human_development_index < 0.700 ~ "medium",
-    human_development_index >= 0.700 & human_development_index < 0.800 ~ "high",
-    human_development_index >= 0.800 ~ "very high"
+    hdi < 0.550 ~ "low",
+    hdi >= 0.550 & hdi < 0.700 ~ "medium",
+    hdi >= 0.700 & hdi < 0.800 ~ "high",
+    hdi >= 0.800 ~ "very high"
     ))
   )
 ```
