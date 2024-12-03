@@ -290,7 +290,7 @@ homicide_visual_df =
          category != "Total",
          sex != "Total",
          between(year, 2015, 2023)) |>
-  select(country, region, category, sex, year, homicide_rate = value)
+  dplyr::select(country, region, category, sex, year, homicide_rate = value)
 ```
 
 Reimport and retidy data for homicide and name it as `homicide_visual_df`
@@ -304,6 +304,18 @@ homicide_visual_df |>
   labs(x = "Year",
        y = "Average Homicide Rate",
        Title = "Average Homicide Rate Across Region")
+```
+
+```{r}
+homicide_visual_df |>
+  group_by(category) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = reorder(category, avg_homicide_rate), 
+             fill = category)) +
+  geom_col(position = "dodge", bin = 3.0) + 
+  labs(x = "Category",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Across Category")
 ```
 
 ```{r}
