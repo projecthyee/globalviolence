@@ -335,6 +335,24 @@ best_subset_cp =
 print(best_subset_cp)
 
 ```
+Select Data
+```{r}
+violence_df =
+  merged_violence_df |> 
+  dplyr::ungroup() |> 
+  dplyr::select(
+    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
+    -iso3_code) |>
+  drop_na() 
+
+violence_predictors <- violence_df %>% 
+  dplyr::select(-violence_rate)
+
+violence_outcome <- violence_df %>% 
+  pull(violence_rate)
+
+```
+
 
 Perform regsubset to predict violence_rate using r-squared as criterion
 ```{r}
@@ -346,17 +364,12 @@ violence_df =
     -iso3_code) |>
   drop_na()
 
-violence_predictors <- violence_df %>% 
-  dplyr::select(-violence_rate)
-
-violence_outcome <- violence_df %>% 
-  pull(violence_rate)
 
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "adjr2")
-
-
 ```
+Perform regsubset to predict violence_rate using cp as criterion
+
 
 
 Perform regsubset to predict homicide_rate. 
