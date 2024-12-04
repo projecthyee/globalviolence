@@ -62,8 +62,8 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
   model_fit <-
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
+  return(model_fit)  
 }
-
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
