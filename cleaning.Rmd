@@ -4,6 +4,8 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
+    
 ---
 
 ```{r setup, include=FALSE}
@@ -69,7 +71,7 @@ we imported and tidied the datasets for our two outcome variables: homicide
 and violence. 
 
 ## Homicide
-```{r}
+```{r message = FALSE}
 homicide_visual_df = 
     read_excel(path = "data/unodc/intentional_homicide.xlsx",
                skip = 2) |>
@@ -181,7 +183,7 @@ different datasets, since the exact population for these categories were not
 provided. 
 
 ## Economic Determinants
-```{r tidy_econ_determinants}
+```{r tidy_econ_determinants, message = FALSE}
 gdp_df = 
   read_excel(path = "data/worldbank/gdp.xls",
              sheet = "Data", skip = 3, na = "") |>
@@ -220,7 +222,7 @@ The `pivot` parameter of the `tidy_df()` function was set to true for these
 datasets, since all of them had the different years as data columns. 
 
 ## Social Determinants
-```{r import_social_determinants}
+```{r import_social_determinants, message = FALSE}
 econ_crime_df = 
   read_excel(path = "data/unodc/corruption_economic_crime.xlsx", skip = 2) |>
   janitor::clean_names() |>
@@ -275,7 +277,7 @@ neither the `pivot` nor `average` options were set to true in the `tidy_df()`
 function.
 
 ## Outcomes of Violence
-```{r import_violence_outcomes}
+```{r import_violence_outcomes, message = FALSE}
 homicide_df = 
   read_excel(path = "data/unodc/intentional_homicide.xlsx", skip = 2) |>
   janitor::clean_names() |>
@@ -299,7 +301,7 @@ their respective rates averaged across category, since we are interested in
 the average rates of homicide and violence for regression analysis.
 
 ## Merge Datasets
-```{r merge_datasets}
+```{r merge_datasets, message = FALSE}
 merged_violence_df =
   left_join(homicide_df, violence_df) |>
   left_join(gdp_df) |>

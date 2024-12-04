@@ -33,6 +33,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
@@ -221,6 +222,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -364,6 +368,14 @@ div.tocify {
 </div><!--/.navbar -->
 
 <div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
 
@@ -599,14 +611,6 @@ human_develop_df =
   rename_with(str_replace_all, pattern = &quot;hdi_&quot;, replacement = &quot;&quot;) |&gt;
   select(iso3_code = 1, &quot;2015&quot;:&quot;2022&quot;) |&gt;
   tidy_df(&quot;hdi&quot;, pivot = TRUE)</code></pre>
-<pre><code>## Rows: 206 Columns: 1076
-## ── Column specification ────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr    (4): iso3, country, hdicode, region
-## dbl (1072): hdi_rank_2022, hdi_1990, hdi_1991, hdi_1992, hdi_1993, hdi_1994,...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <p>The following variables were identified as economic prdictors of
 violence:</p>
 <ul>
@@ -625,19 +629,17 @@ different years as data columns.</p>
   read_excel(path = &quot;data/unodc/corruption_economic_crime.xlsx&quot;, skip = 2) |&gt;
   janitor::clean_names() |&gt;
   filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
-  tidy_df(&quot;crime_rate&quot;,  average = TRUE)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You
-## can override using the `.groups` argument.</code></pre>
-<pre class="r"><code>personnel_df =
+  tidy_df(&quot;crime_rate&quot;,  average = TRUE)
+
+personnel_df =
   read_excel(path = &quot;data/unodc/criminal_justice_personnel.xlsx&quot;, skip = 2) |&gt;
   janitor::clean_names() |&gt;
   filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;,
          indicator == &quot;Criminal Justice Personnel&quot;, 
          sex == &quot;Total&quot;) |&gt;
-  tidy_df(&quot;personnel_rate&quot;, average = TRUE)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You
-## can override using the `.groups` argument.</code></pre>
-<pre class="r"><code>trafficking_df =
+  tidy_df(&quot;personnel_rate&quot;, average = TRUE)
+
+trafficking_df =
   read_excel(path = &quot;data/unodc/human_trafficking.xlsx&quot;, skip = 2) |&gt;
   janitor::clean_names() |&gt;
   filter(indicator == &quot;Detected trafficking victims&quot;,
@@ -658,17 +660,6 @@ alcohol_df =
          year = period, 
          value = fact_value_numeric) |&gt;
   tidy_df(&quot;alcohol_consumption_rate&quot;, average = TRUE)</code></pre>
-<pre><code>## Rows: 11799 Columns: 34
-## ── Column specification ────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr  (15): IndicatorCode, Indicator, ValueType, ParentLocationCode, ParentLo...
-## dbl   (4): Period, FactValueNumeric, FactValueNumericLow, FactValueNumericHigh
-## lgl  (14): IsLatestYear, Dim2 type, Dim2, Dim2ValueCode, Dim3 type, Dim3, Di...
-## dttm  (1): DateModified
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-## `summarise()` has grouped output by &#39;country&#39;. You can override using the `.groups` argument.</code></pre>
 <p>The following variables were identified as social prdictors of
 violence:</p>
 <ul>
@@ -697,17 +688,14 @@ to true in the <code>tidy_df()</code> function.</p>
          dimension == &quot;Total&quot;, 
          sex == &quot;Total&quot;, 
          age == &quot;Total&quot;) |&gt;
-  tidy_df(&quot;homicide_rate&quot;, average = TRUE)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You
-## can override using the `.groups` argument.</code></pre>
-<pre class="r"><code>violence_df = 
+  tidy_df(&quot;homicide_rate&quot;, average = TRUE)
+  
+violence_df = 
   read_excel(path = &quot;data/unodc/violent_sexual_crime.xlsx&quot;, skip = 2) |&gt;
   janitor::clean_names() |&gt;
   filter(indicator == &quot;Violent offences&quot;,
          unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
   tidy_df(&quot;violence_rate&quot;, average = TRUE)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You
-## can override using the `.groups` argument.</code></pre>
 <p>Unlike the tidied dataset for EDA, the datasets for homicide and
 violence had their respective rates averaged across category, since we
 are interested in the average rates of homicide and violence for
@@ -729,17 +717,9 @@ regression analysis.</p>
          region = as.factor(region)) |&gt;
   filter(between(year, 2015, 2023)) |&gt;
   relocate(iso3_code) |&gt;
-  drop_na(violence_rate, homicide_rate)</code></pre>
-<pre><code>## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, year)`
-## Joining with `by = join_by(country, year, iso3_code)`
-## Joining with `by = join_by(country, year, iso3_code)`
-## Joining with `by = join_by(country, year, iso3_code)`
-## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, region, year, iso3_code)`
-## Joining with `by = join_by(country, year)`</code></pre>
-<pre class="r"><code>head(merged_violence_df)</code></pre>
+  drop_na(violence_rate, homicide_rate)
+
+head(merged_violence_df)</code></pre>
 <pre><code>## # A tibble: 6 × 14
 ## # Groups:   country, region [1]
 ##   iso3_code country region  year homicide_rate violence_rate          gdp
@@ -804,6 +784,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {
