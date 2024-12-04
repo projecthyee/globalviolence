@@ -22,7 +22,7 @@ education, transportation, and economic conditions. This project seeks to
 explore the factors driving serious assault, sexual violence, and intentional 
 homicide worldwide from 2015 to 2023. 
 
-We dplyr::selected this time frame because it includes significant global events, 
+Selected this time frame because it includes significant global events, 
 including the COVID-19 pandemic and various conflicts, which have greatly 
 influenced patterns of violence. Also, even though there are a lot of missing 
 data for year 2023, we decided to include the year because this time period 
@@ -70,7 +70,9 @@ Our data comes from 4 primary sources:
 **Our predictor variables of interest**: 
 
 * United Nations Development Program (UNDP): 
-  - Human Development Index: geometric summary measure of longevity, being knowledgeable, and having decent standard of living 
+  - Human Development Index: geometric summary measure of longevity, being 
+  knowledgeable, and having decent standard of living 
+  
 * United Nations Office of Drugs and Crime (UNODC)
   - Unit of measurement: counts or rate per 100,000 population 
   - Corruption and Economic Crime:
@@ -87,10 +89,12 @@ Our data comes from 4 primary sources:
     - Prison staff (administration/education/health/surveilance) 
     - Professional judges or magistrate 
     - Prosecution personnel 
+    
 * World Bank
   - Gross Domestic Product (GDP)
   - Inflation Rate (Measured by Consumer Price Index)
   - Unemployment Rate
+  
 * World Health Organization (WHO)
   - Alcohol Consumption
 
@@ -361,6 +365,7 @@ merged_violence_df |>
   layout(title = "Homicide Rates Across Years", xaxis = list(title = "Year"),
          yaxis = list(title = "Rate (per 100,000 population)"))
 ```
+
 ### Homicide Trend Across Region
 ```{r}
 homicide_visual_df |>
@@ -605,8 +610,8 @@ year, leading a bias or misinterpretation.
 When examining violence rates, the Americas followed a similar trend to the 
 homicide rate, with rates significantly higher than the other regions. This 
 trend reflects the persistent issue of violence in the region, affecting not 
-only homicide rates but also broader forms of violence. 
-However, Oceania presented an extreme outlier in terms of violence rates, 
+only homicide rates but also broader forms of violence. However, Oceania 
+presented an extreme outlier in terms of victim rates of sexual violence, 
 surpassing even the Americas. In fact, Oceania's violence rate was nearly 
 
 
