@@ -609,7 +609,7 @@ cv_df_homicide %>%
     names_to = "Model", 
     values_to = "RMSE",
     names_prefix = "RMSE_"
-  ) %>% 
+  )%>% 
   mutate(
     Model = fct_inorder(Model)
   ) %>% 
