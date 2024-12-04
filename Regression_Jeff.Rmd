@@ -521,8 +521,6 @@ cv_df_homicide <- cv_df_homicide %>%
     test = map(test, as_tibble)
   )
 
-head(cv_df_violence)
-  
 ```
 
 ## Fit Models
@@ -557,10 +555,37 @@ cv_df_violence <-
 
 ### Homicide
 
+```{r}
+cv_df_homicide <-
+  cv_df_homicide %>% 
+  mutate(
+    MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
+    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
+                          + unemployment_rate + hdi + crime_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, outcome = "homicide_rate", 
+                                        alpha = 1,lambda = lambda)),
+    ridge = map(train, \(df) fit_glmnet(df, outcome = "homicide_rate", 
+                                        alpha = 0, lambda = lambda))
+  ) %>% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, "homicide_rate")),
+    rmse_ridge = map2_dbl(
+      ridge, test, \(mod, test) rmse_glmnet(mod, test, "homicide_rate"))
+  ) %>% 
+  dplyr::select(starts_with("rmse_"))
+```
+
+
 ## Compare RMSE
 
 ### Violence
 ```{r}
+
 
 ```
 
