@@ -320,9 +320,6 @@ div.tocify {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="cleaning.html">Data</a>
 </li>
@@ -332,11 +329,28 @@ div.tocify {
 <li>
   <a href="regression.html">Regression</a>
 </li>
-<li>
-  <a href="shiny.html">Shiny</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Shiny
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="shiny.html">Interactive Map</a>
+    </li>
+    <li>
+      <a href="shiny2.html">Shiny 2</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="report.html">Project Report</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="aboutus.html">About Us</a>
 </li>
 <li>
   <a href="https://github.com/projecthyee/p8105_fp_violence">
@@ -442,8 +456,25 @@ variables: homicide and violence.</p>
          category != &quot;Total&quot;,
          sex != &quot;Total&quot;,
          between(year, 2015, 2023)) |&gt;
-  select(country, unit_of_measurement, region, category, sex, year, 
-         homicide_rate = value)</code></pre>
+  select(country, region, category, sex, year, 
+         homicide_rate = value)
+
+head(homicide_visual_df)</code></pre>
+<pre><code>## # A tibble: 6 × 6
+##   country                region   category             sex    year homicide_rate
+##   &lt;chr&gt;                  &lt;chr&gt;    &lt;chr&gt;                &lt;chr&gt; &lt;dbl&gt;         &lt;dbl&gt;
+## 1 Albania                Europe   Intimate partner or… Male   2015         0.138
+## 2 Andorra                Europe   Intimate partner or… Male   2015         0    
+## 3 Argentina              Americas Intimate partner or… Male   2015         0.234
+## 4 Armenia                Asia     Intimate partner or… Male   2015         0    
+## 5 Bahamas                Americas Intimate partner or… Male   2015         1.59 
+## 6 Bosnia and Herzegovina Europe   Intimate partner or… Male   2015         0.174</code></pre>
+<p>The tidied homicide dataset includes country, region, category of
+homicide victims, sex, year and victim rate of homicide. The dataset
+included data for both counts and rates per 100,000 people. Therefore,
+we filtered to choose rates per 100,000 people since it allows
+standardization for comparability by adjusting for differences in
+population size.</p>
 </div>
 <div id="violence" class="section level2">
 <h2>Violence</h2>
@@ -453,8 +484,23 @@ variables: homicide and violence.</p>
   janitor::clean_names() |&gt;
   filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;,
          between(year, 2015, 2023)) |&gt;
-  select(country, indicator, unit_of_measurement, region, category, sex, 
-                year, violence_rate = value)</code></pre>
+  select(country, region, indicator, category, sex, year, violence_rate = value)
+
+head(violence_visual_df)</code></pre>
+<pre><code>## # A tibble: 6 × 7
+##   country              region   indicator     category sex    year violence_rate
+##   &lt;chr&gt;                &lt;chr&gt;    &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt;         &lt;dbl&gt;
+## 1 Albania              Europe   Violent offe… Serious… Total  2015          5.86
+## 2 Andorra              Europe   Violent offe… Serious… Total  2015        185.  
+## 3 United Arab Emirates Asia     Violent offe… Serious… Total  2015          3.59
+## 4 Argentina            Americas Violent offe… Serious… Total  2015        419.  
+## 5 Armenia              Asia     Violent offe… Serious… Total  2015          5.66
+## 6 Antigua and Barbuda  Americas Violent offe… Serious… Total  2015          7.78</code></pre>
+<p>The tidied violence dataset includes country, region, indicator,
+category of violence, sex, year and violence rate. The indicator
+includes different rates for violence (violent offences and victims)
+which will be explored further in EDA. Rates per 100,000 people were
+chosen also for this dataset for comparability.</p>
 </div>
 </div>
 <div id="regression-data" class="section level1">
@@ -486,7 +532,7 @@ outcomes will be tidied and merged for regression analysis.</p>
     
     if(&quot;region&quot; %in% colnames(data)) {
       data = data |&gt;
-        group_by(country, region, year) |&gt;
+        group_by( country, region, year) |&gt;
         summarize(!!variable := mean(value))
     }
     
@@ -561,6 +607,17 @@ human_develop_df =
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>The following variables were identified as economic prdictors of
+violence:</p>
+<ul>
+<li><code>gdp</code></li>
+<li><code>inflation</code></li>
+<li><code>unemployment</code></li>
+<li><code>human development index</code></li>
+</ul>
+<p>The <code>pivot</code> parameter of the <code>tidy_df()</code>
+function was set to true for these datasets, since all of them had the
+different years as data columns.</p>
 </div>
 <div id="social-determinants" class="section level2">
 <h2>Social Determinants</h2>
@@ -612,6 +669,23 @@ alcohol_df =
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ## `summarise()` has grouped output by &#39;country&#39;. You can override using the `.groups` argument.</code></pre>
+<p>The following variables were identified as social prdictors of
+violence:</p>
+<ul>
+<li><code>economic crime</code></li>
+<li><code>criminal justice personnel</code></li>
+<li><code>human trafficking</code></li>
+<li><code>alcohol</code></li>
+</ul>
+<p>The datasets for economic crimes and criminal justice personnel also
+provided data for both counts and rates per 100,000 people.
+Subsequently, we filtered to choose rates per 100,000 people for
+standardization and comparability. The human trafficking dataset
+provided data for number of human trafficking victims, instead of
+trafficking rates; the dataset also included a category for total number
+of trafficking victims, so the data was filtered for total category and
+neither the <code>pivot</code> nor <code>average</code> options were set
+to true in the <code>tidy_df()</code> function.</p>
 </div>
 <div id="outcomes-of-violence" class="section level2">
 <h2>Outcomes of Violence</h2>
@@ -634,16 +708,10 @@ alcohol_df =
   tidy_df(&quot;violence_rate&quot;, average = TRUE)</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
 ## the `.groups` argument.</code></pre>
-<p>The datasets for economic crimes, criminal justice personnel,
-homicide and violence provided data for both counts and rates per
-100,000 people. Therefore, we filtered to choose rates per 100,000
-people since it allows standardization for comparability by adjusting
-for differences in population size. The human trafficking dataset
-provided data for number of human trafficking victims, instead of
-trafficking rates; the dataset also included a category for total number
-of trafficking victims, so the data was filtered for total category and
-neither the <code>pivot</code> nor <code>average</code> options were set
-to true in the <code>tidy_df()</code> function.</p>
+<p>Unlike the tidied dataset for EDA, the datasets for homicide and
+violence had their respective rates averaged across category, since we
+are interested in the average rates of homicide and violence for
+regression analysis.</p>
 </div>
 <div id="merge-datasets" class="section level2">
 <h2>Merge Datasets</h2>
@@ -694,7 +762,10 @@ alcohol consumption rate as variables. There is a total of 127 distinct
 countries.</p>
 <p>After merging the datasets, country and region were converted to
 categorical variables and the dataset was filtered for the years between
-2015 and 2023, the period of our interest for analysis.</p>
+2015 and 2023, the period of our interest for analysis. Although the
+datasets were merged with matching country names tidied by the
+<code>countrycode()</code>, the iso3 codes were retained, since they are
+required for plotting maps.</p>
 </div>
 </div>
 

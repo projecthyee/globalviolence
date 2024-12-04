@@ -79,9 +79,17 @@ homicide_visual_df =
          category != "Total",
          sex != "Total",
          between(year, 2015, 2023)) |>
-  select(country, unit_of_measurement, region, category, sex, year, 
+  select(country, region, category, sex, year, 
          homicide_rate = value)
+
+head(homicide_visual_df)
 ```
+
+The tidied homicide dataset includes country, region, category of homicide 
+victims, sex, year and victim rate of homicide. The dataset included data for 
+both counts and rates per 100,000 people. Therefore, we filtered to choose rates 
+per 100,000 people since it allows standardization for comparability by 
+adjusting for differences in population size.
 
 ## Violence
 ```{r}
@@ -91,10 +99,16 @@ violence_visual_df =
   janitor::clean_names() |>
   filter(unit_of_measurement == "Rate per 100,000 population",
          between(year, 2015, 2023)) |>
-  select(country, indicator, unit_of_measurement, region, category, sex, 
-                year, violence_rate = value)
+  select(country, region, indicator, category, sex, year, violence_rate = value)
+
+head(violence_visual_df)
 ```
 
+The tidied violence dataset includes country, region, indicator, category of 
+violence, sex, year and violence rate. The indicator includes different rates 
+for violence (violent offences and victims) which will be explored further in 
+EDA. Rates per 100,000 people were chosen also for this dataset for 
+comparability. 
 
 # Regression Data
 
@@ -195,6 +209,16 @@ human_develop_df =
   tidy_df("hdi", pivot = TRUE)
 ```
 
+The following variables were identified as economic prdictors of violence: 
+
+* `gdp`
+* `inflation`
+* `unemployment`
+* `human development index`
+
+The `pivot` parameter of the `tidy_df()` function was set to true for these 
+datasets, since all of them had the different years as data columns. 
+
 ## Social Determinants
 ```{r import_social_determinants}
 econ_crime_df = 
@@ -234,6 +258,22 @@ alcohol_df =
   tidy_df("alcohol_consumption_rate", average = TRUE)
 ```
 
+The following variables were identified as social prdictors of violence: 
+
+* `economic crime`
+* `criminal justice personnel`
+* `human trafficking`
+* `alcohol`
+
+The datasets for economic crimes and criminal justice personnel also provided 
+data for both counts and rates per 100,000 people. Subsequently, we filtered to 
+choose rates per 100,000 people for standardization and comparability. The 
+human trafficking dataset provided data for number of human trafficking victims, 
+instead of trafficking rates; the dataset also included a category for total 
+number of trafficking victims, so the data was filtered for total category and 
+neither the `pivot` nor `average` options were set to true in the `tidy_df()` 
+function.
+
 ## Outcomes of Violence
 ```{r import_violence_outcomes}
 homicide_df = 
@@ -254,15 +294,9 @@ violence_df =
   tidy_df("violence_rate", average = TRUE)
 ```
 
-The datasets for economic crimes, criminal justice personnel, homicide and 
-violence provided data for both counts and rates per 100,000 people. 
-Therefore, we filtered to choose rates per 100,000 people since it allows 
-standardization for comparability by adjusting for differences in population 
-size. The human trafficking dataset provided data for number of human 
-trafficking victims, instead of trafficking rates; the dataset also included 
-a category for total number of trafficking victims, so the data was filtered for 
-total category and neither the `pivot` nor `average` options were set to true 
-in the `tidy_df()` function.
+Unlike the tidied dataset for EDA, the datasets for homicide and violence had 
+their respective rates averaged across category, since we are interested in 
+the average rates of homicide and violence for regression analysis.
 
 ## Merge Datasets
 ```{r merge_datasets}
@@ -297,4 +331,6 @@ countries.
 
 After merging the datasets, country and region were converted to categorical 
 variables and the dataset was filtered for the years between 2015 and 2023, 
-the period of our interest for analysis. 
+the period of our interest for analysis. Although the datasets were merged with 
+matching country names tidied by the `countrycode()`, the iso3 codes were 
+retained, since they are required for plotting maps. 
