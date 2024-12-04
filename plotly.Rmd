@@ -15,7 +15,7 @@ merged_violence_df =
   read_csv("./data/merged_violence.csv")
 ```
 
-Column {data-width=650}
+{data-width=650}
 -----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
@@ -26,7 +26,7 @@ merged_violence_df |>
          yaxis = list(title = "Rate (per 100,000 population)"))
 ```
 
-Column {data-width=650}
+{data-width=650}
 -----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
@@ -37,7 +37,7 @@ merged_violence_df |>
          yaxis = list(title = "Rate (per 100,000 population)"))
 ```
 
-Column {data-width=650}
+{data-width=650}
 -----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
@@ -50,14 +50,14 @@ merged_violence_df |>
                       line = list(width = 2, color = '#FFFFFF')))
 ```
 
-Column {data-width=650}
+{data-width=650}
 -----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
-  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
+  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~crime_rate,
           text = ~paste('Country', country, '<br>Year:', year, '<br>Crime rate:', crime_rate,
-                        '<br>Personnel rate:', personnel_rate, '<br>Inflation rate:', inflation_rate,
-                        '<br>Crime rate:', crime_rate), 
+                        '<br>Personnel rate:', personnel_rate, '<br>Inflation rate:', alcohol_consumption_rate,
+                        '<br>Crime rate:', trafficked_victims), 
           type = 'scatter', mode = 'markers', color = ~region,
           marker = list(symbol = 'circle', sizemode = 'diameter',
                       line = list(width = 2, color = '#FFFFFF')))
