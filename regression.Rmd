@@ -13,6 +13,7 @@ library(MASS)
 library(glmnet)
 library(GGally)
 library(leaps)
+library(mgcv)
 set.seed(1)
 ```
 
@@ -36,6 +37,26 @@ best_subset = function(predictor, outcome, criterion) {
   print(optimal_subset$which[optimal_subset_idx,])
 
 }
+
+fit_glmnet = function(df, alpha, outcome, lambda) {
+  
+  outcome_formula <- as.formula(paste(outcome, "~."))
+  predictor <- model.matrix(outcome_formula, data = df)[,-1]
+  predicted <- df %>% pull(outcome)
+  
+  model_fit <- 
+    glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  model_cv <-
+    cv.glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  lambda_opt = model_cv[["lambda.min"]]
+  
+  model_fit <-
+    glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
+  
+}
+
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
@@ -123,7 +144,7 @@ homicide_df =
     -iso3_code) |> 
   drop_na()
 
-homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)
+homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
 
 homicide_predictors <- homicide_df %>% 
   dplyr::select(-homicide_rate)
@@ -142,7 +163,7 @@ violence_df =
     -iso3_code) |>
   drop_na()
 
-violence_matrix <- model.matrix(violence_rate ~., data = violence_df)
+violence_matrix <- model.matrix(violence_rate ~., data = violence_df)[,-1]
   
 violence_predictors <- violence_df %>% 
   dplyr::select(-violence_rate)
@@ -225,6 +246,20 @@ ridge_violence_fit %>%
 ### Predictors for Homicide Rate
 
 ```{r}
+ridge_homicide_fit =
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda, alpha = 0)
+
+ridge_homicide_cv =
+  cv.glmnet(homicide_matrix, homicide_outcome, lambda = lambda, alpha = 0)
+
+lambda_homicide_opt = ridge_homicide_cv[["lambda.min"]]
+
+ridge_homicide_fit = 
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda_homicide_opt, 
+         alpha = 0)
+
+ridge_homicide_fit %>% 
+  broom::tidy()
 
 ```
 
@@ -442,12 +477,55 @@ The results from criterion-based procedures suggest that significant predictors 
 For homicide_rate, the results are not as straightforward. The best model based on Cp and R-squared seems to be the model with 4 predictors because it has the lowest Cp (6.36), and a decently high adjusted R-squared (0.331), indicating a good balance between fit and complexity. As more predictors are added, R-squared adjusts slightly but Cp levels off at around 6 predictors. The model with 4 predictors, which includes inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a better trade-off.
 
 
-# Model Comparison
+# Model Comparison 
 
-## Cross-Validate
+## Create Training and Testing Datasets
+```{r}
+cv_df_violence <- 
+  modelr::crossv_mc(violence_df, 100)
+
+cv_df_violence <- cv_df_violence %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+
+cv_df_homicide <-
+  modelr::crossv_mc(homicide_df, 100)
+
+cv_df_homicide <- cv_df_homicide %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+
+head(cv_df_violence)
+  
+```
+
+## Fit Models
+
+### Violence
+```{r}
+cv_df_violence <-
+  cv_df_violence %>% 
+  mutate(
+    MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
+    MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
+                           crime_rate + personnel_rate + trafficked_victims +
+                           alcohol_consumption_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
+                                        alpha = 1,lambda = lambda)),
+    ridge = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
+                                        alpha = 0, lambda = lambda))
+  )
+```
+
+
+### Homicide
+
+## Compare RMSE
 ```{r}
 
 ```
 
-
-## Calculate RMSE 
