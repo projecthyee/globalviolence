@@ -605,20 +605,5 @@ only homicide rates but also broader forms of violence.
 However, Oceania presented an extreme outlier in terms of violence rates, 
 surpassing even the Americas. In fact, Oceania's violence rate was nearly 
 
-## Missing Values
-
-Predictors. 
-
-```{r}
-merged_violence_df |> select(inflation_rate)
-
-```
-
-
-
-## Regression 
-
-(IN PROGRESS)
-
 
 
