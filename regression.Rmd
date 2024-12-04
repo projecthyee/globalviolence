@@ -39,7 +39,9 @@ best_subset = function(predictor, outcome, criterion) {
 }
 
 fit_glmnet = function(df, alpha, outcome, lambda) {
-  predictor <- model.matrix(outcome ~., data = df)
+  
+  outcome_formula <- as.formula(paste(outcome, "~."))
+  predictor <- model.matrix(outcome_formula, data = df)[,-1]
   predicted <- df %>% pull(outcome)
   
   model_fit <- 
@@ -55,7 +57,6 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
   
 }
 
-fit_glmnet(violence_df, alpha = 1, outcome = violence_rate, lambda)
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
