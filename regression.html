@@ -327,6 +327,8 @@ factors influence homicide rate and violence rate as outcomes.</p>
 </div>
 <div id="helpful-functions" class="section level1">
 <h1>Helpful Functions</h1>
+<div id="best_subset" class="section level2">
+<h2>Best_subset</h2>
 <pre class="r"><code>best_subset = function(predictor, outcome, criterion) {
   
   optimal_subset &lt;- 
@@ -344,9 +346,11 @@ factors influence homicide rate and violence rate as outcomes.</p>
   print(optimal_rsq) 
   print(optimal_subset$which[optimal_subset_idx,])
 
-}
-
-fit_glmnet = function(df, alpha, outcome, lambda) {
+}</code></pre>
+</div>
+<div id="fit_glmnet" class="section level2">
+<h2>fit_glmnet</h2>
+<pre class="r"><code>fit_glmnet = function(df, alpha, outcome, lambda) {
   
   outcome_formula &lt;- as.formula(paste(outcome, &quot;~.&quot;))
   predictor &lt;- model.matrix(outcome_formula, data = df)[,-1]
@@ -363,9 +367,11 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
   model_fit &lt;-
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
-}
-
-rmse_glmnet = function(model, test, outcome) {
+}</code></pre>
+</div>
+<div id="rmse_glmnet" class="section level2">
+<h2>rmse_glmnet</h2>
+<pre class="r"><code>rmse_glmnet = function(model, test, outcome) {
   outcome_formula &lt;- as.formula(paste(outcome, &quot;~.&quot;))
   predictor &lt;- model.matrix(outcome_formula, data = test)[,-1]
   predictions &lt;- predict.glmnet(model, model[[&quot;lambda&quot;]], newx = predictor,
@@ -382,6 +388,7 @@ rmse_glmnet = function(model, test, outcome) {
 performs best subset variable selection and then prints out the optimal
 model diagnostic and the predictor variables included in the regression
 model.</p>
+</div>
 </div>
 <div id="exploratory-data-analysis" class="section level1">
 <h1>Exploratory data analysis</h1>
@@ -670,7 +677,7 @@ ggcorrplot(cor_matrix,
            colors = c(&quot;blue&quot;, &quot;white&quot;, &quot;red&quot;), # Color scale (blue = negative, red = positive)
            title = &quot;Correlation Heatmap&quot;
 )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+<p><img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 There is moderate correlation between <code>hdi</code> and
 <code>alcohol_consumption_rate</code>, corr = 0.5, and moderately high
 correlation between <code>trafficked_victims</code> and
@@ -1355,8 +1362,9 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
     Model = fct_inorder(Model)
   ) %&gt;% 
   ggplot(aes(x = Model, y = RMSE)) +
-  geom_violin()</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+  geom_violin() +
+  ggtitle(&quot;RMSE by Model for Predicting Violence Rate&quot;)</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 </div>
 <div id="homicide-1" class="section level3">
 <h3>Homicide</h3>
@@ -1371,8 +1379,9 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
     Model = fct_inorder(Model)
   ) %&gt;% 
   ggplot(aes(x = Model, y = RMSE)) +
-  geom_violin()</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+  geom_violin() +
+  ggtitle(&quot;RMSE by Model for Predicting Homicide Rate&quot;)</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
 </div>
 </div>

@@ -590,7 +590,7 @@ cv_df_violence %>%
     everything(),
     names_to = "Model", 
     values_to = "RMSE",
-    names_prefix = "RMSE_"
+    names_prefix = "rmse_"
   ) %>% 
   mutate(
     Model = fct_inorder(Model)
@@ -608,7 +608,7 @@ cv_df_homicide %>%
     everything(),
     names_to = "Model", 
     values_to = "RMSE",
-    names_prefix = "RMSE_"
+    names_prefix = "rmse_"
   )%>% 
   mutate(
     Model = fct_inorder(Model)

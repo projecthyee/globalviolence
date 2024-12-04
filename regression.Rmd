@@ -26,8 +26,10 @@ We hypothesize that homicide rate may be influenced by more "direct" indicators 
 
 We perform this analysis to uncover the extent to which different factors influence homicide rate and violence rate as outcomes.
 
-# Helpful Functions
-```{r}
+# Functions for Fitting Data
+
+## Best_subset
+```{r }
 best_subset = function(predictor, outcome, criterion) {
   
   optimal_subset <- 
@@ -46,7 +48,13 @@ best_subset = function(predictor, outcome, criterion) {
   print(optimal_subset$which[optimal_subset_idx,])
 
 }
+```
+This function serves as a wrapper around the leaps function. It performs 
+best subset variable selection and then prints out the optimal model diagnostic 
+and the predictor variables included in the regression model.
 
+## fit_glmnet
+```{r }
 fit_glmnet = function(df, alpha, outcome, lambda) {
   
   outcome_formula <- as.formula(paste(outcome, "~."))
@@ -64,8 +72,16 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
   model_fit <-
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
+  return(model_fit)
+  
 }
+```
+This function serves as a wrapper for the glmnet fitting processing and 
+covers both the fitting and cross-validation process. It returns the glmnet 
+object produced after fitting with optimal lambda value.
 
+## rmse_glmnet
+```{r }
 rmse_glmnet = function(model, test, outcome) {
   outcome_formula <- as.formula(paste(outcome, "~."))
   predictor <- model.matrix(outcome_formula, data = test)[,-1]
@@ -80,10 +96,11 @@ rmse_glmnet = function(model, test, outcome) {
   
 }
 ```
-
-This function serves as a wrapper around the leaps function. It performs 
-best subset variable selection and then prints out the optimal model diagnostic 
-and the predictor variables included in the regression model. 
+This is a wrapper function for the glmnet prediction and evaluation process. 
+Given a fitted glmnet model, a test dataset, and an outcome variable of 
+interest, this function predicts the avlues in the test dataset and then 
+calculates and returns the rmse. 
+ 
 
 # Exploratory data analysis 
 
