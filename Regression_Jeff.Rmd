@@ -21,6 +21,7 @@ library(glmnet)
 library(GGally)
 library(leaps)
 library(mgcv)
+library(modelr)
 set.seed(1)
 ```
 
@@ -64,8 +65,6 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
   
   return(model_fit)  
 }
-
-test <- fit_glmnet(violence_df, alpha = 1, outcome = "violence_rate", lambda = lambda)
 
 rmse_glmnet = function(model, test, outcome) {
   outcome_formula <- as.formula(paste(outcome, "~."))
@@ -547,17 +546,22 @@ cv_df_violence <-
       MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
     rmse_best_subset = map2_dbl(
       MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
-    rmse_lasso = map2_dbl(lasso, test, \(mod, test))
-  )
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, "violence_rate")),
+    rmse_ridge = map2_dbl(
+      ridge, test, \(mod, test) rmse_glmnet(mod, test, "violence_rate"))
+  ) %>% 
+  dplyr::select(starts_with("rmse_"))
 
-head(cv_df_violence)
 ```
-
 
 ### Homicide
 
 ## Compare RMSE
+
+### Violence
 ```{r}
 
 ```
 
+### Homicide
