@@ -585,8 +585,35 @@ cv_df_homicide <-
 
 ### Violence
 ```{r}
-
+cv_df_violence %>%
+  pivot_longer(
+    everything(),
+    names_to = "Model", 
+    values_to = "RMSE",
+    names_prefix = "RMSE_"
+  ) %>% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %>% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin()
 
 ```
 
 ### Homicide
+
+```{r}
+cv_df_homicide %>%
+  pivot_longer(
+    everything(),
+    names_to = "Model", 
+    values_to = "RMSE",
+    names_prefix = "RMSE_"
+  ) %>% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %>% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin()
+```
+
