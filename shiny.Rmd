@@ -79,7 +79,7 @@ sliderInput(
 ```
 
 
-Column {data-width=500}
+Column {data-width=400}
 -----------------------------------------------------------------------
 
 ### Global Visualization 
@@ -108,7 +108,7 @@ renderPlotly(
 
 
 
-Column {data-width=500}
+Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### Average Outcome Rate per Region over the Selected Year
@@ -126,7 +126,7 @@ renderPlotly(
     mutate(country = fct_reorder(country, avg_rate)) |>
     plot_ly(x = ~country, y = ~avg_rate, color = ~country,type = "bar") |>
     layout(xaxis = list(title = "Country"), 
-           yaxis = list(title = "Average rate over the selected year")
+           yaxis = list(title = "Average Rate over the Selected Year")
          )
   )
 ```
