@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Jeffrey Lin" />
+
+<meta name="date" content="2024-11-13" />
+
+<title>EDA</title>
+
+<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="cleaning.html">Data</a>
+</li>
+<li>
+  <a href="eda.html">EDA</a>
+</li>
+<li>
+  <a href="regression.html">Regression</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Shiny
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="shiny.html">Interactive Map</a>
+    </li>
+    <li>
+      <a href="shiny2.html">Shiny 2</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="report.html">Project Report</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="aboutus.html">About Us</a>
+</li>
+<li>
+  <a href="https://github.com/projecthyee/p8105_fp_violence">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">EDA</h1>
+<h4 class="author">Jeffrey Lin</h4>
+<h4 class="date">2024-11-13</h4>
+
+</div>
+
+
+<div id="load-libraries" class="section level1">
+<h1>Load Libraries</h1>
+<pre class="r"><code>library(tidyverse)
+library(readxl)
+library(rlang)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;rlang&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:purrr&#39;:
+## 
+##     %@%, flatten, flatten_chr, flatten_dbl, flatten_int, flatten_lgl,
+##     flatten_raw, invoke, splice</code></pre>
+<pre class="r"><code>library(patchwork)</code></pre>
+</div>
+<div id="data-pre-processing" class="section level1">
+<h1>Data Pre-Processing</h1>
+<div id="examine-merged-violence-dataframe" class="section level2">
+<h2>Examine Merged Violence Dataframe</h2>
+<pre class="r"><code>head(merged_violence_df)</code></pre>
+<pre><code>## # A tibble: 6 × 14
+## # Groups:   country, region [1]
+##   iso3_code country region  year homicide_rate violence_rate          gdp
+##   &lt;chr&gt;     &lt;fct&gt;   &lt;fct&gt;  &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;        &lt;dbl&gt;
+## 1 ALB       Albania Europe  2015          2.22          5.51 11386853113.
+## 2 ALB       Albania Europe  2016          2.74          4.87 11861199831.
+## 3 ALB       Albania Europe  2017          2.01          4.64 13019726212.
+## 4 ALB       Albania Europe  2018          2.29          4.54 15156424015.
+## 5 ALB       Albania Europe  2019          2.26          5.09 15401826127.
+## 6 ALB       Albania Europe  2020          2.13          4.71 15162734205.
+## # ℹ 7 more variables: inflation_rate &lt;dbl&gt;, unemployment_rate &lt;dbl&gt;, hdi &lt;dbl&gt;,
+## #   crime_rate &lt;dbl&gt;, personnel_rate &lt;dbl&gt;, trafficked_victims &lt;dbl&gt;,
+## #   alcohol_consumption_rate &lt;dbl&gt;</code></pre>
+</div>
+<div id="create-separate-dataframe-for-variables-of-interest"
+class="section level2">
+<h2>Create Separate Dataframe for Variables of Interest</h2>
+<pre class="r"><code>EDA_var_interest &lt;- merged_violence_df %&gt;% 
+  mutate(development_status = factor(case_when(
+    hdi &lt; 0.550 ~ &quot;low&quot;,
+    hdi &gt;= 0.550 &amp; hdi &lt; 0.700 ~ &quot;medium&quot;,
+    hdi &gt;= 0.700 &amp; hdi &lt; 0.800 ~ &quot;high&quot;,
+    hdi &gt;= 0.800 ~ &quot;very high&quot;
+    ))
+  )  
+
+head(EDA_var_interest)</code></pre>
+<pre><code>## # A tibble: 6 × 15
+## # Groups:   country, region [1]
+##   iso3_code country region  year homicide_rate violence_rate          gdp
+##   &lt;chr&gt;     &lt;fct&gt;   &lt;fct&gt;  &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;        &lt;dbl&gt;
+## 1 ALB       Albania Europe  2015          2.22          5.51 11386853113.
+## 2 ALB       Albania Europe  2016          2.74          4.87 11861199831.
+## 3 ALB       Albania Europe  2017          2.01          4.64 13019726212.
+## 4 ALB       Albania Europe  2018          2.29          4.54 15156424015.
+## 5 ALB       Albania Europe  2019          2.26          5.09 15401826127.
+## 6 ALB       Albania Europe  2020          2.13          4.71 15162734205.
+## # ℹ 8 more variables: inflation_rate &lt;dbl&gt;, unemployment_rate &lt;dbl&gt;, hdi &lt;dbl&gt;,
+## #   crime_rate &lt;dbl&gt;, personnel_rate &lt;dbl&gt;, trafficked_victims &lt;dbl&gt;,
+## #   alcohol_consumption_rate &lt;dbl&gt;, development_status &lt;fct&gt;</code></pre>
+<pre class="r"><code>var_names &lt;- EDA_var_interest %&gt;% 
+  dplyr::select(c(hdi:alcohol_consumption_rate)) %&gt;% 
+  colnames() </code></pre>
+<pre><code>## Adding missing grouping variables: `country`, `region`</code></pre>
+</div>
+<div id="generalized-plotting-function" class="section level2">
+<h2>Generalized Plotting Function</h2>
+<pre class="r"><code>make_plot = function(data, geom_type, title, grouping = NULL, ...) {
+  plt &lt;- data %&gt;% 
+    ggplot(aes(...)) +
+    geom_type() + 
+    ggtitle(title) +
+    theme(plot.title = element_text(hjust = 0.5))
+  
+  if (!is.null(grouping)) {
+    grouping = sym(grouping)
+    plt &lt;- plt + facet_grid(as.formula(paste(&quot;~&quot;, grouping)))
+  }
+  
+  return(plt)
+  
+}</code></pre>
+</div>
+</div>
+<div id="scatter-plots" class="section level1">
+<h1>Scatter Plots</h1>
+<div id="global" class="section level2">
+<h2>Global</h2>
+<div id="outcome-variable-homicide-rate" class="section level3">
+<h3>Outcome Variable: homicide Rate</h3>
+<pre class="r"><code>map(var_names, \(x) make_plot(EDA_var_interest, geom_point, 
+    str_c(&quot;Homicide Rate by &quot;, x), x = .data[[x]], y = homicide_rate
+    ))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-5-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-5-5.png" width="672" /></p>
+<pre><code>## 
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-5-6.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-5-7.png" width="672" /></p>
+</div>
+<div id="outcome-variable-average-violence-rate" class="section level3">
+<h3>Outcome Variable: Average Violence Rate</h3>
+<pre class="r"><code>map(var_names, \(x) make_plot(EDA_var_interest, geom_point, 
+    str_c(&quot;Average Violence Rate by &quot;, x), x = .data[[x]], y = violence_rate
+    ))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-6-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-6-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-6-5.png" width="672" /></p>
+<pre><code>## 
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-6-6.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-6-7.png" width="672" /></p>
+</div>
+</div>
+<div id="regional" class="section level2">
+<h2>Regional</h2>
+<div id="outcome-variable-average-violence-rate-1"
+class="section level3">
+<h3>Outcome Variable: Average Violence Rate</h3>
+<pre class="r"><code>map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
+    str_c(&quot;Average Violence Rate by &quot;, x, &quot; and Region&quot;), &quot;region&quot;, 
+    x = .data[[x]], y = violence_rate, color = region)
+    )</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-7-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-7-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-7-5.png" width="672" /></p>
+<pre><code>## 
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-7-6.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-7-7.png" width="672" />
+### Outcome Variable: Homocide Rate</p>
+<pre class="r"><code>map(var_names, \(x) make_plot(EDA_var_interest, geom_point,
+    str_c(&quot;Homicide Rate by &quot;, x, &quot; and Region&quot;), &quot;region&quot;, 
+    x = .data[[x]], y = homicide_rate, color = region)
+    )</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-8-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-8-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-8-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-8-5.png" width="672" /></p>
+<pre><code>## 
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-8-6.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing missing values or values outside
+## the scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-8-7.png" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="density-plots" class="section level1">
+<h1>Density Plots</h1>
+<div id="distribution-of-variables-of-interest-by-region"
+class="section level2">
+<h2>Distribution of Variables of Interest by Region</h2>
+<pre class="r"><code>map(var_names, \(x) make_plot(EDA_var_interest, geom_density, 
+    str_c(&quot;Distribution of &quot;, x, &quot; based on Region&quot;), &quot;region&quot;,
+    x = .data[[x]], color = region))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<pre><code>## Warning: Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.</code></pre>
+<pre><code>## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-9-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-9-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-9-5.png" width="672" /></p>
+<pre><code>## 
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-9-6.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-9-7.png" width="672" /></p>
+</div>
+<div id="distribution-of-variables-of-interest-by-development-status"
+class="section level2">
+<h2>Distribution of Variables of Interest by Development Status</h2>
+<pre class="r"><code>map(var_names, \(x) make_plot(EDA_var_interest, geom_density, 
+    str_c(&quot;Distribution of &quot;, x, &quot; based on Development Status&quot;), &quot;development_status&quot;,
+    x = .data[[x]], color = development_status))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<pre><code>## Warning: Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.
+## Groups with fewer than two data points have been dropped.</code></pre>
+<pre><code>## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf
+## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+## -Inf</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-10-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-10-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-10-5.png" width="672" /></p>
+<pre><code>## 
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-10-6.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-10-7.png" width="672" /></p>
+</div>
+<div id="regional-1" class="section level2">
+<h2>Regional</h2>
+</div>
+<div id="by-hdi" class="section level2">
+<h2>by HDI</h2>
+</div>
+</div>
+<div id="bar-charts" class="section level1">
+<h1>Bar Charts</h1>
+<div id="count-of-development-statuses" class="section level2">
+<h2>Count of Development Statuses</h2>
+<pre class="r"><code>EDA_var_interest %&gt;% 
+  drop_na(development_status) %&gt;% 
+  make_plot(geom_bar, &quot;Distribution of Development Status&quot;,
+            x = development_status, fill = development_status)</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+</div>
+<div id="box-plots" class="section level1">
+<h1>Box Plots</h1>
+<div id="average-violence-rate-by-development-status"
+class="section level2">
+<h2>Average Violence Rate by Development Status</h2>
+<pre class="r"><code>EDA_var_interest %&gt;% 
+  drop_na(development_status) %&gt;% 
+  make_plot(geom_boxplot, title = &quot;Average Violence Rate by Development Status&quot;, 
+            x = development_status, y = violence_rate)</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+## Homicide Rate</p>
+<pre class="r"><code>EDA_var_interest %&gt;% 
+  drop_na(development_status) %&gt;% 
+  make_plot(geom_boxplot, title = &quot;Homicide Rate by Development Status&quot;, 
+            x = development_status, y = homicide_rate)</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+</div>
+<div id="old-code" class="section level1">
+<h1>Old Code</h1>
+<div id="global-1" class="section level2">
+<h2>Global</h2>
+<div id="visualize-distribution" class="section level3">
+<h3>Visualize Distribution</h3>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = hdi)) +
+  geom_density() +
+  xlab(&quot;Human Development Index&quot;) + 
+  ylab(&quot;Density&quot;) +
+  ggtitle(&quot;Distribution of Global HDI Scores&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+</div>
+<div id="box-cox-transformation" class="section level3">
+<h3>Box Cox Transformation</h3>
+<pre class="r"><code>merged_violence_df &lt;- merged_violence_df %&gt;%
+  mutate(
+    hdi = hdi + 0.0001
+  )
+
+HDI &lt;- merged_violence_df %&gt;% 
+  pull(hdi)
+
+box_cox_MLE &lt;- as.data.frame(MASS::boxcox(HDI ~ 1)) </code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>lambda &lt;- box_cox_MLE %&gt;%
+  filter(y == max(y)) %&gt;% 
+  pull(x)
+
+merged_violence_df &lt;- merged_violence_df %&gt;% 
+  mutate(
+    box_cox_HDI = (hdi ^ (lambda - 1)) / lambda  
+  )</code></pre>
+<p>Distribution after Box Cox Transformation</p>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = box_cox_HDI)) +
+  geom_density() +
+  xlab(&quot;Box Cox Transformed Human Development Index&quot;) + 
+  ylab(&quot;Density&quot;) +
+  ggtitle(&quot;Distribution of Global HDI Scores&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-16-1.png" width="672" />
+### Scatter plot of HDI against average violence rate</p>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = hdi, violence_rate)) +
+  geom_point() +
+  xlab(&quot;Human Development Index&quot;) +
+  ylab(&quot;Average Violence Rate&quot;) +
+  ggtitle(&quot;Average Rate of Violence by Human Development Index&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+</div>
+<div id="scatter-plot-of-hdi-against-homicide-rate"
+class="section level3">
+<h3>Scatter plot of HDI against homicide rate</h3>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = hdi, homicide_rate)) +
+  geom_point() +
+  xlab(&quot;Human Development Index&quot;) +
+  ylab(&quot;Homicide Rate&quot;) +
+  ggtitle(&quot;Homicide Rate by Human Development Index&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+</div>
+</div>
+<div id="by-region" class="section level2">
+<h2>By Region</h2>
+<div id="distribution-of-hdi-by-region" class="section level3">
+<h3>Distribution of HDI by Region</h3>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = hdi, color = region)) +
+  geom_density() +
+  facet_grid(.~region) +
+  xlab(&quot;Human Development Index&quot;) + 
+  ylab(&quot;Density&quot;) +
+  ggtitle(&quot;Distribution of HDI Scores by Region&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-19-1.png" width="672" />
+### Distribution of HDI by Region with box cox transformation</p>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = box_cox_HDI, color = region)) +
+  geom_density() +
+  facet_grid(.~region) +
+  xlab(&quot;Box Cox Transformed Human Development Index&quot;) + 
+  ylab(&quot;Density&quot;) +
+  ggtitle(&quot;Distribution of HDI Scores by Region&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</div>
+<div id="scatter-plot-of-hdi-against-average-violence-rate"
+class="section level3">
+<h3>Scatter plot of HDI against average violence rate</h3>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = hdi, violence_rate, color = region)) +
+  geom_point() +
+  facet_grid(.~region) +
+  xlab(&quot;Human Development Index&quot;) +
+  ylab(&quot;Average Violence Rate&quot;) +
+  ggtitle(&quot;Average Rate of Violence by Human Development Index&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-21-1.png" width="672" />
+### Scatter plot of HDI against homicide rate</p>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  ggplot(aes(x = hdi, homicide_rate, color = region)) +
+  geom_point() +
+  facet_grid(.~region) +
+  xlab(&quot;Human Development Index&quot;) +
+  ylab(&quot;Homicide Rate&quot;) +
+  ggtitle(&quot;Homicide Rate by Human Development Index&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the
+## scale range (`geom_point()`).</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+</div>
+</div>
+<div id="by-development-status" class="section level2">
+<h2>By Development Status</h2>
+<div id="add-development-variable" class="section level3">
+<h3>Add Development Variable</h3>
+<pre class="r"><code>merged_violence_df &lt;- merged_violence_df %&gt;% 
+  mutate(development_status = factor(case_when(
+    hdi &lt; 0.550 ~ &quot;low&quot;,
+    hdi &gt;= 0.550 &amp; hdi &lt; 0.700 ~ &quot;medium&quot;,
+    hdi &gt;= 0.700 &amp; hdi &lt; 0.800 ~ &quot;high&quot;,
+    hdi &gt;= 0.800 ~ &quot;very high&quot;
+    ))
+  )</code></pre>
+</div>
+<div id="distribution-of-development-status" class="section level3">
+<h3>Distribution of Development Status</h3>
+<pre class="r"><code>merged_violence_df %&gt;% 
+  drop_na(development_status) %&gt;% 
+  ggplot(aes(x = development_status, fill = development_status)) +
+  geom_bar() +
+  xlab(&quot;Development Status&quot;) + 
+  ggtitle(&quot;Distribution of Development Status&quot;) + 
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<p><img src="EDA_Jeff_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,5 +1,5 @@
 ---
-title: "Shiny"
+title: "Interactive Map"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -70,12 +70,13 @@ sliderInput(
   label = h3("Select Year Range"), 
   min = 2015, 
   max = 2023, 
-  value = c(2020, 2022)
+  value = c(2020, 2022),
+  sep = ""
 )
 ```
 
 
-Column {data-width=650}
+Column {data-width=500}
 -----------------------------------------------------------------------
 
 ### Chart A
@@ -90,18 +91,20 @@ renderPlotly(
       ) |>
     group_by(country, iso3_code) |>
     summarize(avg_rate = mean(rate)) |> 
-    mutate(text_label = str_c("Country: ", country, 
+    mutate(avg_rate = round(avg_rate, digits = 3),
+           text_label = str_c("Country: ", country, 
                               "\nAvg Rate: ", avg_rate)) |>
     plot_ly(type = 'choropleth', 
           locations = ~iso3_code, 
           z = ~avg_rate, 
-          text = ~text_label)
+          text = ~text_label, 
+          hovertemplate = paste("%{text}<extra></extra>"))
 )
 ```
 
 
 
-Column {data-width=350}
+Column {data-width=500}
 -----------------------------------------------------------------------
 
 ### Chart B
@@ -116,26 +119,13 @@ renderPlotly(
     group_by(country) |>
     summarize(avg_rate = mean(rate)) |>
     mutate(country = fct_reorder(country, avg_rate)) |>
-    plot_ly(x = ~country, y = ~avg_rate, color = ~country,type = "bar") 
+    plot_ly(x = ~country, y = ~avg_rate, color = ~country,type = "bar") |>
+    layout(xaxis = list(title = "Country"), 
+           yaxis = list(title = "Average rate over the selected year")
+         )
   )
 ```
 
-
-### Chart C
-
-```{r}
-renderPlotly(
-  merged_violence_outcome |> 
-  group_by(region, year) |> 
-  summarize(avg_by_region = mean(rate)) |> 
-  plot_ly(x = ~as.factor(year), y = ~avg_by_region, color = ~region, type = "bar"
-          ) |> 
-  layout(title = "Average Violence Rate by World Region from 2003-2022",
-         xaxis = list(title = "Year"), 
-         yaxis = list(title = "Average Violence Rate (Cases per 100,000)")
-         )
-)
-```
 
 
 
