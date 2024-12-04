@@ -179,7 +179,7 @@ Since no major improvements in normality were observed with the transformations,
 
 ## Multicolliniearity diagnostics
 We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
-```{r}
+```{r echo=FALSE}
 cor_matrix = 
   cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
 

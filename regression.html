@@ -272,7 +272,7 @@ $(document).ready(function () {
   </ul>
 </li>
 <li>
-  <a href="report.html">Project Report</a>
+  <a href="p8105_fp_report.html">Project Report</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -325,8 +325,8 @@ forms.</p>
 <p>We perform this analysis to uncover the extent to which different
 factors influence homicide rate and violence rate as outcomes.</p>
 </div>
-<div id="helpful-functions" class="section level1">
-<h1>Helpful Functions</h1>
+<div id="functions-for-fitting-data" class="section level1">
+<h1>Functions for Fitting Data</h1>
 <div id="best_subset" class="section level2">
 <h2>Best_subset</h2>
 <pre class="r"><code>best_subset = function(predictor, outcome, criterion) {
@@ -347,6 +347,10 @@ factors influence homicide rate and violence rate as outcomes.</p>
   print(optimal_subset$which[optimal_subset_idx,])
 
 }</code></pre>
+<p>This function serves as a wrapper around the leaps function. It
+performs best subset variable selection and then prints out the optimal
+model diagnostic and the predictor variables included in the regression
+model.</p>
 </div>
 <div id="fit_glmnet" class="section level2">
 <h2>fit_glmnet</h2>
@@ -367,7 +371,12 @@ factors influence homicide rate and violence rate as outcomes.</p>
   model_fit &lt;-
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
+  return(model_fit)
+  
 }</code></pre>
+<p>This function serves as a wrapper for the glmnet fitting processing
+and covers both the fitting and cross-validation process. It returns the
+glmnet object produced after fitting with optimal lambda value.</p>
 </div>
 <div id="rmse_glmnet" class="section level2">
 <h2>rmse_glmnet</h2>
@@ -384,10 +393,10 @@ factors influence homicide rate and violence rate as outcomes.</p>
   return(caret::RMSE(predictions, observed))
   
 }</code></pre>
-<p>This function serves as a wrapper around the leaps function. It
-performs best subset variable selection and then prints out the optimal
-model diagnostic and the predictor variables included in the regression
-model.</p>
+<p>This is a wrapper function for the glmnet prediction and evaluation
+process. Given a fitted glmnet model, a test dataset, and an outcome
+variable of interest, this function predicts the avlues in the test
+dataset and then calculates and returns the rmse.</p>
 </div>
 </div>
 <div id="exploratory-data-analysis" class="section level1">
