@@ -41,6 +41,7 @@ merged_violence_df |>
           marker = list(symbol = 'circle', sizemode = 'diameter',
                       line = list(width = 2, color = '#FFFFFF')))
 ```
+
 ```{r}
 merged_violence_df |> 
   plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
@@ -53,15 +54,14 @@ merged_violence_df |>
 ```
 
 ```{r}
-offence_plot = 
-  simple_violent_offences_df |> 
+simple_violent_offences_df |> 
   group_by(category, year, country, region) |> 
   summarise(grp_mean_rate = mean(violence_rate)) |> 
   ggplot(aes(x = reorder(category, grp_mean_rate), y = grp_mean_rate, fill = region)) +
   geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~year, ncol=2) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-offence_plot  
+ 
 
 ```
 
