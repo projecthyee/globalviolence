@@ -179,36 +179,26 @@ lasso_violence_fit |>
 The optimal lambda for violence is 0.794. GDP has the least influence on the model, followed by `trafficked_victims`. These covariates will be removed from the model. 
 
 
-### Predictors for homicide rate. 
-```{r homicide}
-lasso_homicide = 
-  merged_violence_df |> 
-  dplyr::select(-iso3_code, -country, -region, -year, -violence_rate) |> 
-  drop_na()
+### Predictors for homicide rate.
 
-x = model.matrix(homicide_rate ~. - country - region, data = lasso_homicide)[, -1]
-y = lasso_homicide |> pull(homicide_rate)
-
-lambda = 10^(seq(-2, 2.75, 0.1))
-
+```{r}
 lasso_homicide_fit = 
-  glmnet(x, y, lambda = lambda)
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
 
 lasso_homicide_cv = 
-  cv.glmnet(x, y, lambda = lambda)
+  cv.glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
 
 lambda_homicide_opt = 
   lasso_homicide_cv[["lambda.min"]]
 
 lasso_homicide_fit = 
-  glmnet(x, y, lambda = lambda_homicide_opt)
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda_homicide_opt)
 
 lasso_homicide_fit |> 
   broom::tidy()
-
 ```
 
-The optimal lambda for homicide is 0.694.
+The optimal lambda for homicide is 0.050.
 
 # Ridge Regression 
 
