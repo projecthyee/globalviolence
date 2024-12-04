@@ -44,7 +44,8 @@ violent_offences_df |>
 
 ```{r}
 violent_offences_df |> 
-  group_by(region, category, year) |> 
+  # group_by(region, category, year) |> 
+  group_by(region, year) |> 
   summarize(avg_by_region = mean(value)) |> 
   ggplot(aes(x = as.factor(year), y = avg_by_region, fill = region)) +
   geom_col(position = "dodge") + 

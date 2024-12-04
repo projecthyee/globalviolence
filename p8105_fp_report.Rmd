@@ -258,6 +258,20 @@ in the `tidy_df()` function.
 
 ### Merge Datasets
 ```{r merge_datasets}
+merged_violence_df_full =
+  left_join(homicide_df, violence_df) |>
+  left_join(gdp_df) |>
+  left_join(inflation_df) |>
+  left_join(unemployment_df) |>
+  left_join(human_develop_df) |>
+  left_join(econ_crime_df) |>
+  left_join(personnel_df) |>
+  left_join(trafficking_df) |>
+  left_join(alcohol_df) |>
+  mutate(country = as.factor(country),
+         region = as.factor(region)) |>
+  filter(between(year, 2015, 2023)) |>
+  relocate(iso3_code) 
 merged_violence_df =
   left_join(homicide_df, violence_df) |>
   left_join(gdp_df) |>
@@ -311,11 +325,13 @@ homicide_visual_df =
          between(year, 2015, 2023)) |>
   dplyr::select(country, unit_of_measurement, region, category, sex, year, 
                 homicide_rate = value)
+
 ```
 
 ## Violence Rate
 
 ```{r}
+### Maybe rename to `violence_victim_visual_df`
 violence_visual_df = 
     read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
                skip = 2) |>
@@ -326,6 +342,37 @@ violence_visual_df =
          sex != "Total",
          between(year, 2015, 2023)) |>
   dplyr::select(country, indicator, unit_of_measurement, region, category, sex, 
+                year, violence_rate = value)
+# NOTE: violent offences is not separated by gender (ie we don't know gender of perpetrator)
+violent_offences_df = 
+    read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
+               skip = 2) |>
+  janitor::clean_names() |>
+  filter(unit_of_measurement == "Rate per 100,000 population",
+         indicator == "Violent offences",
+         sex == "Total",
+         between(year, 2015, 2023)) |>
+  dplyr::select(country, indicator, unit_of_measurement, region, category, sex, 
+                year, violence_rate = value)
+# Combines category into more generalized ones
+simple_violent_offences_df = 
+    read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
+               skip = 2) |>
+  janitor::clean_names() |>
+  filter(unit_of_measurement == "Rate per 100,000 population",
+         indicator == "Violent offences",
+         sex == "Total",
+         between(year, 2015, 2023)) |>
+  mutate(category = case_when(
+                    category %in% c("Sexual violence", "Sexual violence: Other acts of sexual violence",
+                                    "Sexual violence: Rape", 
+                                    "Sexual violence: Sexual assault") ~ "Sexual violence",
+                    category %in% c("Acts intended to induce fear or emotional distress",
+                                    "Acts intended to induce fear or emotional distress: Cyber-related")
+                    ~ "Acts intended to induce fear or emotional distress",
+                    TRUE ~ category
+  )) |> 
+  dplyr::select(country, indicator, unit_of_measurement, region, category, 
                 year, violence_rate = value)
 ```
 
