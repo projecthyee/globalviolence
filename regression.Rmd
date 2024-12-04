@@ -39,7 +39,7 @@ best_subset = function(predictor, outcome, criterion) {
 }
 
 fit_glmnet = function(df, alpha, outcome, lambda) {
-  predictor <- model.matrix(outcome ~., data = df, alpha = alpha)
+  predictor <- model.matrix(outcome ~., data = df)
   predicted <- df %>% pull(outcome)
   
   model_fit <- 
@@ -54,6 +54,8 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
 }
+
+fit_glmnet(violence_df, alpha = 1, outcome = violence_rate, lambda)
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
@@ -141,7 +143,7 @@ homicide_df =
     -iso3_code) |> 
   drop_na()
 
-homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)
+homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
 
 homicide_predictors <- homicide_df %>% 
   dplyr::select(-homicide_rate)
@@ -160,7 +162,7 @@ violence_df =
     -iso3_code) |>
   drop_na()
 
-violence_matrix <- model.matrix(violence_rate ~., data = violence_df)
+violence_matrix <- model.matrix(violence_rate ~., data = violence_df)[,-1]
   
 violence_predictors <- violence_df %>% 
   dplyr::select(-violence_rate)
@@ -496,6 +498,7 @@ cv_df_homicide <- cv_df_homicide %>%
     test = map(test, as_tibble)
   )
 
+head(cv_df_violence)
   
 ```
 
@@ -510,8 +513,10 @@ cv_df_violence <-
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = df)),
-    lasso = map(train, \(df) fit_glmnet(df, alpha = 1)),
-    ridge = map(train, \(df) fit_glmnet(df, alpha = 0))
+    lasso = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
+                                        alpha = 1,lambda = lambda)),
+    ridge = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
+                                        alpha = 0, lambda = lambda))
   )
 ```
 
