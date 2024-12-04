@@ -2,7 +2,7 @@ name: "Global Violence"
 output_dir: "."
 navbar:
   title: "Home"
-  right:
+  left:
     - text: "Data"
       href: cleaning.html
     - text: "EDA"
@@ -10,9 +10,16 @@ navbar:
     - text: "Regression"
       href: regression.html
     - text: "Shiny"
-      href: shiny.html
+      menu:
+      - text: "Interactive Map"
+        href: shiny.html
+      - text: "Shiny 2"
+        href: shiny2.html
     - text: "Project Report"
       href: report.html
+  right:
+    - text: "About Us"
+      href: aboutus.html
     - icon: fa-github fa-lg
       href: https://github.com/projecthyee/p8105_fp_violence
 output:
