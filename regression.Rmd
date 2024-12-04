@@ -11,7 +11,11 @@ library(MASS)
 library(glmnet)
 library(leaps)
 library(mgcv)
+library(ggcorrplot)
 set.seed(1)
+
+merged_violence_df <- read_csv(
+  file = "data/merged_violence.csv" )
 ```
 
 #Introduction
@@ -86,9 +90,6 @@ and the predictor variables included in the regression model.
 
 ## Visualizations of distributions
 ```{r train/test + distribution}
-##train_df = sample_frac(merged_violence_df, size = 0.8)
-##test_df = anti_join(merged_violence_df, train_df)
-
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
     ggplot(merged_violence_df, aes(x = column)) +
