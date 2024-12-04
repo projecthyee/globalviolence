@@ -30,36 +30,63 @@ provides insight into the contemporary factors shaping violence worldwide.
 
 ## Related Work
 
-
-
-
+Conflict trends in 2023 revealed increasing threats to the state of global peace. New York Times Journalist, Marc Lacey, titled NYT’s annual photojournalism review [“A Weary World”](https://www.nytimes.com/interactive/2023/world/year-in-pictures.html). Though 2024 comes to a close , the conflicts in Russia, Gaza, Ethiopia, and Sudan rage on, and more understanding of violence trends is needed. Tensions within and across countries have major implications for not just conflict prevention but also social and economic preservation which are often more fragile in vulnerable areas.
 
 ## Initial Questions
 
-
-
-(1) What are indicators of violence (which has most influence - answered by regression)?
-(2) How do rates of both indicator and outcome differ by region/country?
-(3) 
-
-
+1. How can we best predict violence and homicide rates (i.e. what are its indicators)? 
+2. How do rates of indicators compare across global regions and countries? 
+3. How do rates of violence and homicide compare across global and regions and countries? 
+4. What categories of violent are most prevalent? 
 
 # Data: Source, Scraping Method & Cleaning
 
 ## Source
+Our data comes from 4 primary sources: 
 
-Since there are many determinants and indicators of violence, we chose the 
-indicators and outcomes that seem most relevant and interesting in 
-exploring violence from the following sources:
+* United Nations Development Program (UNDP) 
+* United Nations Office of Drugs and Crime 
+* World Bank 
+* World Heath Organization 
+
+**Our outcome variables of interest**: 
+
+*Intentional homicide: 
+- counting unit: number of homicide victims per 100,000 population 
+- classification: 
+  - situational context: organized crime, interpersonal (excluding familial/intimate),        
+  - socio-political 
+  - relationship to perpetrator: intimate partner, family member, friend, colleague, etc. 
+  - mechanism: firearm, weapon, physical force 
+
+* Violent and sexual crimes: 
+- counting unit: number of individual offences per 100,000 population 
+- classification of offenses: 
+  - rape 
+  - serious assault 
+  - kidnapping 
+  - sexual violence 
+
+**Our predictor variables of interest**: 
 
 * United Nations Development Program (UNDP): 
-  - Human Development Index
+  - Human Development Index: geometric summary measure of longevity, being knowledgeable, and having decent standard of living 
 * United Nations Office of Drugs and Crime (UNODC)
-  - Corruption and Economic Crime
-  - Criminal Justice Personnel
-  - Human Trafficking
-  - Intentional Homicide
-  - Violent and Sexual Crimes
+  - Unit of measurement: counts or rate per 100,000 population 
+  - Corruption and Economic Crime:
+    - Burglary 
+    - Corruption 
+    - Bribery 
+    - Fraud / Cyber-related fraud 
+    - Money-laundering 
+    - Smuggling of migrants 
+    - Theft 
+    - Unlawful access/interception/interference of computer/system data 
+  - Criminal Justice Personnel:
+    - Police personnel (including administration, detention, prevention) 
+    - Prison staff (administration/education/health/surveilance) 
+    - Professional judges or magistrate 
+    - Prosecution personnel 
 * World Bank
   - Gross Domestic Product (GDP)
   - Inflation Rate (Measured by Consumer Price Index)
@@ -69,25 +96,6 @@ exploring violence from the following sources:
 
 Intentional homicide, and violent and sexual crimes were chosen as the outcome 
 variable to quantify violence. 
-
-* Intentional homicide:
-  - counting unit: number of homicide victims per 100,000 population
-  - classification:
-    - situational context: organized crime, interpersonal (excluding 
-    familial/intimate), socio-political
-    - relationship to perpetrator: intimate partner, family member, friend, 
-    colleague, etc.
-    - mechanism: firearm, weapon, physical force
-
-* Violent and sexual crimes:
-  - counting unit: number of individual offences per 100,000 population
-  - classification of offenses:
-    - rape
-    - serious assault
-    - kidnapping
-    - sexual violence
-  - NOTE: some countries used other counting unit (a series of offenses to form 
-  a case, or multiple cases to form an investigation)
 
 ## Scraping Method
 
@@ -475,13 +483,14 @@ violence_visual_df |>
   filter(indicator == "Violent offences") |>
   group_by(category, year, region) |> 
   summarise(avg_violence_rate = mean(violence_rate)) |> 
+  mutate(category = fct_reorder(category, avg_violence_rate)) |>
   ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~year, ncol=2) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-
-(DESCRIPTION )
+For every year except 2022, Oceania is the region with the highest rates for the serious assault
+and sexual violence category. Interestingly, the gap between Oceania and the Americas decreases greatly in 2022 with Oceania's drop in assault rates. 
 
 
 ### Victim of Sexual Violence Trend by Region
