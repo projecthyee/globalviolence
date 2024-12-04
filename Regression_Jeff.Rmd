@@ -64,6 +64,22 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
   
   return(model_fit)  
 }
+
+test <- fit_glmnet(violence_df, alpha = 1, outcome = "violence_rate", lambda = lambda)
+
+rmse_glmnet = function(model, test, outcome) {
+  outcome_formula <- as.formula(paste(outcome, "~."))
+  predictor <- model.matrix(outcome_formula, data = test)[,-1]
+  predictions <- predict.glmnet(model, model[["lambda"]], newx = predictor,
+                               type = "response")
+  
+  predictions <- as.vector(predictions)
+  observed <- test %>% 
+    pull(outcome)
+  
+  return(caret::RMSE(predictions, observed))
+  
+}
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
@@ -525,6 +541,13 @@ cv_df_violence <-
                                         alpha = 1,lambda = lambda)),
     ridge = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
                                         alpha = 0, lambda = lambda))
+  ) %>% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(lasso, test, \(mod, test))
   )
 
 head(cv_df_violence)
