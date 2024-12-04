@@ -1,18 +1,22 @@
 ---
-title: "viz"
-author: "Malika Top"
-date: "2024-12-03"
-output: html_document
+title: "Determinants of Violence"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-library(ggplot2)
-library(dplyr)
 library(plotly)
+library(flexdashboard)
+
+merged_violence_df = 
+  read_csv("./data/merged_violence.csv")
 ```
 
+Column {data-width=650}
+-----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
   plot_ly(x = ~as.factor(year), y = ~violence_rate, color = ~country,
@@ -22,6 +26,8 @@ merged_violence_df |>
          yaxis = list(title = "Rate (per 100,000 population)"))
 ```
 
+Column {data-width=650}
+-----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
   plot_ly(x = ~as.factor(year), y = ~homicide_rate, color = ~country,
@@ -31,6 +37,8 @@ merged_violence_df |>
          yaxis = list(title = "Rate (per 100,000 population)"))
 ```
 
+Column {data-width=650}
+-----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
   plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
@@ -42,6 +50,8 @@ merged_violence_df |>
                       line = list(width = 2, color = '#FFFFFF')))
 ```
 
+Column {data-width=650}
+-----------------------------------------------------------------------
 ```{r}
 merged_violence_df |> 
   plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
@@ -53,17 +63,6 @@ merged_violence_df |>
                       line = list(width = 2, color = '#FFFFFF')))
 ```
 
-```{r}
-simple_violent_offences_df |> 
-  group_by(category, year, country, region) |> 
-  summarise(grp_mean_rate = mean(violence_rate)) |> 
-  ggplot(aes(x = reorder(category, grp_mean_rate), y = grp_mean_rate, fill = region)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
- 
-
-```
 
 
 
