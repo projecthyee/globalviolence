@@ -17,7 +17,7 @@ merged_violence_df <- read_csv(
   file = "data/merged_violence.csv" )
 ```
 
-#Introduction
+# Introduction
 Our motivation for doing regression is to determine the significant contributors to two outcomes of violence - homicide rate and violence rate. 
 
 Violence is a complex and multifaceted issue, especially when considered in a global context. To better understand its various dimensions, we aimed to include a diverse set of predictors that reflect different underlying factors driving violence. Specifically, economic indicators like GDP, inflation rate, and the Human Development Index (HDI) capture aspects of economic inequality, which can influence social unrest and violence. Crime rate and personnel rate serve as proxies for the level of criminal activity and law enforcement presence, respectively, which can contribute to both non-violent and violent crime. Additionally, trafficked victims and alcohol consumption rate are included to explore the role of cultural norms and behaviors, such as organized crime, substance abuse, and social vulnerability, which can be key drivers of violence.
@@ -235,8 +235,8 @@ First, we will fit a baseline MLR with additive effects from all possible predic
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR_hom) %>% 
-  knitr::kable()
+baseline_MLR_hom %>% 
+  broom::tidy()
 ```
 Results from baseline MLR show that that inflation rate, unemployment rate and hdi are significant predictors of homicide rate at significance level alpha = 0.05. 
 
@@ -476,13 +476,14 @@ cv_df_violence %>%
     everything(),
     names_to = "Model", 
     values_to = "RMSE",
-    names_prefix = "RMSE_"
+    names_prefix = "rmse_"
   ) %>% 
   mutate(
     Model = fct_inorder(Model)
   ) %>% 
   ggplot(aes(x = Model, y = RMSE)) +
-  geom_violin()
+  geom_violin() +
+  ggtitle("RMSE by Model for Predicting Violence Rate")
 
 ```
 
@@ -493,12 +494,13 @@ cv_df_homicide %>%
     everything(),
     names_to = "Model", 
     values_to = "RMSE",
-    names_prefix = "RMSE_"
+    names_prefix = "rmse_"
   )%>% 
   mutate(
     Model = fct_inorder(Model)
   ) %>% 
   ggplot(aes(x = Model, y = RMSE)) +
-  geom_violin()
+  geom_violin() +
+  ggtitle("RMSE by Model for Predicting Homicide Rate")
 ```
 
