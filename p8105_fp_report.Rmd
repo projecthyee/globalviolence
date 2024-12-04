@@ -339,34 +339,6 @@ violence_visual_df =
 
 ## Homicide
 
-### Homicide Rate Across Region
-```{r}
-homicide_visual_df |>
-  group_by(region, year) |>
-  summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = 
-               reorder(region, avg_homicide_rate))) +
-  geom_col(position = "dodge", bin = 3.0) + 
-  labs(x = "Year",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Region",
-       fill = "Region")
-```
-
-### Homicide Rate Across Category
-```{r}
-homicide_visual_df |>
-  group_by(category, sex) |>
-  summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = reorder(sex, avg_homicide_rate),
-             fill = category)) +
-  geom_col(position = "dodge", bin = 3.0) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Category",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Category")
-```
-
 ### Homicide Trend Across Region
 ```{r}
 homicide_visual_df |>
@@ -379,6 +351,63 @@ homicide_visual_df |>
        y = "Average Homicide Rate",
        Title = "Average Homicide Rate Trend")
 ```
+
+The Americas and Asia have significantly higher average homicide rate across 
+years for male victims compared to the other regions. The average homicide rate 
+between genders are not significant for Africa, Asia and Oceania. 
+
+### Homicide Rate Across Category
+```{r}
+homicide_visual_df |>
+  filter(region %in% c("Asia", "Americas")) |>
+  group_by(category, sex, region) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = region,
+             fill = reorder(category, avg_homicide_rate))) +
+  geom_col(position = "dodge", bin = 3.0) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Region",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Across Category", 
+       fill = "Category")
+```
+
+Further exploring homicide in Americas and Asia, the Americas have higher 
+homicide rates for most categories compared to Asia. Homicides of perpetrator 
+to victim relationship unknown has the largest homicide rate. Homicides of 
+unknown types, organized criminal groups or gangs and interpersonal homicide 
+are the next three categories with the highest homicide rate in the Americas. 
+
+On the other hand, Asia has a significantly high homicide rate in terrorist 
+offences (socio-political homicide) compared to the other categories,
+suggesting high casualties as a result of terrorist activities for countries in 
+Asia. The other categories have a homicide rate lesser than 5 percent. 
+
+### Homicide by Category 
+```{r}
+homicide_visual_df |>
+  group_by(region, category, year) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = 
+               reorder(category, avg_homicide_rate))) +
+  geom_bar(stat = "identity") + 
+  labs(x = "Year",
+       y = "Total Homicide Rate",
+       Title = "Homicide by Category",
+       fill = "Category")
+```
+
+The total homicide rate is the highest in 2021, but there is a noticeable 
+decrease in the rate to it's lowest point in 2022 possibly due to socio-economic 
+factors or public health interventions. Homicides of unknown types and perpetrator 
+to victim relationship unknown have consistently high proportions in homicide. 
+
+For the years from 2018 to 2021, we can observe that homicides 
+as a result of terrorist offences (socio-political homicide) contribute 
+significantly to homicide, indicating larger numbers of terrorist activities 
+in many countries or regions for those years. 
+
+
 
 I took the average for each country over the time frame and plotted using 
 the choropleth. 
@@ -435,12 +464,14 @@ violence_visual_df |>
   group_by(region, sex, year) |>
   summarize(avg_violence_rate = mean(violence_rate)) |>
   ggplot(aes(y = avg_violence_rate, x = year, color = sex)) +
-  geom_smooth(se = FALSE) +
+  geom_smooth(method = "loess", se = FALSE, span = 3) +
   facet_grid(~region) + 
   labs(x = "Year",
        y = "Average Violence Rate",
        Title = "Average Violence Rate Trend")
 ```
+
+
 
 Similar to the homicide rate, I took the average of the reported violence rate 
 for each country and plotted using choropleth. However, since there are a lot 
