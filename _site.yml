@@ -9,14 +9,14 @@ navbar:
       href: eda.html
     - text: "Regression"
       href: regression.html
-    - text: "Shiny"
+    - text: "Shiny & Dashboard"
       menu:
       - text: "Prevalence of Violence"
         href: https://yousmni3269.shinyapps.io/shiny/
       - text: "Trends of Violence"
         href: https://yousmni3269.shinyapps.io/shinyapp/
       - text: "Homicide vs. Violence"
-        href: plotly2.html
+        href: plotly_vs.html
     - text: "Project Report"
       href: report.html
   right:

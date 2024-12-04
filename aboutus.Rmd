@@ -1,0 +1,28 @@
+---
+title: "Team Members"
+output:  
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# **My An Huynh**
+
+MS in Biostatistics
+
+# **Jeffrey Lin**
+
+MS in Biostatistics
+
+# **Soo Min You**
+
+MS in Biostatistics
+
+# **Hyun Kim** 
+
+MS in Biostatistics
+
+# **Malika Top**
+
+MS in Biostatistics
+
