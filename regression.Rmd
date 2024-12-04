@@ -37,6 +37,23 @@ best_subset = function(predictor, outcome, criterion) {
   print(optimal_subset$which[optimal_subset_idx,])
 
 }
+
+fit_glmnet = function(df, alpha, outcome, lambda) {
+  predictor <- model.matrix(outcome ~., data = df, alpha = alpha)
+  predicted <- df %>% pull(outcome)
+  
+  model_fit <- 
+    glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  model_cv <-
+    cv.glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  lambda_opt = model_cv[["lambda.min"]]
+  
+  model_fit <-
+    glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
+  
+}
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
@@ -489,10 +506,12 @@ cv_df_homicide <- cv_df_homicide %>%
 cv_df_violence <-
   cv_df_violence %>% 
   mutate(
-    MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df))
+    MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
-                           alcohol_consumption_rate, data = df))
+                           alcohol_consumption_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, alpha = 1)),
+    ridge = map(train, \(df) fit_glmnet(df, alpha = 0))
   )
 ```
 
