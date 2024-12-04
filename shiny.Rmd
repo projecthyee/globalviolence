@@ -79,7 +79,7 @@ sliderInput(
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Chart A
+### Global Visualization 
 
 ```{r}
 renderPlotly(
@@ -107,7 +107,7 @@ renderPlotly(
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Chart B
+### Average Outcome Rate per Region over the Selected Year
 
 ```{r}
 renderPlotly(

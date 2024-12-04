@@ -4,51 +4,79 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(plotly)
 library(flexdashboard)
+library(viridis)
+library(shiny)
 
 merged_violence_df = 
-  read_csv("./data/merged_violence.csv")
+  read.csv("./data/merged_violence.csv")[-1] |> 
+  pivot_longer(
+    cols = c(homicide_rate:violence_rate), 
+    names_to = "outcome", 
+    values_to = "rate", 
+    names_pattern = "(.*)_rate"
+  )
 ```
 
-Column {data-width=650}
+Column {.sidebar}
 -----------------------------------------------------------------------
 
-### Violent Rate Across Years
-
 ```{r}
-merged_violence_df |> 
-  plot_ly(x = ~as.factor(year), 
-          y = ~violence_rate, 
-          color = ~country,
-          type = 'scatter', 
-          mode = 'lines', 
-          colors = "viridis",
-          line = list(width = 1)) |> 
-  layout(title = "Violence Rates Across Years", 
-         xaxis = list(title = "Year"),
-         yaxis = list(title = "Rate (per 100,000 population)"))
+region_choices = 
+  merged_violence_df |>
+  distinct(region) |>
+  pull(region) 
+
+selectInput(
+  inputId = "region_choice", 
+  label = h3("Select Region"), 
+  choices = region_choices, 
+  selected = "Asia"
+)
 ```
 
-Column {data-width=650}
+```{r}
+outcome_choices = 
+  merged_violence_df |>
+  distinct(outcome) |>
+  pull(outcome)
+
+radioButtons(
+  inputId = "outcome_choice", 
+  label = h3("Select Outcome Type"), 
+  choices = outcome_choices,
+  selected = "homicide"
+)
+```
+
+Column 
 -----------------------------------------------------------------------
 
-### Homicide Rate Across Years
+### Outcome Rates across Years per Region 
 
 ```{r}
-merged_violence_df |> 
-  plot_ly(x = ~as.factor(year), 
-          y = ~homicide_rate, 
-          color = ~country,
-          type = 'scatter', 
-          mode = 'lines', 
-          colors = "viridis",
-          line = list(width = 1)) |> 
-  layout(title = "Homicide Rates Across Years", 
-         xaxis = list(title = "Year"),
-         yaxis = list(title = "Rate (per 100,000 population)"))
+renderPlotly(
+  merged_violence_df |> 
+    filter(
+      region == input[["region_choice"]], 
+      outcome == input[["outcome_choice"]]
+      ) |>
+    mutate(rate = round(rate, digits = 3)) |>
+    group_by(country) |>
+    plot_ly(x = ~as.factor(year), 
+            y = ~rate, 
+            color = ~country,
+            type = 'scatter', 
+            mode = 'lines', 
+            line = list(width = 1)) |> 
+    layout(xaxis = list(title = "Year"),
+          yaxis = list(title = "Rate (per 100,000 population)"))
+)
 ```
+
