@@ -13,6 +13,7 @@ library(MASS)
 library(glmnet)
 library(GGally)
 library(leaps)
+library(mgcv)
 set.seed(1)
 ```
 
@@ -456,12 +457,38 @@ The results from criterion-based procedures suggest that significant predictors 
 For homicide_rate, the results are not as straightforward. The best model based on Cp and R-squared seems to be the model with 4 predictors because it has the lowest Cp (6.36), and a decently high adjusted R-squared (0.331), indicating a good balance between fit and complexity. As more predictors are added, R-squared adjusts slightly but Cp levels off at around 6 predictors. The model with 4 predictors, which includes inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a better trade-off.
 
 
-# Model Comparison
+# Model Comparison 
 
-## Cross-Validate
+## Create Training and Testing Datasets
+```{r}
+cv_df <- 
+  modelr::crossv_mc(merged_violence_df, 100)
+
+cv_df <- cv_df %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+
+  
+```
+
+## Fit Models
+
+### Violence
+```{r}
+cv_df <-
+  cv_df %>% 
+  mutate(
+    MLR_al
+  )
+```
+
+
+### Homicide
+
+## Compare RMSE
 ```{r}
 
 ```
 
-
-## Calculate RMSE 
