@@ -108,7 +108,6 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
 # Statistical Learning Approaches
 
 ## Data Pre-processing 
-
 ```{r}
 lambda = 10^(seq(-2, 2.75, 0.1))
 
@@ -120,7 +119,25 @@ homicide_df =
     -iso3_code) |> 
   drop_na()
 
+homicide_predictors <- homicide_df %>% 
+  dplyr::select(-homicide_rate)
 
+homicide_outcome <- homicide_df %>% 
+  pull(homicide_rate)
+
+violence_df =
+  merged_violence_df |> 
+  dplyr::ungroup() |> 
+  dplyr::select(
+    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
+    -iso3_code) |>
+  drop_na()
+
+violence_predictors <- violence_df %>% 
+  dplyr::select(-violence_rate)
+
+violence_outcome <- violence_df %>% 
+  pull(violence_rate)
 
 ```
 
@@ -137,7 +154,7 @@ lasso_violence =
   dplyr::select(-iso3_code, -country, -region, -year, -homicide_rate) |> 
   drop_na()
 
-x = model.matrix(violence_rate ~. - country - region, data = lasso_violence)[, -1]
+x = model.matrix(violence_rate ~., data = violence_df)
 y = lasso_violence |> pull(violence_rate)
 
 lambda = 10^(seq(-2, 2.75, 0.1))
