@@ -461,10 +461,19 @@ For homicide_rate, the results are not as straightforward. The best model based 
 
 ## Create Training and Testing Datasets
 ```{r}
-cv_df <- 
-  modelr::crossv_mc(merged_violence_df, 100)
+cv_df_violence <- 
+  modelr::crossv_mc(violence_df, 100)
 
-cv_df <- cv_df %>% 
+cv_df_violence <- cv_df_violence %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+
+cv_df_homicide <-
+  modelr::crossv_mc(homicide_df, 100)
+
+cv_df_homicide <- cv_df_homicide %>% 
   mutate(
     train = map(train, as_tibble),
     test = map(test, as_tibble)
@@ -477,10 +486,13 @@ cv_df <- cv_df %>%
 
 ### Violence
 ```{r}
-cv_df <-
-  cv_df %>% 
+cv_df_violence <-
+  cv_df_violence %>% 
   mutate(
-    MLR_al
+    MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df))
+    MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
+                           crime_rate + personnel_rate + trafficked_victims +
+                           alcohol_consumption_rate, data = df))
   )
 ```
 
