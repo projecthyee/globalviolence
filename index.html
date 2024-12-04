@@ -9,9 +9,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top" />
 
 
-<title>EDA</title>
+<title>Global Violence</title>
 
 <script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -33,7 +34,6 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
@@ -222,9 +222,6 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
-<style type="text/css">
-.code-folding-btn { margin-bottom: 4px; }
-</style>
 
 
 
@@ -369,22 +366,56 @@ div.tocify {
 
 <div id="header">
 
-<div class="btn-group pull-right float-right">
-<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
-<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
-<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
-<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
-</ul>
-</div>
 
 
-
-<h1 class="title toc-ignore">EDA</h1>
+<h1 class="title toc-ignore">Global Violence</h1>
+<h4 class="author">My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim,
+Malika Top</h4>
 
 </div>
 
 
-<p>ADD FROM PROJECT</p>
+<div id="motivation" class="section level2">
+<h2>Motivation</h2>
+<p>Globally, violence undermines social and economic development, with
+its impacts being more pronounced in “developing” countries. Communities
+lacking adequate resources or experiencing systemic inequities are more
+vulnerable to various health challenges, including violence. Factors
+that influence health also play a role in shaping violence, which in
+turn affects determinants such as housing, education, transportation,
+and economic conditions. This project seeks to explore the factors
+driving serious assault, sexual violence, and intentional homicide
+worldwide from 2015 to 2023.</p>
+<p>We dplyr::selected this time frame because it includes significant
+global events, including the COVID-19 pandemic and various conflicts,
+which have greatly influenced patterns of violence. Also, even though
+there are a lot of missing data for year 2023, we decided to include the
+year because this time period provides insight into the contemporary
+factors shaping violence worldwide.</p>
+<p>Moreover, we modeled with both homicide rate and violence rate as our
+outcomes instead of just one because we can see a more nuanced
+understanding of the global violence landscape and real-world complexity
+of violence. These two outcomes represent different forms of violence
+with potentially different causes and implications. Though homicide and
+violence rate may be related, capture different dimension of violent
+behavior: homicide rate specifically measures the occurrence of fatal
+violence, such as murders, whereas violence rate focuses on a broader
+violence, including non-fatal ones. For example, assaults, sexual
+violences and armed conflicts.</p>
+</div>
+<div id="related-work" class="section level2">
+<h2>Related Work</h2>
+</div>
+<div id="initial-questions" class="section level2">
+<h2>Initial Questions</h2>
+<ol style="list-style-type: decimal">
+<li>What are indicators of violence (which has most influence - answered
+by regression)?</li>
+<li>How do rates of both indicator and outcome differ by
+region/country?</li>
+<li></li>
+</ol>
+</div>
 
 
 
@@ -421,11 +452,6 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
-<script>
-$(document).ready(function () {
-  window.initializeCodeFolding("hide" === "show");
-});
-</script>
 
 <script>
 $(document).ready(function ()  {

@@ -18,7 +18,7 @@ merged_violence_df =
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-# 
+# Violent Rate Across Years
 
 ```{r}
 merged_violence_df |> 
@@ -37,7 +37,7 @@ merged_violence_df |>
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-#
+# Homicide Rate Across Years
 
 ```{r}
 merged_violence_df |> 
@@ -55,6 +55,8 @@ merged_violence_df |>
 
 Column {data-width=650}
 -----------------------------------------------------------------------
+ 
+# Economic Predictors: Homicide vs. Violence Rate
 
 ```{r}
 merged_violence_df |> 
@@ -75,6 +77,8 @@ merged_violence_df |>
 
 Column {data-width=650}
 -----------------------------------------------------------------------
+
+# Social Predictors: Homicide vs. Violence Rate
 
 ```{r}
 merged_violence_df |> 

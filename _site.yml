@@ -14,7 +14,7 @@ navbar:
       - text: "Interactive Map"
         href: shiny.html
       - text: "Shiny 2"
-        href: shiny2.html
+        href: plotly.html
     - text: "Project Report"
       href: report.html
   right:
