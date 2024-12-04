@@ -11,11 +11,11 @@ navbar:
       href: regression.html
     - text: "Shiny"
       menu:
-      - text: "Interactive Map 1"
+      - text: "Prevalence of Violence"
         href: https://yousmni3269.shinyapps.io/shiny/
-      - text: "Interactive Map 2"
+      - text: "Trends of Violence"
         href: https://yousmni3269.shinyapps.io/shinyapp/
-      - text: "Predictors"
+      - text: "Homicide vs. Violence"
         href: plotly2.html
     - text: "Project Report"
       href: report.html
