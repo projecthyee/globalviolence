@@ -89,7 +89,7 @@ and the predictor variables included in the regression model.
 # Exploratory data analysis 
 
 ## Visualizations of distributions
-```{r train/test + distribution}
+```{r distribution}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
     ggplot(merged_violence_df, aes(x = column)) +
