@@ -16,6 +16,7 @@ library(leaps)
 library(mgcv)
 set.seed(1)
 ```
+
 #Introduction
 Our motivation for doing regression is to determine the significant contributors to two outcomes of violence - homicide rate and violence rate. 
 
@@ -64,6 +65,20 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
 }
+
+rmse_glmnet = function(model, test, outcome) {
+  outcome_formula <- as.formula(paste(outcome, "~."))
+  predictor <- model.matrix(outcome_formula, data = test)[,-1]
+  predictions <- predict.glmnet(model, model[["lambda"]], newx = predictor,
+                               type = "response")
+  
+  predictions <- as.vector(predictions)
+  observed <- test %>% 
+    pull(outcome)
+  
+  return(caret::RMSE(predictions, observed))
+  
+}
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
@@ -95,7 +110,7 @@ All variables are skewed right, except for human development index which is bimo
 Transformation step involves writing a function for natural log transformation and a function for Box-Cox transformation. The functions will be mapped into the 
 nested list col which includes all continuous variables in the `merged_violence_df` dataset. 
 
-Natural Log Transform.
+## Natural Log Transform.
 ```{r ln_transform}
 ln_transform = function(value) {
   return(log(abs(value)))
@@ -109,7 +124,7 @@ ln_df =
 map(list, \(x) plot_distributions(pull(ln_df, x), x))
 ```
 
-Box-Cox Transform. 
+## Box-Cox Transform. 
 ```{r boxcox}
 boxcox_transform = function(value) {
   if (all(is.na(value))) {
@@ -170,11 +185,12 @@ There is moderate correlation between `hdi` and `alcohol_consumption_rate`, corr
 
 ## Data Pre-processing
 
+### Define Lambda Range
 ```{r}
 lambda = 10^(seq(-2, 2.75, 0.1))
 ```
 
-Pre-processing for homicide.
+### Pre-processing for homicide.
 ```{r}
 homicide_df =
   merged_violence_df |> 
@@ -193,7 +209,7 @@ homicide_outcome <- homicide_df %>%
   pull(homicide_rate)
 ```
 
-Pre-processing for violence.
+###Pre-processing for violence.
 ```{r}
 violence_df =
   merged_violence_df |> 
@@ -227,7 +243,6 @@ summary(baseline_MLR_hom)
 Results from baseline MLR show that that inflation rate, unemployment rate and hdi are significant predictors of homicide rate at significance level alpha = 0.05. 
 
 ## Check Baseline Homicide Prediction Model for Colinearity
-
 ```{r}
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %>% 
@@ -265,10 +280,10 @@ vif_baseline_viol_MLR %>%
 ```
 Results from VIF show that there is no multicollinearity issue (VIF < 5).
 
-## Lasso 
+# Lasso 
 We used Lasso to as a feature selection tool to find the most important variables in predicting homicide rate and violence rate. 
 
-### Predictors for violence rate:
+## Predictors for violence rate:
 To prepare data for Lasso (fitting violence rate), we removed variables that are not predictors including iso3_code, country, region, year and homicide rate. We then dropped NA values before performing Lasso. 
 
 ```{r}
@@ -292,7 +307,7 @@ lasso_violence_fit |>
 The optimal lambda for violence rate is 0.794. Based on lasso estimates, the coefficient for `gdp` was shrunk to 0. 
 
 
-### Predictors for homicide rate.
+## Predictors for homicide rate.
 
 ```{r}
 lasso_homicide_fit = 
@@ -314,66 +329,23 @@ lasso_homicide_fit |>
 
 The optimal lambda for homicide rate is 0.050. Similar to the results from violence, the coefficient for `gdp` was shrunk to 0. 
 
-## Ridge Regression 
+# Criterion-based procedure
 
-### Predictors for Violence Rate
-```{r}
-ridge_violence_fit =
-  glmnet(violence_matrix, violence_outcome, lambda = lambda, alpha = 0)
+## Best Subset Regression for Violence Rate
 
-ridge_violence_cv =
-  cv.glmnet(violence_matrix, violence_outcome, lambda = lambda, alpha = 0)
-
-lambda_violence_opt = ridge_violence_cv[["lambda.min"]]
-
-ridge_violence_fit = 
-  glmnet(violence_matrix, violence_outcome, lambda = lambda_violence_opt, 
-         alpha = 0)
-
-ridge_violence_fit %>% 
-  broom::tidy() |> 
-  knitr::kable()
-
-```
-
-
-### Predictors for Homicide Rate
-
-```{r}
-ridge_homicide_fit =
-  glmnet(homicide_matrix, homicide_outcome, lambda = lambda, alpha = 0)
-
-ridge_homicide_cv =
-  cv.glmnet(homicide_matrix, homicide_outcome, lambda = lambda, alpha = 0)
-
-lambda_homicide_opt = ridge_homicide_cv[["lambda.min"]]
-
-ridge_homicide_fit = 
-  glmnet(homicide_matrix, homicide_outcome, lambda = lambda_homicide_opt, 
-         alpha = 0)
-
-ridge_homicide_fit %>% 
-  broom::tidy() |> 
-  knitr::kable()
-
-```
-
-## Criterion-based procedure
-
-### Regsubset for Violence Rate
-Perform regsubset to predict violence rate using r-squared as criterion
+### Predict violence rate using r-squared as criterion
 ```{r}
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "adjr2")
 ```
-Perform regsubset to predict violence_rate using Cp as criterion
 
+### Predict violence_rate using Cp as criterion
 ```{r}
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "Cp")
 ```
 
-Check for co-linearity in best subset violence model 
+### Check for co-linearity in best subset violence model 
 ```{r}
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
@@ -389,21 +361,22 @@ vif_subset_violence_model %>%
   knitr::kable()
 ```
 
-### Regsubset for Homicide Rate
-Predict regsubset to predict homicide rate using R-squared as criterion
+## Best subset regression for Homicide Rate
+
+### Predict homicide rate using R-squared as criterion
 ```{r}
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = "adjr2")
 ```
 
-Predict Homicide Rates using Cp as criterion
+### Predict Homicide Rates using Cp as criterion
 ```{r}
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = "Cp")
 ```
 
 
-Check for co-linearity in best subset homicide model
+### Check for co-linearity in best subset homicide model
 ```{r}
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + crime_rate, data = homicide_df)
@@ -445,8 +418,6 @@ cv_df_homicide <- cv_df_homicide %>%
     test = map(test, as_tibble)
   )
 
-head(cv_df_violence)
-  
 ```
 
 ## Fit Models
@@ -461,19 +432,75 @@ cv_df_violence <-
                            crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
-                                        alpha = 1,lambda = lambda)),
-    ridge = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
-                                        alpha = 0, lambda = lambda))
-  )
+                                        alpha = 1,lambda = lambda))
+  ) %>% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, "violence_rate"))
+  ) %>% 
+  dplyr::select(starts_with("rmse_"))
 
-head(cv_df_violence)
+```
+
+### Homicide
+```{r}
+cv_df_homicide <-
+  cv_df_homicide %>% 
+  mutate(
+    MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
+    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
+                          + unemployment_rate + hdi + crime_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, outcome = "homicide_rate", 
+                                        alpha = 1,lambda = lambda))
+  ) %>% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, "homicide_rate"))
+  ) %>% 
+  dplyr::select(starts_with("rmse_"))
 ```
 
 
-### Homicide
-
 ## Compare RMSE
-```{r}
 
+### Violence
+```{r}
+cv_df_violence %>%
+  pivot_longer(
+    everything(),
+    names_to = "Model", 
+    values_to = "RMSE",
+    names_prefix = "RMSE_"
+  ) %>% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %>% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin()
+
+```
+
+### Homicide
+```{r}
+cv_df_homicide %>%
+  pivot_longer(
+    everything(),
+    names_to = "Model", 
+    values_to = "RMSE",
+    names_prefix = "RMSE_"
+  )%>% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %>% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin()
 ```
 
