@@ -1,7 +1,9 @@
 ---
 title: "P8105 Final Project: Determinants of Global Violence"
 author: "My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top"
-output: html_document
+output: 
+  html_document:
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -9,6 +11,7 @@ library(readxl)
 library(countrycode)
 library(plotly)
 library(tidyverse)
+
 ```
 
 ## Motivation
