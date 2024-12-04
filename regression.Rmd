@@ -16,6 +16,14 @@ library(leaps)
 library(mgcv)
 set.seed(1)
 ```
+#Introduction
+Our motivation for doing regression is to determine the significant contributors to two outcomes of violence - homicide rate and violence rate. 
+
+Violence is a complex and multifaceted issue, especially when considered in a global context. To better understand its various dimensions, we aimed to include a diverse set of predictors that reflect different underlying factors driving violence. Specifically, economic indicators like GDP, inflation rate, and the Human Development Index (HDI) capture aspects of economic inequality, which can influence social unrest and violence. Crime rate and personnel rate serve as proxies for the level of criminal activity and law enforcement presence, respectively, which can contribute to both non-violent and violent crime. Additionally, trafficked victims and alcohol consumption rate are included to explore the role of cultural norms and behaviors, such as organized crime, substance abuse, and social vulnerability, which can be key drivers of violence.
+
+We hypothesize that homicide rate may be influenced by more "direct" indicators including crime rate, HDI and trafficked_victims. We hypothesize that violence rate may be influenced by all factors we included in this dataset, because violence can exist in multiple forms. 
+
+We perform this analysis to uncover the extent to which different factors influence homicide rate and violence rate as outcomes.
 
 # Helpful Functions
 ```{r}
@@ -56,75 +64,107 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
 }
-
 ```
 
 This function serves as a wrapper around the leaps function. It performs 
 best subset variable selection and then prints out the optimal model diagnostic 
 and the predictor variables included in the regression model. 
 
-## Regression 
+# Exploratory data analysis 
 
-Split data into training and testing + visualize distributions 
+## Visualizations of distributions
 ```{r train/test + distribution}
-train_df = sample_frac(merged_violence_df, size = 0.8)
-test_df = anti_join(merged_violence_df, train_df)
+##train_df = sample_frac(merged_violence_df, size = 0.8)
+##test_df = anti_join(merged_violence_df, train_df)
 
 plot_distributions = function(column, name) {
-  
   if(is.numeric(column) & name != "year") {
-    ggplot(train_df, aes(x = column)) +
+    ggplot(merged_violence_df, aes(x = column)) +
     geom_density() +
     labs(title = paste("Distribution of", name))
   }
-  
 }
 
-train_list = colnames(train_df)
-map(train_list, \(x) plot_distributions(pull(train_df, x), x))
+list = colnames(merged_violence_df)
+map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
 ```
 
-After looking at the distributions of all variables, all variables are skewed 
-right, except for human development index which is bimodal and slightly 
-left-skewed. I will apply ln transformations and box-cox transformations to 
-these variables, and use the Shapiro-Wilk test to test for normality. Even 
-though it is not necessary to normalize the predictors, this step will stabilize 
-variance and reduce heteroscedasticity. I think it will be helpful for further 
-steps with model.
+All variables are skewed right, except for human development index which is bimodal and slightly left-skewed. We will apply ln transformations and Box-Cox transformations to these variables. Even though it is not necessary to normalize the distribution of predictors, this step will stabilize variance and reduce heteroscedasticity. We believe it will be helpful for further steps with model.
 
-Transformation step involves writing a function for ln transformation and a 
-function for box_cox transformation. The functions will be mapped into the 
-nested listcol which includes all continuous variables in the train_df dataset. 
+## Transformations
+Transformation step involves writing a function for natural log transformation and a function for Box-Cox transformation. The functions will be mapped into the 
+nested list col which includes all continuous variables in the `merged_violence_df` dataset. 
 
+Natural Log Transform.
 ```{r ln_transform}
 ln_transform = function(value) {
   return(log(abs(value)))
 }
 
-ln_train_df = 
-  train_df |>
+ln_df = 
+  merged_violence_df |>
   mutate(across(c(homicide_rate:alcohol_consumption_rate), 
                 ln_transform))
 
-map(train_list, \(x) plot_distributions(pull(ln_train_df, x), x))
+map(list, \(x) plot_distributions(pull(ln_df, x), x))
 ```
 
-```{r boxcox_transform, eval = FALSE, include = FALSE}
+Box-Cox Transform. 
+```{r boxcox}
 boxcox_transform = function(value) {
-  value = value + abs(min(value, na.rm = TRUE)) + 0.00001
-  
+  if (all(is.na(value))) {
+    return(value) 
+  }
+
+  min_value = min(value, na.rm = TRUE) 
+  if (min_value <= 0) {
+    value = value + abs(min_value) + 0.00001  
+  }
+
+  if (length(unique(value)) == 1) {
+    return(value) 
+  }
+
   boxcox_result = boxcox(value ~ 1, plotit = FALSE)
-  lambda = boxcox_result$x[which.max(boxcox_result$y)]
-  return((value^lambda - 1) / lambda)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]  
+
+
+  transformed_value = (value^lambda - 1) / lambda
+  return(transformed_value)
 }
 
-boxcox_train_df = 
-  train_df |>
-  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
-                boxcox_transform))
 
-map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
+boxcox_df = merged_violence_df |> 
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ~ boxcox_transform(.)))
+
+map(list, \(x) plot_distributions(pull(boxcox_df, x), x))
+
 ```
+
+While initial EDA suggested that logarithmic and Box-Cox transformations might be useful for improving normality, the results indicate that these transformations are not entirely necessary. The primary motivation for using these transformations is often to address skewness. However, after reviewing the data and the results of the transformations, we found that the original data already provides a reasonable representation of the underlying distribution.
+
+While the natural logarithm helped with normality, the Box-Cox transformation did not substantially improve the data's distribution. Box-Cox transformation requires shifting data to be strictly positive, which could introduce unnecessary complexity.
+
+Since no major improvements in normality were observed with the transformations, we ultimately decided that it would be more appropriate to use the original data. This approach avoids unnecessary manipulation and preserves the integrity of the underlying data.
+
+## Multicolliniearity diagnostics
+We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
+```{r}
+cor_matrix = 
+  cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
+
+
+ggcorrplot(cor_matrix, 
+           method = "circle",  
+           type = "lower",  
+           lab = TRUE,        
+           lab_size = 3,      
+           colors = c("blue", "white", "red"), # Color scale (blue = negative, red = positive)
+           title = "Correlation Heatmap"
+)
+```
+There is moderate correlation between `hdi` and `alcohol_consumption_rate`, corr = 0.5, and moderately high correlation between `trafficked_victims` and `gdp`, corr = 0.7. 
 
 # Statistical Learning Approaches
 
@@ -134,7 +174,7 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
 lambda = 10^(seq(-2, 2.75, 0.1))
 ```
 
-
+Pre-processing for homicide.
 ```{r}
 homicide_df =
   merged_violence_df |> 
@@ -153,7 +193,7 @@ homicide_outcome <- homicide_df %>%
   pull(homicide_rate)
 ```
 
-
+Pre-processing for violence.
 ```{r}
 violence_df =
   merged_violence_df |> 
@@ -174,11 +214,62 @@ violence_outcome <- violence_df %>%
 ```
 
 
+# Baseline MLR with additive effects
+First, we will fit a baseline MLR with additive effects from all possible predictor variables to use as a point of reference for our modeling process. This step provides basic understanding of the extent to which different covariates contribute to the outcomes of interest. 
+
+## Predict Homicide Rates
+```{r}
+baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+summary(baseline_MLR_hom)
+```
+Results from baseline MLR show that that inflation rate, unemployment rate and hdi are significant predictors of homicide rate at significance level alpha = 0.05. 
+
+## Check Baseline Homicide Prediction Model for Colinearity
+
+```{r}
+vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
+vif_baseline_hom_MLR %>% 
+  tibble(
+    variable = names(vif_baseline_hom_MLR),
+    VIF = vif_baseline_hom_MLR
+  ) %>% 
+  dplyr::select(variable, VIF) %>% 
+  knitr::kable()
+
+```
+
+Results from VIF show that there is no multicollinearity issue (VIF < 5).
+
+## Predict Violence Rates
+```{r}
+baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+summary(baseline_MLR_viol)
+
+```
+Results from MLR show that gdp, inflation rate, crime rate, personnel rate, number of trafficked victims per 100,000 and alcohol consumption rates are significant predictors of violence rate at significance level alpha = 0.01. 
+
+## Calculate VIF for baseline violence MLR
+```{r}
+vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
+vif_baseline_viol_MLR %>% 
+  tibble(
+    variable = names(vif_baseline_viol_MLR),
+    VIF = vif_baseline_viol_MLR
+  ) %>% 
+  dplyr::select(variable, VIF) %>% 
+  knitr::kable()
+```
+Results from VIF show that there is no multicollinearity issue (VIF < 5).
+
 ## Lasso 
-Use lasso to find the most important variables in predicting homicide rate and violence rate. 
+We used Lasso to as a feature selection tool to find the most important variables in predicting homicide rate and violence rate. 
 
 ### Predictors for violence rate:
-To prepare data for lasso (fitting violence rate), I removed variables that are not predictors including iso3_code, country, region, year and homicide rate. I then dropped NA values before performing lasso. 
+To prepare data for Lasso (fitting violence rate), we removed variables that are not predictors including iso3_code, country, region, year and homicide rate. We then dropped NA values before performing Lasso. 
 
 ```{r}
 lasso_violence_fit = 
@@ -194,10 +285,11 @@ lasso_violence_fit =
   glmnet(violence_matrix, violence_outcome, lambda = lambda_violence_opt)
 
 lasso_violence_fit |> 
-  broom::tidy()
+  broom::tidy() |> 
+  knitr::kable()
 ```
 
-The optimal lambda for violence is 0.794. GDP has the least influence on the model, followed by `trafficked_victims`. These covariates will be removed from the model. 
+The optimal lambda for violence rate is 0.794. Based on lasso estimates, the coefficient for `gdp` was shrunk to 0. 
 
 
 ### Predictors for homicide rate.
@@ -216,10 +308,11 @@ lasso_homicide_fit =
   glmnet(homicide_matrix, homicide_outcome, lambda = lambda_homicide_opt)
 
 lasso_homicide_fit |> 
-  broom::tidy()
+  broom::tidy() |> 
+  knitr::kable()
 ```
 
-The optimal lambda for homicide is 0.050.
+The optimal lambda for homicide rate is 0.050. Similar to the results from violence, the coefficient for `gdp` was shrunk to 0. 
 
 ## Ridge Regression 
 
@@ -238,7 +331,8 @@ ridge_violence_fit =
          alpha = 0)
 
 ridge_violence_fit %>% 
-  broom::tidy()
+  broom::tidy() |> 
+  knitr::kable()
 
 ```
 
@@ -259,144 +353,15 @@ ridge_homicide_fit =
          alpha = 0)
 
 ridge_homicide_fit %>% 
-  broom::tidy()
-
-```
-
-# Baseline MLR with additive effects from all possible predictor variables 
-
-## Predict Homicide Rates
-```{r}
-baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
-                    alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR_hom)
-```
-## Check Baseline Homicide Prediction Model for Colinearity
-
-```{r}
-vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
-vif_baseline_hom_MLR %>% 
-  tibble(
-    variable = names(vif_baseline_hom_MLR),
-    VIF = vif_baseline_hom_MLR
-  ) %>% 
-  dplyr::select(variable, VIF) %>% 
-  knitr::kable()
-
-```
-
-
-
-## Predict Violence Rates
-```{r}
-baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
-                    alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR_viol)
-
-```
-## Calculate VIF for baseline violence MLR
-```{r}
-vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
-vif_baseline_viol_MLR %>% 
-  tibble(
-    variable = names(vif_baseline_viol_MLR),
-    VIF = vif_baseline_viol_MLR
-  ) %>% 
-  dplyr::select(variable, VIF) %>% 
-  knitr::kable()
-```
-
-
-## Heat map and MLR 
-I will use cor() to find the correlation between the predictors of homicide rate and violence. 
-```{r}
-
-cor_matrix = 
-  cor(violence_predictors_df[, c("inflation_rate", "unemployment_rate", "hdi", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
-
-
-ggcorrplot(cor_matrix, 
-           method = "circle",  
-           type = "lower",  
-           lab = TRUE,        
-           lab_size = 3,      
-           colors = c("blue", "white", "red"), # Color scale (blue = negative, red = positive)
-           title = "Correlation Heatmap"
-)
-
-```
-I found that there is moderate correlation between `hdi` and `alcohol_consumption_rate`, corr = 0.5. I will fit 2 MLR models, one with and one without the interaction between these two covariates. 
-
-
-Fit MLR for homicide rate 
-```{r}
-hom_linear_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + hdi + alcohol_consumption_rate, data = merged_violence_df) 
-summary(hom_linear_model)
-
-hom_interaction_model = lm(homicide_rate ~ inflation_rate + unemployment_rate + alcohol_consumption_rate * hdi, data = merged_violence_df) 
-
-AIC(hom_interaction_model)
-AIC(hom_linear_model)
-
-vif_hom_linear_model <- car::vif(hom_linear_model)
-vif_hom_linear_model %>% 
-  tibble(
-    variable = names(vif_hom_linear_model),
-    VIF = vif_hom_linear_model
-  ) %>% 
-  dplyr::select(variable, VIF) %>% 
-  knitr::kable()
-
-```
-
-The adjusted R-squared for the linear model is 0.08781 and its AIC is 5015.024. The adjusted R-squared for the interaction model is 0.106429 and its AIC is 5002.571. This means that the interaction model explains the variation in homicide rate better than the linear model. 
-
-Fit MLR for violence rate 
-```{r}
-violence_linear_model = lm(violence_rate ~ inflation_rate + unemployment_rate + hdi + alcohol_consumption_rate, data = merged_violence_df) 
-summary(violence_linear_model)
-
-violence_interaction_model = lm(violence_rate ~ inflation_rate + unemployment_rate + alcohol_consumption_rate * hdi, data = merged_violence_df)
-summary(violence_interaction_model)
-
-AIC(violence_interaction_model)
-AIC(violence_linear_model)
-
-vif_violence_linear_model <- car::vif(violence_linear_model) 
-vif_violence_linear_model %>% 
-  tibble(
-    variable = names(vif_violence_linear_model),
-    VIF = vif_violence_linear_model
-  ) %>% 
-  dplyr::select(variable, VIF) %>% 
+  broom::tidy() |> 
   knitr::kable()
 
 ```
 
 ## Criterion-based procedure
 
-Select Data
-```{r}
-violence_df =
-  merged_violence_df |> 
-  dplyr::ungroup() |> 
-  dplyr::select(
-    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
-    -iso3_code) |>
-  drop_na() 
-
-violence_predictors <- violence_df %>% 
-  dplyr::select(-violence_rate)
-
-violence_outcome <- violence_df %>% 
-  pull(violence_rate)
-
-```
-
-
-Perform regsubset to predict violence_rate using r-squared as criterion
+### Regsubset for Violence Rate
+Perform regsubset to predict violence rate using r-squared as criterion
 ```{r}
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "adjr2")
@@ -408,35 +373,6 @@ best_subset(predictor = violence_predictors, outcome = violence_outcome,
             criterion = "Cp")
 ```
 
-Select Data
-```{r}
-homicide_df =
-  merged_violence_df |> 
-  dplyr::ungroup() |> 
-  dplyr::select(
-    homicide_rate, everything(), -violence_rate, -year, -country, -region, 
-    -iso3_code) |> 
-  drop_na()
-
-homicide_predictors <- homicide_df %>% 
-  dplyr::select(-homicide_rate)
-
-homicide_outcome <- homicide_df %>% 
-  pull(homicide_rate)
-
-```
-
-Predict Homicide Rates using R-squared as criterion
-```{r}
-best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
-            criterion = "adjr2")
-```
-
-Predict Homicide Rates using Cp as criterion
-```{r}
-best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
-            criterion = "Cp")
-```
 Check for co-linearity in best subset violence model 
 ```{r}
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
@@ -451,9 +387,21 @@ vif_subset_violence_model %>%
   ) %>% 
   dplyr::select(variable, VIF) %>% 
   knitr::kable()
-  
-  
 ```
+
+### Regsubset for Homicide Rate
+Predict regsubset to predict homicide rate using R-squared as criterion
+```{r}
+best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+            criterion = "adjr2")
+```
+
+Predict Homicide Rates using Cp as criterion
+```{r}
+best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+            criterion = "Cp")
+```
+
 
 Check for co-linearity in best subset homicide model
 ```{r}
@@ -469,8 +417,6 @@ vif_subset_homicide_model %>%
   dplyr::select(variable, VIF) %>% 
   knitr::kable()
 ```
-
-
 
 The results from criterion-based procedures suggest that significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. This yields the most appropriate Cp value (5.363), which is approximately close to the number of predictors, and highest adjusted R-squared (0.510). 
 
