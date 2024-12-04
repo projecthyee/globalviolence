@@ -1,7 +1,7 @@
 ---
 title: "P8105 Final Project: Determinants of Global Violence"
 author: "My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -264,20 +264,6 @@ in the `tidy_df()` function.
 
 ### Merge Datasets
 ```{r merge_datasets}
-merged_violence_df_full =
-  left_join(homicide_df, violence_df) |>
-  left_join(gdp_df) |>
-  left_join(inflation_df) |>
-  left_join(unemployment_df) |>
-  left_join(human_develop_df) |>
-  left_join(econ_crime_df) |>
-  left_join(personnel_df) |>
-  left_join(trafficking_df) |>
-  left_join(alcohol_df) |>
-  mutate(country = as.factor(country),
-         region = as.factor(region)) |>
-  filter(between(year, 2015, 2023)) |>
-  relocate(iso3_code) 
 merged_violence_df =
   left_join(homicide_df, violence_df) |>
   left_join(gdp_df) |>
@@ -330,7 +316,13 @@ homicide_visual_df =
          sex != "Total",
          between(year, 2015, 2023)) |>
   select(country, region, category, sex, year, 
-         homicide_rate = value)
+         homicide_rate = value) |>
+  mutate(category = str_replace_all(category, 
+                                    "^Intimate partner or family member.*", 
+                                    "Intimate partner or family member"),
+         category = str_replace_all(category, 
+                                    "^Socio-political homicide.*", 
+                                    "Socio-political homicide"))
 
 ```
 
@@ -342,7 +334,11 @@ violence_visual_df =
   janitor::clean_names() |>
   filter(unit_of_measurement == "Rate per 100,000 population",
          between(year, 2015, 2023)) |>
-  select(country, region, indicator, category, sex, year, violence_rate = value)
+  select(country, region, indicator, category, sex, year, 
+         violence_rate = value) |>
+  mutate(category = str_replace_all(category, 
+                                    "^Sexual violence.*", 
+                                    "Sexual violence"))
 ```
 
 # EDA
@@ -393,13 +389,12 @@ homicide_visual_df |>
 Further exploring homicide in Americas and Asia, the Americas have higher 
 homicide rates for most categories compared to Asia. Homicides of perpetrator 
 to victim relationship unknown has the largest homicide rate. Homicides of 
-unknown types, organized criminal groups or gangs and interpersonal homicide 
-are the next three categories with the highest homicide rate in the Americas. 
+unknown types is next category with the highest homicide rate in the Americas. 
 
-On the other hand, Asia has a significantly high homicide rate in terrorist 
-offences (socio-political homicide) compared to the other categories,
-suggesting high casualties as a result of terrorist activities for countries in 
-Asia. The other categories have a homicide rate lesser than 5 percent. 
+On the other hand, Asia has a significantly high homicide rate in 
+socio-political homicide compared to the other categories,suggesting high 
+casualties as a result of socio-political activities for countries in Asia. 
+The other categories have a homicide rate lesser than 5 percent. 
 
 ### Proportion of Homicide Rate by Category 
 ```{r}

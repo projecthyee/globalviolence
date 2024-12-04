@@ -71,7 +71,7 @@ we imported and tidied the datasets for our two outcome variables: homicide
 and violence. 
 
 ## Homicide
-```{r message = FALSE}
+```{r}
 homicide_visual_df = 
     read_excel(path = "data/unodc/intentional_homicide.xlsx",
                skip = 2) |>
@@ -82,9 +82,14 @@ homicide_visual_df =
          sex != "Total",
          between(year, 2015, 2023)) |>
   select(country, region, category, sex, year, 
-         homicide_rate = value)
+         homicide_rate = value) |>
+  mutate(category = str_replace_all(category, 
+                                    "^Intimate partner or family member.*", 
+                                    "Intimate partner or family member"),
+         category = str_replace_all(category, 
+                                    "^Socio-political homicide.*", 
+                                    "Socio-political homicide"))
 
-head(homicide_visual_df)
 ```
 
 The tidied homicide dataset includes country, region, category of homicide 
@@ -101,9 +106,11 @@ violence_visual_df =
   janitor::clean_names() |>
   filter(unit_of_measurement == "Rate per 100,000 population",
          between(year, 2015, 2023)) |>
-  select(country, region, indicator, category, sex, year, violence_rate = value)
-
-head(violence_visual_df)
+  select(country, region, indicator, category, sex, year, 
+         violence_rate = value) |>
+  mutate(category = str_replace_all(category, 
+                                    "^Sexual violence.*", 
+                                    "Sexual violence"))
 ```
 
 The tidied violence dataset includes country, region, indicator, category of 

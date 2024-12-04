@@ -346,6 +346,9 @@ div.tocify {
     <li>
       <a href="plotly.html">Shiny 2</a>
     </li>
+    <li>
+      <a href="plotly2.html">Shiny 3</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -469,18 +472,13 @@ variables: homicide and violence.</p>
          sex != &quot;Total&quot;,
          between(year, 2015, 2023)) |&gt;
   select(country, region, category, sex, year, 
-         homicide_rate = value)
-
-head(homicide_visual_df)</code></pre>
-<pre><code>## # A tibble: 6 × 6
-##   country                region   category             sex    year homicide_rate
-##   &lt;chr&gt;                  &lt;chr&gt;    &lt;chr&gt;                &lt;chr&gt; &lt;dbl&gt;         &lt;dbl&gt;
-## 1 Albania                Europe   Intimate partner or… Male   2015         0.138
-## 2 Andorra                Europe   Intimate partner or… Male   2015         0    
-## 3 Argentina              Americas Intimate partner or… Male   2015         0.234
-## 4 Armenia                Asia     Intimate partner or… Male   2015         0    
-## 5 Bahamas                Americas Intimate partner or… Male   2015         1.59 
-## 6 Bosnia and Herzegovina Europe   Intimate partner or… Male   2015         0.174</code></pre>
+         homicide_rate = value) |&gt;
+  mutate(category = str_replace_all(category, 
+                                    &quot;^Intimate partner or family member.*&quot;, 
+                                    &quot;Intimate partner or family member&quot;),
+         category = str_replace_all(category, 
+                                    &quot;^Socio-political homicide.*&quot;, 
+                                    &quot;Socio-political homicide&quot;))</code></pre>
 <p>The tidied homicide dataset includes country, region, category of
 homicide victims, sex, year and victim rate of homicide. The dataset
 included data for both counts and rates per 100,000 people. Therefore,
@@ -496,18 +494,11 @@ population size.</p>
   janitor::clean_names() |&gt;
   filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;,
          between(year, 2015, 2023)) |&gt;
-  select(country, region, indicator, category, sex, year, violence_rate = value)
-
-head(violence_visual_df)</code></pre>
-<pre><code>## # A tibble: 6 × 7
-##   country              region   indicator     category sex    year violence_rate
-##   &lt;chr&gt;                &lt;chr&gt;    &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt;         &lt;dbl&gt;
-## 1 Albania              Europe   Violent offe… Serious… Total  2015          5.86
-## 2 Andorra              Europe   Violent offe… Serious… Total  2015        185.  
-## 3 United Arab Emirates Asia     Violent offe… Serious… Total  2015          3.59
-## 4 Argentina            Americas Violent offe… Serious… Total  2015        419.  
-## 5 Armenia              Asia     Violent offe… Serious… Total  2015          5.66
-## 6 Antigua and Barbuda  Americas Violent offe… Serious… Total  2015          7.78</code></pre>
+  select(country, region, indicator, category, sex, year, 
+         violence_rate = value) |&gt;
+  mutate(category = str_replace_all(category, 
+                                    &quot;^Sexual violence.*&quot;, 
+                                    &quot;Sexual violence&quot;))</code></pre>
 <p>The tidied violence dataset includes country, region, indicator,
 category of violence, sex, year and violence rate. The indicator
 includes different rates for violence (violent offences and victims)
