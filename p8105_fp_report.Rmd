@@ -526,9 +526,9 @@ Americas, Europe and Asia has been stable over the years.
 ```{r}
 violence_visual_df |>
   filter(indicator == "Violent offences") |>
-  group_by(category, year, country, region) |> 
+  group_by(category, year, region) |> 
   summarise(avg_violence_rate = mean(violence_rate)) |> 
-  ggplot(aes(x = category, y = grp_mean_rate, fill = region)) +
+  ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~year, ncol=2) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
