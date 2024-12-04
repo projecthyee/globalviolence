@@ -522,6 +522,21 @@ but declines significantly until 2022. The rate for Africa has shown a steady
 decrease from 2017 until 2022. Comparatively, the rate of violence offences for 
 Americas, Europe and Asia has been stable over the years. 
 
+### Violence Rates by Category
+```{r}
+violence_visual_df |>
+  filter(indicator == "Violent offences") |>
+  group_by(category, year, country, region) |> 
+  summarise(avg_violence_rate = mean(violence_rate)) |> 
+  ggplot(aes(x = category, y = grp_mean_rate, fill = region)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~year, ncol=2) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+(DESCRIPTION )
+
+
 ### Victim of Sexual Violence Trend by Region
 ```{r}
 violence_visual_df |>
@@ -600,19 +615,6 @@ Similar to the homicide rate, I took the average of the reported violence rate
 for each country and plotted using choropleth. However, since there are a lot 
 of missing data for violence rate, I dropped the NAs first and then took the 
 average. 
-### Trends in Violence Rates by Category
-```{r}
-offence_plot = 
-  simple_violent_offences_df |> 
-  group_by(category, year, country, region) |> 
-  summarise(grp_mean_rate = mean(violence_rate)) |> 
-  ggplot(aes(x = category, y = grp_mean_rate, fill = region)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-offence_plot  
-
-```
 
 
 ```{r choropleth}
