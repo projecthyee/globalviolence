@@ -200,21 +200,33 @@ lasso_homicide_fit |>
 
 The optimal lambda for homicide is 0.050.
 
-# Ridge Regression 
+## Ridge Regression 
 
+### Predictors for Violence Rate
 ```{r}
-lambda = 10^(seq(-2, 2.75, 0.1))
+ridge_violence_fit =
+  glmnet(violence_matrix, violence_outcome, lambda = lambda, alpha = 0)
 
-lasso_fit =
-  glmnet(x, y, lambda = lambda)
+ridge_violence_cv =
+  cv.glmnet(violence_matrix, violence_outcome, lambda = lambda, alpha = 0)
 
-lasso_cv =
-  cv.glmnet(x, y, lambda = lambda)
+lambda_violence_opt = ridge_violence_cv[["lambda.min"]]
 
-lambda_opt = lasso_cv[["lambda.min"]]
+ridge_violence_fit = 
+  glmnet(violence_matrix, violence_outcome, lambda = lambda_violence_opt, 
+         alpha = 0)
+
+ridge_violence_fit %>% 
+  broom::tidy()
 
 ```
 
+
+### Predictors for Homicide Rate
+
+```{r}
+
+```
 
 # Baseline MLR with additive effects from all possible predictor variables 
 
