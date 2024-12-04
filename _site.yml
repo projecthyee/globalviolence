@@ -18,7 +18,7 @@ navbar:
       - text: "Homicide vs. Violence"
         href: plotly_vs.html
     - text: "Project Report"
-      href: report.html
+      href: p8105_fp_report.html
   right:
     - text: "About Us"
       href: aboutus.html
