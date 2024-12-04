@@ -225,6 +225,20 @@ ridge_violence_fit %>%
 ### Predictors for Homicide Rate
 
 ```{r}
+ridge_homicide_fit =
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda, alpha = 0)
+
+ridge_homicide_cv =
+  cv.glmnet(homicide_matrix, homicide_outcome, lambda = lambda, alpha = 0)
+
+lambda_homicide_opt = ridge_homicide_cv[["lambda.min"]]
+
+ridge_homicide_fit = 
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda_homicide_opt, 
+         alpha = 0)
+
+ridge_homicide_fit %>% 
+  broom::tidy()
 
 ```
 
