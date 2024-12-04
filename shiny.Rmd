@@ -33,7 +33,8 @@ Column {.sidebar}
 region_choices = 
   merged_violence_outcome |>
   distinct(region) |>
-  pull(region) 
+  pull(region) |>
+  sort()
 
 selectInput(
   inputId = "region_choice", 

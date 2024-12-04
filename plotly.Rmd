@@ -21,7 +21,7 @@ merged_violence_df =
     names_to = "outcome", 
     values_to = "rate", 
     names_pattern = "(.*)_rate"
-  )
+  ) 
 ```
 
 Column {.sidebar}
@@ -31,13 +31,16 @@ Column {.sidebar}
 region_choices = 
   merged_violence_df |>
   distinct(region) |>
-  pull(region) 
+  pull(region) |>
+  sort()
+
+region_choices = c("Total", region_choices)
 
 selectInput(
   inputId = "region_choice", 
   label = h3("Select Region"), 
   choices = region_choices, 
-  selected = "Asia"
+  selected = "Total"
 )
 ```
 
@@ -64,7 +67,8 @@ Column
 renderPlotly(
   merged_violence_df |> 
     filter(
-      region == input[["region_choice"]], 
+      if (input[["region_choice"]] == "Total") TRUE 
+      else region == input[["region_choice"]],
       outcome == input[["outcome_choice"]]
       ) |>
     mutate(rate = round(rate, digits = 3)) |>
