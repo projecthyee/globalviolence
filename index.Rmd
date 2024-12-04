@@ -27,7 +27,7 @@ provides insight into the contemporary factors shaping violence worldwide.
 # Related Work
 
 Conflict trends in 2023 revealed increasing threats to the state of global peace. 
-New York Times Journalist, Marc Lacey, titled NYT’s annual photojournalism 
+New York Times (NYT) Journalist, Marc Lacey, titled NYT’s annual photojournalism 
 review [“A Weary World”](https://www.nytimes.com/interactive/2023/world/year-in-pictures.html). 
 Though 2024 comes to a close , the conflicts in Russia, Gaza, Ethiopia, and 
 Sudan rage on, and more understanding of violence trends is needed. Tensions 
