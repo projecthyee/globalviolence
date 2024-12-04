@@ -28,8 +28,14 @@ influenced patterns of violence. Also, even though there are a lot of missing
 data for year 2023, we decided to include the year because this time period 
 provides insight into the contemporary factors shaping violence worldwide. 
 
+## Related Work
+
+
+
+
 
 ## Initial Questions
+
 
 
 (1) What are indicators of violence (which has most influence - answered by regression)?
@@ -163,27 +169,27 @@ be merged for regression analysis.
 gdp_df = 
   read_excel(path = "data/worldbank/gdp.xls",
              sheet = "Data", skip = 3, na = "") |>
-  dplyr::select(iso3_code = 2, "2015":"2023") |>
+  select(iso3_code = 2, "2015":"2023") |>
   tidy_df("gdp", pivot = TRUE)
 
 inflation_df = 
   read_excel(path = "data/worldbank/inflation_rate.xls", 
              sheet = "Data", skip = 3, na = "") |>
-  dplyr::select(iso3_code = 2, "2015":"2023") |>
+  select(iso3_code = 2, "2015":"2023") |>
   tidy_df("inflation_rate", pivot = TRUE)
 
 unemployment_df =
   read_excel(path = "data/worldbank/unemployment_rate.xlsx",
              range = "A1:BP437", na = "..") |>
   rename_with(str_replace_all, pattern = " \\[.*", replacement = "") |>
-  dplyr::select(iso3_code = 4, "2013":"2023") |>
+  select(iso3_code = 4, "2013":"2023") |>
   tidy_df("unemployment_rate", pivot = TRUE)
 
 human_develop_df =
   read_csv(file = "data/undp/human_development_index.csv", na = "") |>
   head(-11) |>
   rename_with(str_replace_all, pattern = "hdi_", replacement = "") |>
-  dplyr::select(iso3_code = 1, "2015":"2022") |>
+  select(iso3_code = 1, "2015":"2022") |>
   tidy_df("hdi", pivot = TRUE)
 ```
 
@@ -213,14 +219,14 @@ trafficking_df =
          txt_value != "<5") |>
   mutate(value = str_replace_all(txt_value, ",", ""),
          value = as.numeric(value)) |>
-  dplyr::select(iso3_code : region, year, trafficked_victims = value) |>
+  select(iso3_code : region, year, trafficked_victims = value) |>
   tidy_df("trafficked_victims")
 
 alcohol_df =
   read_csv(file = "data/who/alcohol_consumption.csv", na = "") |>
   janitor::clean_names() |>
   filter(dim1 == "Both sexes") |>
-  dplyr::select(iso3_code = spatial_dim_value_code, 
+  select(iso3_code = spatial_dim_value_code, 
          year = period, 
          value = fact_value_numeric) |>
   tidy_df("alcohol_consumption_rate", average = TRUE)
@@ -314,7 +320,22 @@ genders.
 
 ## Homicide Rate
 ```{r}
+all_homicide_df =
+  read_excel(path = "data/unodc/intentional_homicide.xlsx",
+               skip = 2) |>
+  janitor::clean_names()
 homicide_visual_df = 
+    read_excel(path = "data/unodc/intentional_homicide.xlsx",
+               skip = 2) |>
+  janitor::clean_names() |>
+  filter(unit_of_measurement == "Rate per 100,000 population",
+         indicator == "Victims of intentional homicide",
+         category != "Total",
+         sex != "Total",
+         between(year, 2015, 2023)) |>
+  dplyr::select(country, unit_of_measurement, region, category, sex, year, 
+                homicide_rate = value)
+homicide_visual_df2 = 
     read_excel(path = "data/unodc/intentional_homicide.xlsx",
                skip = 2) |>
   janitor::clean_names() |>
@@ -341,7 +362,7 @@ violence_visual_df =
                           "Victims of sexual violence"),
          sex != "Total",
          between(year, 2015, 2023)) |>
-  dplyr::select(country, indicator, unit_of_measurement, region, category, sex, 
+  select(country, indicator, unit_of_measurement, region, category, sex, 
                 year, violence_rate = value)
 # NOTE: violent offences is not separated by gender (ie we don't know gender of perpetrator)
 violent_offences_df = 
@@ -379,35 +400,15 @@ simple_violent_offences_df =
 # EDA
 
 ## Homicide
-
-### Homicide Rate Across Region
+### Global Homicide Rates From 2015-2023
 ```{r}
-homicide_visual_df |>
-  group_by(region, year) |>
-  summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = 
-               reorder(region, avg_homicide_rate))) +
-  geom_col(position = "dodge", bin = 3.0) + 
-  labs(x = "Year",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Region",
-       fill = "Region")
+merged_violence_df |> 
+  plot_ly(x = ~as.factor(year), y = ~homicide_rate, color = ~country,
+          type = 'scatter', mode = 'lines', colors = "viridis",
+          line = list(width = 1)) |> 
+  layout(title = "Homicide Rates Across Years", xaxis = list(title = "Year"),
+         yaxis = list(title = "Rate (per 100,000 population)"))
 ```
-
-### Homicide Rate Across Category
-```{r}
-homicide_visual_df |>
-  group_by(category, sex) |>
-  summarize(avg_homicide_rate = mean(homicide_rate)) |>
-  ggplot(aes(y = avg_homicide_rate, x = reorder(category, avg_homicide_rate),
-             fill = sex)) +
-  geom_col(position = "dodge", bin = 3.0) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Category",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Category")
-```
-
 ### Homicide Trend Across Region
 ```{r}
 homicide_visual_df |>
@@ -421,8 +422,76 @@ homicide_visual_df |>
        Title = "Average Homicide Rate Trend")
 ```
 
+The Americas and Asia have significantly higher average homicide rate across 
+years for male victims compared to the other regions. The average homicide rate 
+between genders are not significant for Africa, Asia and Oceania. 
+
+### Homicide Rate Across Category
+```{r}
+homicide_visual_df |>
+  filter(region %in% c("Asia", "Americas")) |>
+  group_by(category, sex, region) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = region,
+             fill = reorder(category, avg_homicide_rate))) +
+  geom_col(position = "dodge", bin = 3.0) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Region",
+       y = "Average Homicide Rate",
+       Title = "Average Homicide Rate Across Category", 
+       fill = "Category")
+```
+
+Further exploring homicide in Americas and Asia, the Americas have higher 
+homicide rates for most categories compared to Asia. Homicides of perpetrator 
+to victim relationship unknown has the largest homicide rate. Homicides of 
+unknown types, organized criminal groups or gangs and interpersonal homicide 
+are the next three categories with the highest homicide rate in the Americas. 
+
+On the other hand, Asia has a significantly high homicide rate in terrorist 
+offences (socio-political homicide) compared to the other categories,
+suggesting high casualties as a result of terrorist activities for countries in 
+Asia. The other categories have a homicide rate lesser than 5 percent. 
+
+### Homicide by Category 
+```{r}
+homicide_visual_df |>
+  group_by(region, category, year) |>
+  summarize(avg_homicide_rate = mean(homicide_rate)) |>
+  ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = 
+               reorder(category, avg_homicide_rate))) +
+  geom_bar(stat = "identity") + 
+  labs(x = "Year",
+       y = "Total Homicide Rate",
+       Title = "Homicide by Category",
+       fill = "Category")
+```
+
+The total homicide rate is the highest in 2021, but there is a noticeable 
+decrease in the rate to it's lowest point in 2022 possibly due to socio-economic 
+factors or public health interventions. Homicides of unknown types and perpetrator 
+to victim relationship unknown have consistently high proportions in homicide. 
+
+For the years from 2018 to 2021, we can observe that homicides 
+as a result of terrorist offences (socio-political homicide) contribute 
+significantly to homicide, indicating larger numbers of terrorist activities 
+in many countries or regions for those years. 
+
+
+
 I took the average for each country over the time frame and plotted using 
 the choropleth. 
+
+## Violence
+```{r}
+merged_violence_df |> 
+  plot_ly(x = ~as.factor(year), y = ~violence_rate, color = ~country,
+          type = 'scatter', mode = 'lines', colors = "viridis",
+          line = list(width = 1)) |> 
+  layout(title = "Violence Rates Across Years", xaxis = list(title = "Year"),
+         yaxis = list(title = "Rate (per 100,000 population)"))
+```
+### Global Violence Rates from 2015-2023
 
 ```{r}
 merged_violence_df |>
@@ -476,17 +545,32 @@ violence_visual_df |>
   group_by(region, sex, year) |>
   summarize(avg_violence_rate = mean(violence_rate)) |>
   ggplot(aes(y = avg_violence_rate, x = year, color = sex)) +
-  geom_smooth(se = FALSE) +
+  geom_smooth(method = "loess", se = FALSE, span = 3) +
   facet_grid(~region) + 
   labs(x = "Year",
        y = "Average Violence Rate",
        Title = "Average Violence Rate Trend")
 ```
 
+
+
 Similar to the homicide rate, I took the average of the reported violence rate 
 for each country and plotted using choropleth. However, since there are a lot 
 of missing data for violence rate, I dropped the NAs first and then took the 
 average. 
+### Trends in Violence Rates by Category
+```{r}
+offence_plot = 
+  simple_violent_offences_df |> 
+  group_by(category, year, country, region) |> 
+  summarise(grp_mean_rate = mean(violence_rate)) |> 
+  ggplot(aes(x = category, y = grp_mean_rate, fill = region)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~year, ncol=2) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+offence_plot  
+
+```
 
 ```{r choropleth}
 merged_violence_df |>
@@ -501,7 +585,6 @@ merged_violence_df |>
           text = ~text_label, 
           colorscale = "Viridis", 
           hovertemplate = paste("%{text}<extra></extra>")) 
-
 ```
 
 ## Global Prevalence of Violence 
@@ -524,48 +607,17 @@ trend reflects the persistent issue of violence in the region, affecting not
 only homicide rates but also broader forms of violence. 
 However, Oceania presented an extreme outlier in terms of violence rates, 
 surpassing even the Americas. In fact, Oceania's violence rate was nearly 
-double that of the Americas, which raises questions about the underlying causes.
-
 
 ## Missing Values
 
-## Jeff is confused, was this running before
-Which rows have the least NA values? 
-```{r}
-merged_violence_df |> 
-  rowwise() |> 
-  mutate(na_ct = sum(is.na(c_across(everything())))) |> 
-  ungroup()
+Predictors. 
 
-hist(merged_violence_df$violence_rate)
-hist(merged_violence_df$homicide_rate)
+```{r}
+merged_violence_df |> select(inflation_rate)
+
 ```
 
-#### NA Values by Year
-```{r}
-merged_violence_df |> 
-  filter(is.na(violence_rate)) |> 
-  dplyr::select(iso3_code, country, year, violence_rate) |> 
-  group_by(year) |> 
-  summarise(count = n()) |>
-  knitr::kable()
-```
-We have the least NA values for the last 6 years or so (2017-2023), excluding 2019
-and 2020, which may be due to COVID. Based on this, what should we dplyr::select?
 
-#### NA Values by Country
-```{r}
-merged_violence_df |> 
-  filter(is.na(violence_rate)) |> 
-  dplyr::select(iso3_code, country, year, violence_rate) |> 
-  group_by(country) |> 
-  summarise(count = n()) |> 
-  arrange(desc(count)) |>
-  head(10) |>
-  knitr::kable()
-```
-Bahrain, India, Seychelles, China, Afghanistan, Rwanda have no violence data across 2015-2023 at all.
-Qatar (2021), Bermuda (2015-2027), Haiti (2018), Mauritius (2020-2021). 
 
 ## Regression 
 
