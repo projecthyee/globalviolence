@@ -1,7 +1,7 @@
 ---
 title: "P8105 Final Project: Determinants of Global Violence"
 author: "My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -264,20 +264,6 @@ in the `tidy_df()` function.
 
 ### Merge Datasets
 ```{r merge_datasets}
-merged_violence_df_full =
-  left_join(homicide_df, violence_df) |>
-  left_join(gdp_df) |>
-  left_join(inflation_df) |>
-  left_join(unemployment_df) |>
-  left_join(human_develop_df) |>
-  left_join(econ_crime_df) |>
-  left_join(personnel_df) |>
-  left_join(trafficking_df) |>
-  left_join(alcohol_df) |>
-  mutate(country = as.factor(country),
-         region = as.factor(region)) |>
-  filter(between(year, 2015, 2023)) |>
-  relocate(iso3_code) 
 merged_violence_df =
   left_join(homicide_df, violence_df) |>
   left_join(gdp_df) |>
@@ -320,10 +306,6 @@ genders.
 
 ## Homicide Rate
 ```{r}
-all_homicide_df =
-  read_excel(path = "data/unodc/intentional_homicide.xlsx",
-               skip = 2) |>
-  janitor::clean_names()
 homicide_visual_df = 
     read_excel(path = "data/unodc/intentional_homicide.xlsx",
                skip = 2) |>
@@ -333,64 +315,30 @@ homicide_visual_df =
          category != "Total",
          sex != "Total",
          between(year, 2015, 2023)) |>
-  dplyr::select(country, unit_of_measurement, region, category, sex, year, 
-                homicide_rate = value)
-homicide_visual_df2 = 
-    read_excel(path = "data/unodc/intentional_homicide.xlsx",
-               skip = 2) |>
-  janitor::clean_names() |>
-  filter(unit_of_measurement == "Rate per 100,000 population",
-         indicator == "Victims of intentional homicide",
-         category != "Total",
-         sex != "Total",
-         between(year, 2015, 2023)) |>
-  dplyr::select(country, unit_of_measurement, region, category, sex, year, 
-                homicide_rate = value)
+  select(country, region, category, sex, year, 
+         homicide_rate = value) |>
+  mutate(category = str_replace_all(category, 
+                                    "^Intimate partner or family member.*", 
+                                    "Intimate partner or family member"),
+         category = str_replace_all(category, 
+                                    "^Socio-political homicide.*", 
+                                    "Socio-political homicide"))
 
 ```
 
 ## Violence Rate
 ```{r}
-### Maybe rename to `violence_victim_visual_df`
 violence_visual_df = 
     read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
                skip = 2) |>
   janitor::clean_names() |>
   filter(unit_of_measurement == "Rate per 100,000 population",
          between(year, 2015, 2023)) |>
-  select(country, indicator, unit_of_measurement, region, category, sex, 
-                year, violence_rate = value)
-# NOTE: violent offences is not separated by gender (ie we don't know gender of perpetrator)
-violent_offences_df = 
-    read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
-               skip = 2) |>
-  janitor::clean_names() |>
-  filter(unit_of_measurement == "Rate per 100,000 population",
-         indicator == "Violent offences",
-         sex == "Total",
-         between(year, 2015, 2023)) |>
-  dplyr::select(country, indicator, unit_of_measurement, region, category, sex, 
-                year, violence_rate = value)
-# Combines category into more generalized ones
-simple_violent_offences_df = 
-    read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
-               skip = 2) |>
-  janitor::clean_names() |>
-  filter(unit_of_measurement == "Rate per 100,000 population",
-         indicator == "Violent offences",
-         sex == "Total",
-         between(year, 2015, 2023)) |>
-  mutate(category = case_when(
-                    category %in% c("Sexual violence", "Sexual violence: Other acts of sexual violence",
-                                    "Sexual violence: Rape", 
-                                    "Sexual violence: Sexual assault") ~ "Sexual violence",
-                    category %in% c("Acts intended to induce fear or emotional distress",
-                                    "Acts intended to induce fear or emotional distress: Cyber-related")
-                    ~ "Acts intended to induce fear or emotional distress",
-                    TRUE ~ category
-  )) |> 
-  dplyr::select(country, indicator, unit_of_measurement, region, category, 
-                year, violence_rate = value)
+  select(country, region, indicator, category, sex, year, 
+         violence_rate = value) |>
+  mutate(category = str_replace_all(category, 
+                                    "^Sexual violence.*", 
+                                    "Sexual violence"))
 ```
 
 # EDA
@@ -441,13 +389,12 @@ homicide_visual_df |>
 Further exploring homicide in Americas and Asia, the Americas have higher 
 homicide rates for most categories compared to Asia. Homicides of perpetrator 
 to victim relationship unknown has the largest homicide rate. Homicides of 
-unknown types, organized criminal groups or gangs and interpersonal homicide 
-are the next three categories with the highest homicide rate in the Americas. 
+unknown types is next category with the highest homicide rate in the Americas. 
 
-On the other hand, Asia has a significantly high homicide rate in terrorist 
-offences (socio-political homicide) compared to the other categories,
-suggesting high casualties as a result of terrorist activities for countries in 
-Asia. The other categories have a homicide rate lesser than 5 percent. 
+On the other hand, Asia has a significantly high homicide rate in 
+socio-political homicide compared to the other categories,suggesting high 
+casualties as a result of socio-political activities for countries in Asia. 
+The other categories have a homicide rate lesser than 5 percent. 
 
 ### Proportion of Homicide Rate by Category 
 ```{r}
@@ -521,6 +468,21 @@ the other regions. Moreover, the average rate for Oceania increases at 2020,
 but declines significantly until 2022. The rate for Africa has shown a steady 
 decrease from 2017 until 2022. Comparatively, the rate of violence offences for 
 Americas, Europe and Asia has been stable over the years. 
+
+### Violence Rates by Category
+```{r}
+violence_visual_df |>
+  filter(indicator == "Violent offences") |>
+  group_by(category, year, region) |> 
+  summarise(avg_violence_rate = mean(violence_rate)) |> 
+  ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~year, ncol=2) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+(DESCRIPTION )
+
 
 ### Victim of Sexual Violence Trend by Region
 ```{r}
@@ -600,19 +562,6 @@ Similar to the homicide rate, I took the average of the reported violence rate
 for each country and plotted using choropleth. However, since there are a lot 
 of missing data for violence rate, I dropped the NAs first and then took the 
 average. 
-### Trends in Violence Rates by Category
-```{r}
-offence_plot = 
-  simple_violent_offences_df |> 
-  group_by(category, year, country, region) |> 
-  summarise(grp_mean_rate = mean(violence_rate)) |> 
-  ggplot(aes(x = category, y = grp_mean_rate, fill = region)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-offence_plot  
-
-```
 
 
 ```{r choropleth}
@@ -650,21 +599,6 @@ trend reflects the persistent issue of violence in the region, affecting not
 only homicide rates but also broader forms of violence. 
 However, Oceania presented an extreme outlier in terms of violence rates, 
 surpassing even the Americas. In fact, Oceania's violence rate was nearly 
-
-## Missing Values
-
-Predictors. 
-
-```{r}
-merged_violence_df |> select(inflation_rate)
-
-```
-
-
-
-## Regression 
-
-(IN PROGRESS)
 
 
 

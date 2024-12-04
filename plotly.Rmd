@@ -1,0 +1,54 @@
+---
+title: "Violence Trend by Country"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plotly)
+library(flexdashboard)
+
+merged_violence_df = 
+  read_csv("./data/merged_violence.csv")
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Violent Rate Across Years
+
+```{r}
+merged_violence_df |> 
+  plot_ly(x = ~as.factor(year), 
+          y = ~violence_rate, 
+          color = ~country,
+          type = 'scatter', 
+          mode = 'lines', 
+          colors = "viridis",
+          line = list(width = 1)) |> 
+  layout(title = "Violence Rates Across Years", 
+         xaxis = list(title = "Year"),
+         yaxis = list(title = "Rate (per 100,000 population)"))
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Homicide Rate Across Years
+
+```{r}
+merged_violence_df |> 
+  plot_ly(x = ~as.factor(year), 
+          y = ~homicide_rate, 
+          color = ~country,
+          type = 'scatter', 
+          mode = 'lines', 
+          colors = "viridis",
+          line = list(width = 1)) |> 
+  layout(title = "Homicide Rates Across Years", 
+         xaxis = list(title = "Year"),
+         yaxis = list(title = "Rate (per 100,000 population)"))
+```

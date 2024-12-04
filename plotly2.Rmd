@@ -1,24 +1,77 @@
 ---
-title: "plotly2"
-author: "Hyun Kim (hk3373)"
-date: "`r Sys.Date()`"
-output: html_document
+title: "Violence Predictors"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(flexdashboard)
+
+merged_violence_df = 
+  read_csv("./data/merged_violence.csv")
 ```
 
-## Plotly to work on by Country
+Column {data-width=650}
+-----------------------------------------------------------------------
+ 
+### Economic Predictors: Homicide vs. Violence Rate
+
 ```{r}
-merged_violence_df |>
-  ggplot(aes(y = violence_rate, x = factor(year), group = country, 
-             fill = violence_rate)) +
-  geom_line(aes(color = country))
-
-
-merged_violence_df |>
-  ggplot(aes(y = homicide_rate, x = factor(year), group = country, 
-             fill = homicide_rate)) +
-  geom_line(aes(color = country))
+merged_violence_df |> 
+  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
+          text = ~paste('Country', country, 
+                        '<br>Year:', year, 
+                        '<br>HDI:', hdi,
+                        '<br>GDP:', gdp, 
+                        '<br>Inflation Rate:', inflation_rate,
+                        '<br>Unemployment Rate:', unemployment_rate), 
+          type = 'scatter', 
+          mode = 'markers', 
+          color = ~region,
+          marker = list(symbol = 'circle', 
+                        sizemode = 'diameter',
+                        line = list(width = 2, color = '#FFFFFF')))
 ```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Social Predictors: Homicide vs. Violence Rate
+
+```{r}
+merged_violence_df |> 
+  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~crime_rate,
+          text = ~paste('Country', country, 
+                        '<br>Year:', year, 
+                        '<br>Economic Crime Rate:', crime_rate,
+                        '<br>Personnel Rate:', personnel_rate, 
+                        '<br>Alcohol Consumption Rate:', alcohol_consumption_rate,
+                        '<br>Trafficed Victims:', trafficked_victims), 
+          type = 'scatter', 
+          mode = 'markers', 
+          color = ~region,
+          marker = list(symbol = 'circle', 
+                        sizemode = 'diameter',
+                        line = list(width = 2, color = '#FFFFFF')))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
