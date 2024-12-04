@@ -15,6 +15,8 @@ navbar:
         href: shiny.html
       - text: "Shiny 2"
         href: plotly.html
+      - text: "Shiny 3"
+        href: plotly2.html
     - text: "Project Report"
       href: report.html
   right:
