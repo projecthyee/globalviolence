@@ -1,7 +1,5 @@
 ---
 title: "Regression"
-author: "My An Huynh"
-date: "2024-11-15"
 output: html_document
 ---
 
@@ -12,6 +10,7 @@ library(glmnet)
 library(leaps)
 library(mgcv)
 library(ggcorrplot)
+library(modelr)
 set.seed(1)
 
 merged_violence_df <- read_csv(
@@ -109,7 +108,7 @@ Transformation step involves writing a function for natural log transformation a
 nested list col which includes all continuous variables in the `merged_violence_df` dataset. 
 
 ## Natural Log Transform.
-```{r ln_transform}
+```{r ln-transform}
 ln_transform = function(value) {
   return(log(abs(value)))
 }
@@ -236,7 +235,8 @@ First, we will fit a baseline MLR with additive effects from all possible predic
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR_hom)
+summary(baseline_MLR_hom) %>% 
+  knitr::kable()
 ```
 Results from baseline MLR show that that inflation rate, unemployment rate and hdi are significant predictors of homicide rate at significance level alpha = 0.05. 
 

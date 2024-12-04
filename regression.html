@@ -9,11 +9,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="My An Huynh" />
 
+<meta name="date" content="2024-11-15" />
 
-<title>regression</title>
+<title>Regression</title>
 
-<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -32,6 +34,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -259,13 +263,13 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="https://yousmni3269.shinyapps.io/shiny/">Interactive Map</a>
+      <a href="https://yousmni3269.shinyapps.io/shiny/">Prevalence of Violence</a>
     </li>
     <li>
-      <a href="plotly.html">Shiny 2</a>
+      <a href="https://yousmni3269.shinyapps.io/shinyapp/">Trends of Violence</a>
     </li>
     <li>
-      <a href="plotly2.html">Shiny 3</a>
+      <a href="plotly2.html">Homicide vs. Violence</a>
     </li>
   </ul>
 </li>
@@ -292,570 +296,1100 @@ $(document).ready(function () {
 
 
 
+<h1 class="title toc-ignore">Regression</h1>
+<h4 class="author">My An Huynh</h4>
+<h4 class="date">2024-11-15</h4>
 
 </div>
 
 
-<div id="regression" class="section level1">
-<h1>Regression</h1>
-<p>My An Huynh 2024-11-15</p>
-</div>
-<div id="data-source-scraping-method-cleaning" class="section level1">
-<h1>Data: Source, Scraping Method &amp; Cleaning</h1>
-<div id="source" class="section level2">
-<h2>Source</h2>
-<p>Since there are many determinants and indicators of violence, we
-chose the indicators and outcomes that we thought were most interesting
-and relevant in exploring violence from the following sources:</p>
-<ul>
-<li>International Monetary Fund (IMF)
-<ul>
-<li>Unemployment Rate</li>
-</ul></li>
-<li>United Nations Development Program (UNDP):
-<ul>
-<li>Human Development Index</li>
-</ul></li>
-<li>United Nations Office of Drugs and Crime (UNODC)
-<ul>
-<li>Corruption and Economic Crime</li>
-<li>Criminal Justice Personnel</li>
-<li>Drug Seizure (2018 - 2022)</li>
-<li>Firearms Trafficking</li>
-<li>Human Trafficking</li>
-<li>Intentional Homicide</li>
-<li>Violent and Sexual Crimes</li>
-</ul></li>
-<li>World Bank
-<ul>
-<li>Gross Domestic Product (GDP)</li>
-<li>Inflation Rate (Measured by Consumer Price Index)</li>
-</ul></li>
-<li>World Health Organization (WHO)
-<ul>
-<li>Alcohol Consumption</li>
-</ul></li>
-</ul>
-<p>Intentional homicide, and violent and sexual crimes were chosen as
-the outcome variable to quantify violence.</p>
-</div>
-<div id="scraping-method" class="section level2">
-<h2>Scraping Method</h2>
-<p>The datasets were downloaded from the official websites of the
-sources above. The names of the files were also changed accordingly for
-clarity and to avoid confusion. For example, the alcohol consumption
-data file was renamed from “data.csv” to “alcohol_consumption.csv”.</p>
-</div>
-<div id="cleaning" class="section level2">
-<h2>Cleaning</h2>
-<div id="economic-determinants" class="section level3">
-<h3>Economic Determinants</h3>
-<pre class="r"><code>gdp_df = 
-  read_excel(
-    path = &quot;data/worldbank/gdp.xls&quot;,
-    sheet = &quot;Data&quot;,
-    skip = 3,
-    na = &quot;&quot;
-  ) |&gt;
-  dplyr::select(country = &quot;Country Code&quot;, &quot;2015&quot;:&quot;2023&quot;) |&gt;
-  pivot_longer(
-    &quot;2015&quot;:&quot;2023&quot;,
-    names_to = &quot;year&quot;,
-    values_to = &quot;gdp&quot;
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  drop_na()</code></pre>
-<pre><code>## Warning: There was 1 warning in `mutate()`.
-## ℹ In argument: `country = countrycode(...)`.
-## Caused by warning:
-## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX</code></pre>
-<pre class="r"><code>inflation_df = 
-  read_excel(
-    path = &quot;data/worldbank/inflation_rate.xls&quot;,
-    sheet = &quot;Data&quot;,
-    skip = 3,
-    na = &quot;&quot;
-  ) |&gt;
-  dplyr::select(country = &quot;Country Code&quot;, &quot;2015&quot;:&quot;2023&quot;) |&gt;
-  pivot_longer(
-    &quot;2015&quot;:&quot;2023&quot;,
-    names_to = &quot;year&quot;,
-    values_to = &quot;inflation_rate&quot;
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  drop_na()</code></pre>
-<pre><code>## Warning: There was 1 warning in `mutate()`.
-## ℹ In argument: `country = countrycode(...)`.
-## Caused by warning:
-## ! Some values were not matched unambiguously: AFE, AFW, ARB, CEB, CHI, CSS, EAP, EAR, EAS, ECA, ECS, EMU, EUU, FCS, HIC, HPC, IBD, IBT, IDA, IDB, IDX, INX, LAC, LCN, LDC, LIC, LMC, LMY, LTE, MEA, MIC, MNA, NAC, OED, OSS, PRE, PSS, PST, SAS, SSA, SSF, SST, TEA, TEC, TLA, TMN, TSA, TSS, UMC, WLD, XKX</code></pre>
-<pre class="r"><code>unemployment_df =
-  read_excel(
-    path = &quot;data/imf/unemployment_rate.xls&quot;,
-    range = &quot;A1:AY116&quot;,
-    na = &quot;no data&quot;
-  ) |&gt;
-  dplyr::select(country = &quot;Unemployment rate (Percent)&quot;, &quot;2015&quot;:&quot;2023&quot;) |&gt;
-  drop_na(country) |&gt;
-  pivot_longer(
-    &quot;2015&quot;:&quot;2023&quot;,
-    names_to = &quot;year&quot;,
-    values_to = &quot;unemployment_rate&quot;
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = &quot;country.name&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) 
+<p>#Introduction Our motivation for doing regression is to determine the
+significant contributors to two outcomes of violence - homicide rate and
+violence rate.</p>
+<p>Violence is a complex and multifaceted issue, especially when
+considered in a global context. To better understand its various
+dimensions, we aimed to include a diverse set of predictors that reflect
+different underlying factors driving violence. Specifically, economic
+indicators like GDP, inflation rate, and the Human Development Index
+(HDI) capture aspects of economic inequality, which can influence social
+unrest and violence. Crime rate and personnel rate serve as proxies for
+the level of criminal activity and law enforcement presence,
+respectively, which can contribute to both non-violent and violent
+crime. Additionally, trafficked victims and alcohol consumption rate are
+included to explore the role of cultural norms and behaviors, such as
+organized crime, substance abuse, and social vulnerability, which can be
+key drivers of violence.</p>
+<p>We hypothesize that homicide rate may be influenced by more “direct”
+indicators including crime rate, HDI and trafficked_victims. We
+hypothesize that violence rate may be influenced by all factors we
+included in this dataset, because violence can exist in multiple
+forms.</p>
+<p>We perform this analysis to uncover the extent to which different
+factors influence homicide rate and violence rate as outcomes.</p>
+<div id="helpful-functions" class="section level1">
+<h1>Helpful Functions</h1>
+<pre class="r"><code>best_subset = function(predictor, outcome, criterion) {
+  
+  optimal_subset &lt;- 
+    leaps(x = predictor, y = outcome, nbest = 3, 
+      method = criterion, names = names(predictor))
+  
+  if (criterion == &quot;Cp&quot;) {
+    optimal_rsq &lt;- optimal_subset[[criterion]] %&gt;% min()
+    optimal_subset_idx &lt;- optimal_subset[[criterion]] %&gt;% which.min()
+  } else {
+    optimal_rsq &lt;- optimal_subset[[criterion]] %&gt;% max()
+    optimal_subset_idx &lt;- optimal_subset[[criterion]] %&gt;% which.max()
+  }
+  
+  print(optimal_rsq) 
+  print(optimal_subset$which[optimal_subset_idx,])
 
-human_development_df =
-  read_csv(
-    file = &quot;data/undp/human_development_index.csv&quot;,
-    na = &quot;&quot;) |&gt;
-  head(-11) |&gt;
-  pivot_longer(
-    &quot;hdi_2015&quot;:&quot;hdi_2022&quot;,
-    names_to = &quot;year&quot;,
-    values_to = &quot;human_development_index&quot;
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  dplyr::select(country = &quot;iso3&quot;, year, human_development_index) |&gt;
-  mutate(year = str_replace_all(year, &quot;hdi_&quot;, &quot;&quot;),
-         year = as.numeric(year),
-         country = countrycode(country, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA))</code></pre>
-<pre><code>## Rows: 206 Columns: 1076
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr    (4): iso3, country, hdicode, region
-## dbl (1072): hdi_rank_2022, hdi_1990, hdi_1991, hdi_1992, hdi_1993, hdi_1994,...
+}
+
+fit_glmnet = function(df, alpha, outcome, lambda) {
+  
+  outcome_formula &lt;- as.formula(paste(outcome, &quot;~.&quot;))
+  predictor &lt;- model.matrix(outcome_formula, data = df)[,-1]
+  predicted &lt;- df %&gt;% pull(outcome)
+  
+  model_fit &lt;- 
+    glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  model_cv &lt;-
+    cv.glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  lambda_opt = model_cv[[&quot;lambda.min&quot;]]
+  
+  model_fit &lt;-
+    glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
+  
+}
+
+rmse_glmnet = function(model, test, outcome) {
+  outcome_formula &lt;- as.formula(paste(outcome, &quot;~.&quot;))
+  predictor &lt;- model.matrix(outcome_formula, data = test)[,-1]
+  predictions &lt;- predict.glmnet(model, model[[&quot;lambda&quot;]], newx = predictor,
+                               type = &quot;response&quot;)
+  
+  predictions &lt;- as.vector(predictions)
+  observed &lt;- test %&gt;% 
+    pull(outcome)
+  
+  return(caret::RMSE(predictions, observed))
+  
+}</code></pre>
+<p>This function serves as a wrapper around the leaps function. It
+performs best subset variable selection and then prints out the optimal
+model diagnostic and the predictor variables included in the regression
+model.</p>
+</div>
+<div id="exploratory-data-analysis" class="section level1">
+<h1>Exploratory data analysis</h1>
+<div id="visualizations-of-distributions" class="section level2">
+<h2>Visualizations of distributions</h2>
+<pre class="r"><code>plot_distributions = function(column, name) {
+  if(is.numeric(column) &amp; name != &quot;year&quot;) {
+    ggplot(merged_violence_df, aes(x = column)) +
+    geom_density() +
+    labs(title = paste(&quot;Distribution of&quot;, name))
+  }
+}
+
+list = colnames(merged_violence_df)
+map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="regression_files/figure-html/distribution-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]
+## NULL
 ## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div id="social-determinants" class="section level3">
-<h3>Social Determinants</h3>
-<pre class="r"><code>crime_rate_df = 
-  read_excel(
-    path = &quot;data/unodc/corruption_economic_crime.xlsx&quot;,
-    skip = 2
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, &quot;^GBR.*&quot;, &quot;GBR&quot;),
-         iso3_code = str_replace_all(iso3_code, &quot;^IRQ.*&quot;, &quot;IRQ&quot;),
-         country = countrycode(iso3_code, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  group_by(country, region, year) |&gt;
-  summarize(avg_crime_rate = mean(value))</code></pre>
-<pre><code>## Warning: There was 1 warning in `mutate()`.
-## ℹ In argument: `country = countrycode(...)`.
-## Caused by warning:
-## ! Some values were not matched unambiguously: XKX
-
-## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
-## the `.groups` argument.</code></pre>
-<pre class="r"><code>justice_personnel_df =
-  read_excel(
-    path = &quot;data/unodc/criminal_justice_personnel.xlsx&quot;,
-    skip = 2
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  filter(indicator == &quot;Criminal Justice Personnel&quot;,
-         unit_of_measurement == &quot;Rate per 100,000 population&quot;,
-         sex == &quot;Total&quot;) |&gt;
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, &quot;^GBR.*&quot;, &quot;GBR&quot;),
-         iso3_code = str_replace_all(iso3_code, &quot;^IRQ.*&quot;, &quot;IRQ&quot;),
-         country = countrycode(iso3_code, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  group_by(country, region, year) |&gt;
-  summarize(avg_personnel_rate = mean(value))</code></pre>
-<pre><code>## Warning: There was 1 warning in `mutate()`.
-## ℹ In argument: `country = countrycode(...)`.
-## Caused by warning:
-## ! Some values were not matched unambiguously: XKX
-
-## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
-## the `.groups` argument.</code></pre>
-<pre class="r"><code>drugs_2018_2022_df =
-  read_excel(
-    path = &quot;data/unodc/drug_seizures_2018_2022.xlsx&quot;,
-    skip = 1
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  rename(year = reference_year) |&gt;
-  mutate(year = as.numeric(year),
-         country = countrycode(ms_code, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  group_by(country, region, year) |&gt;
-  summarize(total_drug_seizures = sum(kilograms))</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
-## the `.groups` argument.</code></pre>
-<pre class="r"><code>firearms_df = 
-    read_excel(
-    path = &quot;data/unodc/firearms_trafficking.xlsx&quot;,
-    skip = 2
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, &quot;^GBR.*&quot;, &quot;GBR&quot;),
-         iso3_code = str_replace_all(iso3_code, &quot;^IRQ.*&quot;, &quot;IRQ&quot;),
-         country = countrycode(iso3_code, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  filter(indicator == &quot;Arms seized&quot;,
-         category == &quot;Total&quot;) |&gt;
-  group_by(country, region, year) |&gt;
-  summarize(total_arms_seized = sum(value))</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
-## the `.groups` argument.</code></pre>
-<pre class="r"><code>trafficking_df =
-  read_excel(
-    path = &quot;data/unodc/human_trafficking.xlsx&quot;,
-    skip = 2
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  filter(category == &quot;Total&quot;,
-         sex == &quot;Total&quot;,
-         age == &quot;Total&quot;,
-         txt_value != &quot;&lt;5&quot;) |&gt;
-  mutate(txt_value = str_replace_all(txt_value, &quot;,&quot;, &quot;&quot;),
-         txt_value = as.numeric(txt_value), 
-         year = as.numeric(year), 
-         country = countrycode(iso3_code, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  group_by(country, region, year) |&gt;
-  summarize(total_trafficking = sum(txt_value))</code></pre>
-<pre><code>## Warning: There was 1 warning in `mutate()`.
-## ℹ In argument: `country = countrycode(...)`.
-## Caused by warning:
-## ! Some values were not matched unambiguously: CAR, CAS, EEU, MCA, MCN, SAF, SAM
-
-## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
-## the `.groups` argument.</code></pre>
-<pre class="r"><code>alcohol_consumption_df =
-  read_csv(
-    file = &quot;data/who/alcohol_consumption.csv&quot;, 
-    na = &quot;&quot;
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  filter(dim1 == &quot;Both sexes&quot;) |&gt;
-  dplyr::select(country = spatial_dim_value_code, year = period, 
-         alcohol_consumption = fact_value_numeric) |&gt;
-  mutate(year = as.numeric(year),
-         country = countrycode(country, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA))</code></pre>
-<pre><code>## Rows: 11799 Columns: 34
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr  (15): IndicatorCode, Indicator, ValueType, ParentLocationCode, ParentLo...
-## dbl   (4): Period, FactValueNumeric, FactValueNumericLow, FactValueNumericHigh
-## lgl  (14): IsLatestYear, Dim2 type, Dim2, Dim2ValueCode, Dim3 type, Dim3, Di...
-## dttm  (1): DateModified
+## [[3]]
+## NULL
 ## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div id="outcomes-of-violence" class="section level3">
-<h3>Outcomes of Violence</h3>
-<pre class="r"><code>homicide_rate_df = 
-    readxl::read_excel(
-    path = &quot;data/unodc/intentional_homicide.xlsx&quot;,
-    skip = 2
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  filter(indicator == &quot;Victims of intentional homicide&quot;,
-         unit_of_measurement == &quot;Rate per 100,000 population&quot;,
-         dimension == &quot;Total&quot;,
-         sex == &quot;Total&quot;,
-         age == &quot;Total&quot;) |&gt;
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, &quot;^GBR.*&quot;, &quot;GBR&quot;),
-         iso3_code = str_replace_all(iso3_code, &quot;^IRQ.*&quot;, &quot;IRQ&quot;),
-         country = countrycode(iso3_code, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  dplyr::select(country, region, year, homicide_rate = value)</code></pre>
-<pre><code>## Warning: There was 1 warning in `mutate()`.
-## ℹ In argument: `country = countrycode(...)`.
-## Caused by warning:
-## ! Some values were not matched unambiguously: XKX</code></pre>
-<pre class="r"><code>violence_rate_df = 
-    readxl::read_excel(
-    path = &quot;data/unodc/violent_sexual_crime.xlsx&quot;,
-    skip = 2
-  ) |&gt;
-  janitor::clean_names() |&gt;
-  filter(indicator == &quot;Violent offences&quot;,
-         unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
-  pivot_wider(
-    names_from = indicator,
-    values_from = value
-  ) |&gt;
-  rename(violence_rate = &quot;Violent offences&quot;) |&gt;
-  mutate(year = as.numeric(year),
-         iso3_code = str_replace_all(iso3_code, &quot;^GBR.*&quot;, &quot;GBR&quot;),
-         iso3_code = str_replace_all(iso3_code, &quot;^IRQ.*&quot;, &quot;IRQ&quot;),
-         country = countrycode(iso3_code, origin = &quot;iso3c&quot;,
-                               destination = &quot;country.name&quot;,
-                               nomatch = NA)) |&gt;
-  group_by(country, year) |&gt;
-  summarize(avg_violence_rate = mean(violence_rate)) </code></pre>
-<pre><code>## Warning: There was 1 warning in `mutate()`.
-## ℹ In argument: `country = countrycode(...)`.
-## Caused by warning:
-## ! Some values were not matched unambiguously: XKX
-
-## `summarise()` has grouped output by &#39;country&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<p>For the economic determinants, all the datasets had years organized
-as different columns, where each column represented values for that
-specific year. Therefore, pivot_longer() was applied to pivot years and
-their respective values into two columns.</p>
-<p>For rates of all social determinants, we filtered and chose the data
-to be rates per 100,000 people since it allows standardization for
-comparability by adjusting for differences in population size.</p>
-<p>The countrycode() function from the countrycode package was also
-implemented in order to standardize the country names of each dataset
-since some of the country names were represented inconsistently across
-datasets. For example, South Korea was represented as “Korea (Republic
-of)” and “Korea, Rep.”</p>
-</div>
-<div id="merge-datasets" class="section level3">
-<h3>Merge Datasets</h3>
-<pre class="r"><code>merged_violence_df =
-  left_join(homicide_rate_df, violence_rate_df) |&gt;
-  left_join(gdp_df) |&gt;
-  left_join(inflation_df) |&gt;
-  left_join(unemployment_df) |&gt;
-  left_join(human_development_df) |&gt;
-  left_join(crime_rate_df) |&gt;
-  left_join(justice_personnel_df) |&gt;
-  left_join(drugs_2018_2022_df) |&gt;
-  left_join(firearms_df) |&gt;
-  left_join(trafficking_df) |&gt;
-  left_join(alcohol_consumption_df) |&gt;
-  mutate(country = as.factor(country),
-         region = as.factor(region)) |&gt;
-  filter(between(year, 2015, 2023)) |&gt;
-  drop_na(country, region)</code></pre>
-<pre><code>## Joining with `by = join_by(country, year)`
-## Joining with `by = join_by(country, year)`
-## Joining with `by = join_by(country, year)`
-## Joining with `by = join_by(country, year)`
-## Joining with `by = join_by(country, year)`
-## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, region, year)`
-## Joining with `by = join_by(country, year)`</code></pre>
-<pre class="r"><code>str(merged_violence_df)</code></pre>
-<pre><code>## tibble [1,028 × 15] (S3: tbl_df/tbl/data.frame)
-##  $ country                : Factor w/ 199 levels &quot;Afghanistan&quot;,..: 1 6 2 5 188 9 10 4 12 13 ...
-##  $ region                 : Factor w/ 5 levels &quot;Africa&quot;,&quot;Americas&quot;,..: 3 1 4 4 3 2 3 5 5 4 ...
-##  $ year                   : num [1:1028] 2015 2015 2015 2015 2015 ...
-##  $ homicide_rate          : num [1:1028] 9.975 4.458 2.22 0 0.673 ...
-##  $ avg_violence_rate      : num [1:1028] NA NA 5.51 41.26 2.16 ...
-##  $ gdp                    : num [1:1028] 1.91e+10 9.05e+10 1.14e+10 2.79e+09 3.70e+11 ...
-##  $ inflation_rate         : num [1:1028] -0.662 9.356 1.896 NA 4.07 ...
-##  $ unemployment_rate      : num [1:1028] NA NA 17.1 3.9 NA 6.5 18.5 NA 6.1 6.2 ...
-##  $ human_development_index: num [1:1028] 0.479 0.591 0.797 0.856 0.86 0.85 0.769 NA 0.933 0.91 ...
-##  $ avg_crime_rate         : num [1:1028] NA NA 25.9 784.7 31.9 ...
-##  $ avg_personnel_rate     : num [1:1028] NA NA 165 148 NA ...
-##  $ total_drug_seizures    : num [1:1028] NA NA NA NA NA NA NA NA NA NA ...
-##  $ total_arms_seized      : num [1:1028] NA NA NA NA NA NA NA NA NA NA ...
-##  $ total_trafficking      : num [1:1028] NA NA 109 NA 34 ...
-##  $ alcohol_consumption    : num [1:1028] 0.009 7.76 5.04 10.76 2.37 ...</code></pre>
-<p>The final merged dataset includes 1028 rows and 15 columns, including
-country, region, year, homicide rate, average violence offence rate,
-gdp, inflation rate, unemployment rate, average crime rate, average
-(criminal justice) personnel rate, total drug seized (2018 - 2022),
-total arm seized, total trafficking and alcohol consumption as
-variables. There is a total of 163 distinct countries.</p>
-<p>After merging the datasets, country and region were converted to
-categorical variables. Rows with NA values for country and region were
-dropped, and the dataset was filtered for the years between 2015 and
-2023.</p>
-</div>
-</div>
-<div id="regression-1" class="section level2">
-<h2>Regression</h2>
-<p>Split data into training and testing + visualize distributions</p>
-<pre class="r"><code>train_df = sample_frac(merged_violence_df, size = 0.8)
-test_df = anti_join(merged_violence_df, train_df, by = &quot;gdp&quot;)
-
-train_df |&gt; 
-  ggplot(aes(x = homicide_rate)) +
-  geom_density()</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-1.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = avg_violence_rate)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 196 rows containing non-finite outside the scale range
+## [[4]]
+## NULL
+## 
+## [[5]]
+## NULL
+## 
+## [[6]]</code></pre>
+<p><img src="regression_files/figure-html/distribution-2.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<p><img src="regression_files/figure-html/distribution-3.png" width="672" /></p>
+<pre><code>## 
+## [[8]]</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-2.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = gdp)) +
-  geom_density()</code></pre>
+<p><img src="regression_files/figure-html/distribution-4.png" width="672" /></p>
+<pre><code>## 
+## [[9]]</code></pre>
+<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/distribution-5.png" width="672" /></p>
+<pre><code>## 
+## [[10]]</code></pre>
+<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/distribution-6.png" width="672" /></p>
+<pre><code>## 
+## [[11]]</code></pre>
 <pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-3.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = inflation_rate)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 83 rows containing non-finite outside the scale range
+<p><img src="regression_files/figure-html/distribution-7.png" width="672" /></p>
+<pre><code>## 
+## [[12]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-4.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = unemployment_rate)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 239 rows containing non-finite outside the scale range
+<p><img src="regression_files/figure-html/distribution-8.png" width="672" /></p>
+<pre><code>## 
+## [[13]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-5.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = avg_crime_rate)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 215 rows containing non-finite outside the scale range
+<p><img src="regression_files/figure-html/distribution-9.png" width="672" /></p>
+<pre><code>## 
+## [[14]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-6.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = human_development_index)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 60 rows containing non-finite outside the scale range
+<p><img src="regression_files/figure-html/distribution-10.png" width="672" /></p>
+<pre><code>## 
+## [[15]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-7.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = avg_crime_rate)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 215 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-8.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = avg_personnel_rate)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 384 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-9.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = total_drug_seizures)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 487 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-10.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = total_arms_seized)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 574 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-11.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = total_trafficking)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 353 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-12.png" /><!-- --></p>
-<pre class="r"><code>train_df |&gt; 
-  ggplot(aes(x = alcohol_consumption)) +
-  geom_density()</code></pre>
-<pre><code>## Warning: Removed 240 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img
-src="regression_files/figure-gfm/train/test%20+%20visualization-13.png" /><!-- --></p>
-<p>After looking at the distributions of all variables, all variables
-are skewed right, except for human development index which is slightly
-skewed left. I will apply ln transformations and box-cox transformations
-to these variables, and use the Shapiro-Wilk test to test for normality.
-Even though it is not necessary to normalize the predictors, this step
-will stablize variance and reduce heteroscedasticity. I think it will be
-helpful for further steps with model.</p>
-<p>Transformation step involves writing a function for ln transformation
-and a function for box_cox transformation. The functions will be mapped
-into the nested listcol which includes all continuous variables in the
-train_df dataset.</p>
-<pre class="r"><code>ln_transform = function(df) {
-  df |&gt; 
-    mutate(across(everything(), ~ {
-      if(any(!is.na(.) &amp; . &lt;= 0)) {
-      . = . + abs(min(., na.rm = TRUE) + 0.0000000001)
-    }
-      log(.)
-    }))
-}</code></pre>
-<p>Working on box cox but the code doesn’t work …</p>
-<pre class="r"><code>box_cox_transform = function(df) {
-  df |&gt; 
-    mutate(across(where(is.numeric), ~ {
-      if (any(!is.na(.) &amp; . &lt;= 0)) {
-        . &lt;- . + min(., na.rm = TRUE) + 0.0000000001  
-      }
+<p><img src="regression_files/figure-html/distribution-11.png" width="672" /></p>
+<p>All variables are skewed right, except for human development index
+which is bimodal and slightly left-skewed. We will apply ln
+transformations and Box-Cox transformations to these variables. Even
+though it is not necessary to normalize the distribution of predictors,
+this step will stabilize variance and reduce heteroscedasticity. We
+believe it will be helpful for further steps with model.</p>
+</div>
+<div id="transformations" class="section level2">
+<h2>Transformations</h2>
+<p>Transformation step involves writing a function for natural log
+transformation and a function for Box-Cox transformation. The functions
+will be mapped into the nested list col which includes all continuous
+variables in the <code>merged_violence_df</code> dataset.</p>
+</div>
+<div id="natural-log-transform." class="section level2">
+<h2>Natural Log Transform.</h2>
+<pre class="r"><code>ln_transform = function(value) {
+  return(log(abs(value)))
+}
 
-      box_cox_result &lt;- boxcox(. ~ 1, lambda = &quot;all&quot;, plotit = FALSE)
+ln_df = 
+  merged_violence_df |&gt;
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ln_transform))
 
-      box_cox_tidy &lt;- tidy(box_cox_result)
-      
-      optimal_lambda &lt;- box_cox_tidy |&gt; 
-        filter(logLik == max(logLik)) |&gt; 
-        pull(lambda) 
-      
-      if (optimal_lambda == 0) {
-        log(.) 
-      } else {
-        ((.)^optimal_lambda - 1) / optimal_lambda  
-      }
-    }))
-}</code></pre>
-<pre class="r"><code>nested_train_df =
-  train_df |&gt; 
-  nest(data = c(homicide_rate:alcohol_consumption)) |&gt; 
+map(list, \(x) plot_distributions(pull(ln_df, x), x))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]
+## NULL
+## 
+## [[3]]
+## NULL
+## 
+## [[4]]
+## NULL
+## 
+## [[5]]
+## NULL
+## 
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-2.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 3 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-3.png" width="672" /></p>
+<pre><code>## 
+## [[8]]</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-4.png" width="672" /></p>
+<pre><code>## 
+## [[9]]</code></pre>
+<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-5.png" width="672" /></p>
+<pre><code>## 
+## [[10]]</code></pre>
+<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-6.png" width="672" /></p>
+<pre><code>## 
+## [[11]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-7.png" width="672" /></p>
+<pre><code>## 
+## [[12]]</code></pre>
+<pre><code>## Warning: Removed 38 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-8.png" width="672" /></p>
+<pre><code>## 
+## [[13]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-9.png" width="672" /></p>
+<pre><code>## 
+## [[14]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-10.png" width="672" /></p>
+<pre><code>## 
+## [[15]]</code></pre>
+<pre><code>## Warning: Removed 213 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/ln-transform-11.png" width="672" /></p>
+</div>
+<div id="box-cox-transform." class="section level2">
+<h2>Box-Cox Transform.</h2>
+<pre class="r"><code>boxcox_transform = function(value) {
+  if (all(is.na(value))) {
+    return(value) 
+  }
+
+  min_value = min(value, na.rm = TRUE) 
+  if (min_value &lt;= 0) {
+    value = value + abs(min_value) + 0.00001  
+  }
+
+  if (length(unique(value)) == 1) {
+    return(value) 
+  }
+
+  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]  
+
+
+  transformed_value = (value^lambda - 1) / lambda
+  return(transformed_value)
+}
+
+
+boxcox_df = merged_violence_df |&gt; 
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ~ boxcox_transform(.)))
+
+map(list, \(x) plot_distributions(pull(boxcox_df, x), x))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="regression_files/figure-html/boxcox-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]
+## NULL
+## 
+## [[3]]
+## NULL
+## 
+## [[4]]
+## NULL
+## 
+## [[5]]
+## NULL
+## 
+## [[6]]</code></pre>
+<p><img src="regression_files/figure-html/boxcox-2.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<p><img src="regression_files/figure-html/boxcox-3.png" width="672" /></p>
+<pre><code>## 
+## [[8]]</code></pre>
+<pre><code>## Warning: Removed 771 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-4.png" width="672" /></p>
+<pre><code>## 
+## [[9]]</code></pre>
+<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-5.png" width="672" /></p>
+<pre><code>## 
+## [[10]]</code></pre>
+<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-6.png" width="672" /></p>
+<pre><code>## 
+## [[11]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-7.png" width="672" /></p>
+<pre><code>## 
+## [[12]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-8.png" width="672" /></p>
+<pre><code>## 
+## [[13]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-9.png" width="672" /></p>
+<pre><code>## 
+## [[14]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-10.png" width="672" /></p>
+<pre><code>## 
+## [[15]]</code></pre>
+<pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/boxcox-11.png" width="672" /></p>
+<p>While initial EDA suggested that logarithmic and Box-Cox
+transformations might be useful for improving normality, the results
+indicate that these transformations are not entirely necessary. The
+primary motivation for using these transformations is often to address
+skewness. However, after reviewing the data and the results of the
+transformations, we found that the original data already provides a
+reasonable representation of the underlying distribution.</p>
+<p>While the natural logarithm helped with normality, the Box-Cox
+transformation did not substantially improve the data’s distribution.
+Box-Cox transformation requires shifting data to be strictly positive,
+which could introduce unnecessary complexity.</p>
+<p>Since no major improvements in normality were observed with the
+transformations, we ultimately decided that it would be more appropriate
+to use the original data. This approach avoids unnecessary manipulation
+and preserves the integrity of the underlying data.</p>
+</div>
+<div id="multicolliniearity-diagnostics" class="section level2">
+<h2>Multicolliniearity diagnostics</h2>
+<p>We used <code>cor()</code> to find the correlation between the eight
+predictors of homicide rate and violence.</p>
+<pre class="r"><code>cor_matrix = 
+  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,&quot;crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, &quot;alcohol_consumption_rate&quot;)], use = &quot;pairwise.complete.obs&quot;)
+
+
+ggcorrplot(cor_matrix, 
+           method = &quot;circle&quot;,  
+           type = &quot;lower&quot;,  
+           lab = TRUE,        
+           lab_size = 3,      
+           colors = c(&quot;blue&quot;, &quot;white&quot;, &quot;red&quot;), # Color scale (blue = negative, red = positive)
+           title = &quot;Correlation Heatmap&quot;
+)</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+There is moderate correlation between <code>hdi</code> and
+<code>alcohol_consumption_rate</code>, corr = 0.5, and moderately high
+correlation between <code>trafficked_victims</code> and
+<code>gdp</code>, corr = 0.7.</p>
+</div>
+</div>
+<div id="statistical-learning-approaches" class="section level1">
+<h1>Statistical Learning Approaches</h1>
+<div id="data-pre-processing" class="section level2">
+<h2>Data Pre-processing</h2>
+<div id="define-lambda-range" class="section level3">
+<h3>Define Lambda Range</h3>
+<pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))</code></pre>
+</div>
+<div id="pre-processing-for-homicide." class="section level3">
+<h3>Pre-processing for homicide.</h3>
+<pre class="r"><code>homicide_df =
+  merged_violence_df |&gt; 
+  dplyr::ungroup() |&gt; 
+  dplyr::select(
+    homicide_rate, everything(), -violence_rate, -year, -country, -region, 
+    -iso3_code) |&gt; 
+  drop_na()
+
+homicide_matrix &lt;- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
+
+homicide_predictors &lt;- homicide_df %&gt;% 
+  dplyr::select(-homicide_rate)
+
+homicide_outcome &lt;- homicide_df %&gt;% 
+  pull(homicide_rate)</code></pre>
+<p>###Pre-processing for violence.</p>
+<pre class="r"><code>violence_df =
+  merged_violence_df |&gt; 
+  dplyr::ungroup() |&gt; 
+  dplyr::select(
+    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
+    -iso3_code) |&gt;
+  drop_na()
+
+violence_matrix &lt;- model.matrix(violence_rate ~., data = violence_df)[,-1]
+  
+violence_predictors &lt;- violence_df %&gt;% 
+  dplyr::select(-violence_rate)
+
+violence_outcome &lt;- violence_df %&gt;% 
+  pull(violence_rate)</code></pre>
+</div>
+</div>
+</div>
+<div id="baseline-mlr-with-additive-effects" class="section level1">
+<h1>Baseline MLR with additive effects</h1>
+<p>First, we will fit a baseline MLR with additive effects from all
+possible predictor variables to use as a point of reference for our
+modeling process. This step provides basic understanding of the extent
+to which different covariates contribute to the outcomes of
+interest.</p>
+<div id="predict-homicide-rates" class="section level2">
+<h2>Predict Homicide Rates</h2>
+<pre class="r"><code>baseline_MLR_hom &lt;- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+summary(baseline_MLR_hom)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = homicide_rate ~ gdp + inflation_rate + unemployment_rate + 
+##     hdi + crime_rate + personnel_rate + trafficked_victims + 
+##     alcohol_consumption_rate, data = merged_violence_df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -23.805  -3.623  -0.431   2.133  82.629 
+## 
+## Coefficients:
+##                            Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)               7.712e+01  6.895e+00  11.185  &lt; 2e-16 ***
+## gdp                       4.365e-13  3.031e-13   1.440 0.150875    
+## inflation_rate           -7.310e-01  1.997e-01  -3.660 0.000298 ***
+## unemployment_rate        -3.801e-01  1.438e-01  -2.644 0.008626 ** 
+## hdi                      -7.976e+01  9.358e+00  -8.523  7.6e-16 ***
+## crime_rate                4.786e-03  3.741e-03   1.279 0.201744    
+## personnel_rate            9.082e-03  6.451e-03   1.408 0.160258    
+## trafficked_victims       -4.297e-04  5.839e-04  -0.736 0.462382    
+## alcohol_consumption_rate -2.166e-01  2.052e-01  -1.055 0.292193    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 9.722 on 301 degrees of freedom
+##   (461 observations deleted due to missingness)
+## Multiple R-squared:  0.3529, Adjusted R-squared:  0.3357 
+## F-statistic: 20.52 on 8 and 301 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Results from baseline MLR show that that inflation rate, unemployment
+rate and hdi are significant predictors of homicide rate at significance
+level alpha = 0.05.</p>
+</div>
+<div id="check-baseline-homicide-prediction-model-for-colinearity"
+class="section level2">
+<h2>Check Baseline Homicide Prediction Model for Colinearity</h2>
+<pre class="r"><code>vif_baseline_hom_MLR &lt;- car::vif(baseline_MLR_hom)
+vif_baseline_hom_MLR %&gt;% 
+  tibble(
+    variable = names(vif_baseline_hom_MLR),
+    VIF = vif_baseline_hom_MLR
+  ) %&gt;% 
+  dplyr::select(variable, VIF) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="right">VIF</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">gdp</td>
+<td align="right">2.396884</td>
+</tr>
+<tr class="even">
+<td align="left">inflation_rate</td>
+<td align="right">1.176607</td>
+</tr>
+<tr class="odd">
+<td align="left">unemployment_rate</td>
+<td align="right">1.164411</td>
+</tr>
+<tr class="even">
+<td align="left">hdi</td>
+<td align="right">2.455203</td>
+</tr>
+<tr class="odd">
+<td align="left">crime_rate</td>
+<td align="right">1.700020</td>
+</tr>
+<tr class="even">
+<td align="left">personnel_rate</td>
+<td align="right">1.306548</td>
+</tr>
+<tr class="odd">
+<td align="left">trafficked_victims</td>
+<td align="right">2.315171</td>
+</tr>
+<tr class="even">
+<td align="left">alcohol_consumption_rate</td>
+<td align="right">1.896571</td>
+</tr>
+</tbody>
+</table>
+<p>Results from VIF show that there is no multicollinearity issue (VIF
+&lt; 5).</p>
+</div>
+<div id="predict-violence-rates" class="section level2">
+<h2>Predict Violence Rates</h2>
+<pre class="r"><code>baseline_MLR_viol &lt;- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+summary(baseline_MLR_viol)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = violence_rate ~ gdp + inflation_rate + unemployment_rate + 
+##     hdi + crime_rate + personnel_rate + trafficked_victims + 
+##     alcohol_consumption_rate, data = merged_violence_df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -80.250 -13.201  -4.800   5.171 208.183 
+## 
+## Coefficients:
+##                            Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)               4.420e+01  1.997e+01   2.214 0.027575 *  
+## gdp                       2.388e-12  8.778e-13   2.720 0.006908 ** 
+## inflation_rate           -2.016e+00  5.784e-01  -3.486 0.000563 ***
+## unemployment_rate        -1.172e-01  4.163e-01  -0.281 0.778580    
+## hdi                      -1.298e+01  2.710e+01  -0.479 0.632180    
+## crime_rate                1.193e-01  1.083e-02  11.016  &lt; 2e-16 ***
+## personnel_rate           -6.281e-02  1.868e-02  -3.362 0.000873 ***
+## trafficked_victims        8.236e-03  1.691e-03   4.871  1.8e-06 ***
+## alcohol_consumption_rate -1.632e+00  5.943e-01  -2.747 0.006382 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 28.15 on 301 degrees of freedom
+##   (461 observations deleted due to missingness)
+## Multiple R-squared:  0.5204, Adjusted R-squared:  0.5077 
+## F-statistic: 40.83 on 8 and 301 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Results from MLR show that gdp, inflation rate, crime rate, personnel
+rate, number of trafficked victims per 100,000 and alcohol consumption
+rates are significant predictors of violence rate at significance level
+alpha = 0.01.</p>
+</div>
+<div id="calculate-vif-for-baseline-violence-mlr"
+class="section level2">
+<h2>Calculate VIF for baseline violence MLR</h2>
+<pre class="r"><code>vif_baseline_viol_MLR &lt;- car::vif(baseline_MLR_viol)
+vif_baseline_viol_MLR %&gt;% 
+  tibble(
+    variable = names(vif_baseline_viol_MLR),
+    VIF = vif_baseline_viol_MLR
+  ) %&gt;% 
+  dplyr::select(variable, VIF) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="right">VIF</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">gdp</td>
+<td align="right">2.396884</td>
+</tr>
+<tr class="even">
+<td align="left">inflation_rate</td>
+<td align="right">1.176607</td>
+</tr>
+<tr class="odd">
+<td align="left">unemployment_rate</td>
+<td align="right">1.164411</td>
+</tr>
+<tr class="even">
+<td align="left">hdi</td>
+<td align="right">2.455203</td>
+</tr>
+<tr class="odd">
+<td align="left">crime_rate</td>
+<td align="right">1.700020</td>
+</tr>
+<tr class="even">
+<td align="left">personnel_rate</td>
+<td align="right">1.306548</td>
+</tr>
+<tr class="odd">
+<td align="left">trafficked_victims</td>
+<td align="right">2.315171</td>
+</tr>
+<tr class="even">
+<td align="left">alcohol_consumption_rate</td>
+<td align="right">1.896571</td>
+</tr>
+</tbody>
+</table>
+<p>Results from VIF show that there is no multicollinearity issue (VIF
+&lt; 5).</p>
+</div>
+</div>
+<div id="lasso" class="section level1">
+<h1>Lasso</h1>
+<p>We used Lasso to as a feature selection tool to find the most
+important variables in predicting homicide rate and violence rate.</p>
+<div id="predictors-for-violence-rate" class="section level2">
+<h2>Predictors for violence rate:</h2>
+<p>To prepare data for Lasso (fitting violence rate), we removed
+variables that are not predictors including iso3_code, country, region,
+year and homicide rate. We then dropped NA values before performing
+Lasso.</p>
+<pre class="r"><code>lasso_violence_fit = 
+  glmnet(violence_matrix, violence_outcome, lambda = lambda)
+
+lasso_violence_cv = 
+  cv.glmnet(violence_matrix, violence_outcome, lambda = lambda)
+
+lambda_violence_opt = 
+  lasso_violence_cv[[&quot;lambda.min&quot;]]
+
+lasso_violence_fit = 
+  glmnet(violence_matrix, violence_outcome, lambda = lambda_violence_opt)
+
+lasso_violence_fit |&gt; 
+  broom::tidy() |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">step</th>
+<th align="right">estimate</th>
+<th align="right">lambda</th>
+<th align="right">dev.ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">1</td>
+<td align="right">38.1401915</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="even">
+<td align="left">…1</td>
+<td align="right">1</td>
+<td align="right">-0.0200852</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="odd">
+<td align="left">gdp</td>
+<td align="right">1</td>
+<td align="right">0.0000000</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="even">
+<td align="left">inflation_rate</td>
+<td align="right">1</td>
+<td align="right">-1.5199887</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="odd">
+<td align="left">unemployment_rate</td>
+<td align="right">1</td>
+<td align="right">-0.1054106</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="even">
+<td align="left">crime_rate</td>
+<td align="right">1</td>
+<td align="right">0.1120914</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="odd">
+<td align="left">personnel_rate</td>
+<td align="right">1</td>
+<td align="right">-0.0501932</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="even">
+<td align="left">trafficked_victims</td>
+<td align="right">1</td>
+<td align="right">0.0088820</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+<tr class="odd">
+<td align="left">alcohol_consumption_rate</td>
+<td align="right">1</td>
+<td align="right">-1.4866370</td>
+<td align="right">0.3981072</td>
+<td align="right">0.5315699</td>
+</tr>
+</tbody>
+</table>
+<p>The optimal lambda for violence rate is 0.794. Based on lasso
+estimates, the coefficient for <code>gdp</code> was shrunk to 0.</p>
+</div>
+<div id="predictors-for-homicide-rate." class="section level2">
+<h2>Predictors for homicide rate.</h2>
+<pre class="r"><code>lasso_homicide_fit = 
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
+
+lasso_homicide_cv = 
+  cv.glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
+
+lambda_homicide_opt = 
+  lasso_homicide_cv[[&quot;lambda.min&quot;]]
+
+lasso_homicide_fit = 
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda_homicide_opt)
+
+lasso_homicide_fit |&gt; 
+  broom::tidy() |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">step</th>
+<th align="right">estimate</th>
+<th align="right">lambda</th>
+<th align="right">dev.ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">1</td>
+<td align="right">76.2863204</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="even">
+<td align="left">…1</td>
+<td align="right">1</td>
+<td align="right">-0.0055324</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="odd">
+<td align="left">gdp</td>
+<td align="right">1</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="even">
+<td align="left">inflation_rate</td>
+<td align="right">1</td>
+<td align="right">-0.6118305</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="odd">
+<td align="left">unemployment_rate</td>
+<td align="right">1</td>
+<td align="right">-0.3684458</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="even">
+<td align="left">hdi</td>
+<td align="right">1</td>
+<td align="right">-76.9758914</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="odd">
+<td align="left">crime_rate</td>
+<td align="right">1</td>
+<td align="right">0.0038193</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="even">
+<td align="left">personnel_rate</td>
+<td align="right">1</td>
+<td align="right">0.0097432</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+<tr class="odd">
+<td align="left">alcohol_consumption_rate</td>
+<td align="right">1</td>
+<td align="right">-0.1917146</td>
+<td align="right">0.0794328</td>
+<td align="right">0.3619247</td>
+</tr>
+</tbody>
+</table>
+<p>The optimal lambda for homicide rate is 0.050. Similar to the results
+from violence, the coefficient for <code>gdp</code> was shrunk to 0.</p>
+</div>
+</div>
+<div id="criterion-based-procedure" class="section level1">
+<h1>Criterion-based procedure</h1>
+<div id="best-subset-regression-for-violence-rate"
+class="section level2">
+<h2>Best Subset Regression for Violence Rate</h2>
+<div id="predict-violence-rate-using-r-squared-as-criterion"
+class="section level3">
+<h3>Predict violence rate using r-squared as criterion</h3>
+<pre class="r"><code>best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+            criterion = &quot;adjr2&quot;)</code></pre>
+<pre><code>## [1] 0.521327
+##                     ...1                      gdp           inflation_rate 
+##                     TRUE                     TRUE                     TRUE 
+##        unemployment_rate                      hdi               crime_rate 
+##                    FALSE                    FALSE                     TRUE 
+##           personnel_rate       trafficked_victims alcohol_consumption_rate 
+##                     TRUE                     TRUE                     TRUE</code></pre>
+</div>
+<div id="predict-violence_rate-using-cp-as-criterion"
+class="section level3">
+<h3>Predict violence_rate using Cp as criterion</h3>
+<pre class="r"><code>best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+            criterion = &quot;Cp&quot;)</code></pre>
+<pre><code>## [1] 6.413214
+##                     ...1                      gdp           inflation_rate 
+##                     TRUE                     TRUE                     TRUE 
+##        unemployment_rate                      hdi               crime_rate 
+##                    FALSE                    FALSE                     TRUE 
+##           personnel_rate       trafficked_victims alcohol_consumption_rate 
+##                     TRUE                     TRUE                     TRUE</code></pre>
+</div>
+<div id="check-for-co-linearity-in-best-subset-violence-model"
+class="section level3">
+<h3>Check for co-linearity in best subset violence model</h3>
+<pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + 
+                           crime_rate + personnel_rate + trafficked_victims +
+                           alcohol_consumption_rate, data = violence_df)
+vif_subset_violence_model &lt;- car::vif(subset_violence_lm) 
+
+vif_subset_violence_model %&gt;% 
+  tibble(
+    variable = names(vif_subset_violence_model),
+    VIF = vif_subset_violence_model
+  ) %&gt;% 
+  dplyr::select(variable, VIF) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="right">VIF</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">gdp</td>
+<td align="right">2.346184</td>
+</tr>
+<tr class="even">
+<td align="left">inflation_rate</td>
+<td align="right">1.070415</td>
+</tr>
+<tr class="odd">
+<td align="left">crime_rate</td>
+<td align="right">1.373276</td>
+</tr>
+<tr class="even">
+<td align="left">personnel_rate</td>
+<td align="right">1.240083</td>
+</tr>
+<tr class="odd">
+<td align="left">trafficked_victims</td>
+<td align="right">2.282920</td>
+</tr>
+<tr class="even">
+<td align="left">alcohol_consumption_rate</td>
+<td align="right">1.168675</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="best-subset-regression-for-homicide-rate"
+class="section level2">
+<h2>Best subset regression for Homicide Rate</h2>
+<div id="predict-homicide-rate-using-r-squared-as-criterion"
+class="section level3">
+<h3>Predict homicide rate using R-squared as criterion</h3>
+<pre class="r"><code>best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+            criterion = &quot;adjr2&quot;)</code></pre>
+<pre><code>## [1] 0.3454581
+##                     ...1                      gdp           inflation_rate 
+##                     TRUE                     TRUE                     TRUE 
+##        unemployment_rate                      hdi               crime_rate 
+##                     TRUE                     TRUE                     TRUE 
+##           personnel_rate       trafficked_victims alcohol_consumption_rate 
+##                     TRUE                    FALSE                     TRUE</code></pre>
+</div>
+<div id="predict-homicide-rates-using-cp-as-criterion"
+class="section level3">
+<h3>Predict Homicide Rates using Cp as criterion</h3>
+<pre class="r"><code>best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+            criterion = &quot;Cp&quot;)</code></pre>
+<pre><code>## [1] 6.758296
+##                     ...1                      gdp           inflation_rate 
+##                     TRUE                     TRUE                     TRUE 
+##        unemployment_rate                      hdi               crime_rate 
+##                     TRUE                     TRUE                    FALSE 
+##           personnel_rate       trafficked_victims alcohol_consumption_rate 
+##                     TRUE                    FALSE                    FALSE</code></pre>
+</div>
+<div id="check-for-co-linearity-in-best-subset-homicide-model"
+class="section level3">
+<h3>Check for co-linearity in best subset homicide model</h3>
+<pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ inflation_rate + unemployment_rate +
+                           hdi + crime_rate, data = homicide_df)
+
+vif_subset_homicide_model &lt;- car::vif(subset_homicide_lm)
+vif_subset_homicide_model %&gt;% 
+  tibble(
+    variable = names(vif_subset_homicide_model),
+    VIF = vif_subset_homicide_model
+  ) %&gt;% 
+  dplyr::select(variable, VIF) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="right">VIF</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">inflation_rate</td>
+<td align="right">1.169288</td>
+</tr>
+<tr class="even">
+<td align="left">unemployment_rate</td>
+<td align="right">1.034265</td>
+</tr>
+<tr class="odd">
+<td align="left">hdi</td>
+<td align="right">1.468355</td>
+</tr>
+<tr class="even">
+<td align="left">crime_rate</td>
+<td align="right">1.316883</td>
+</tr>
+</tbody>
+</table>
+<p>The results from criterion-based procedures suggest that significant
+predictors for violence_rate are gdp, inflation_rate, crime_rate,
+personnel_rate, trafficked_victims and alcohol_consumption rate, with a
+total of 6 predictors. This yields the most appropriate Cp value
+(5.363), which is approximately close to the number of predictors, and
+highest adjusted R-squared (0.510).</p>
+<p>For homicide_rate, the results are not as straightforward. The best
+model based on Cp and R-squared seems to be the model with 4 predictors
+because it has the lowest Cp (6.36), and a decently high adjusted
+R-squared (0.331), indicating a good balance between fit and complexity.
+As more predictors are added, R-squared adjusts slightly but Cp levels
+off at around 6 predictors. The model with 4 predictors, which includes
+inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a
+better trade-off.</p>
+</div>
+</div>
+</div>
+<div id="model-comparison" class="section level1">
+<h1>Model Comparison</h1>
+<div id="create-training-and-testing-datasets" class="section level2">
+<h2>Create Training and Testing Datasets</h2>
+<pre class="r"><code>cv_df_violence &lt;- 
+  modelr::crossv_mc(violence_df, 100)
+
+cv_df_violence &lt;- cv_df_violence %&gt;% 
   mutate(
-    ln_transformed_data = map(data, ln_transform)
-    #Can add box cox code here
-  ) |&gt; 
-  unnest(ln_transformed_data) |&gt; 
-  rename_with(~ paste0(&quot;ln_&quot;, .), where(is.numeric)) |&gt; 
-  rename(
-    year = ln_year
-  ) </code></pre>
-<pre><code>## Warning: There were 76 warnings in `mutate()`.
-## The first warning was:
-## ℹ In argument: `across(...)`.
-## Caused by warning:
-## ! There was 1 warning in `mutate()`.
-## ℹ In argument: `across(...)`.
-## Caused by warning in `log()`:
-## ! NaNs produced
-## ℹ Run `dplyr::last_dplyr_warnings()` to see the 75 remaining warnings.</code></pre>
-<pre class="r"><code>nested_train_df =
-  nested_train_df |&gt; 
-  dplyr::select(country, year, region, starts_with(&quot;ln&quot;))</code></pre>
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+
+cv_df_homicide &lt;-
+  modelr::crossv_mc(homicide_df, 100)
+
+cv_df_homicide &lt;- cv_df_homicide %&gt;% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )</code></pre>
+</div>
+<div id="fit-models" class="section level2">
+<h2>Fit Models</h2>
+<div id="violence" class="section level3">
+<h3>Violence</h3>
+<pre class="r"><code>cv_df_violence &lt;-
+  cv_df_violence %&gt;% 
+  mutate(
+    MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
+    MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
+                           crime_rate + personnel_rate + trafficked_victims +
+                           alcohol_consumption_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;violence_rate&quot;, 
+                                        alpha = 1,lambda = lambda))
+  ) %&gt;% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, &quot;violence_rate&quot;))
+  ) %&gt;% 
+  dplyr::select(starts_with(&quot;rmse_&quot;))</code></pre>
+</div>
+<div id="homicide" class="section level3">
+<h3>Homicide</h3>
+<pre class="r"><code>cv_df_homicide &lt;-
+  cv_df_homicide %&gt;% 
+  mutate(
+    MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
+    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
+                          + unemployment_rate + hdi + crime_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;homicide_rate&quot;, 
+                                        alpha = 1,lambda = lambda))
+  ) %&gt;% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, &quot;homicide_rate&quot;))
+  ) %&gt;% 
+  dplyr::select(starts_with(&quot;rmse_&quot;))</code></pre>
+</div>
+</div>
+<div id="compare-rmse" class="section level2">
+<h2>Compare RMSE</h2>
+<div id="violence-1" class="section level3">
+<h3>Violence</h3>
+<pre class="r"><code>cv_df_violence %&gt;%
+  pivot_longer(
+    everything(),
+    names_to = &quot;Model&quot;, 
+    values_to = &quot;RMSE&quot;,
+    names_prefix = &quot;RMSE_&quot;
+  ) %&gt;% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %&gt;% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin()</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+</div>
+<div id="homicide-1" class="section level3">
+<h3>Homicide</h3>
+<pre class="r"><code>cv_df_homicide %&gt;%
+  pivot_longer(
+    everything(),
+    names_to = &quot;Model&quot;, 
+    values_to = &quot;RMSE&quot;,
+    names_prefix = &quot;RMSE_&quot;
+  )%&gt;% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %&gt;% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin()</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+</div>
 </div>
 </div>
 
