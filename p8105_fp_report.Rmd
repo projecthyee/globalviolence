@@ -123,13 +123,13 @@ tidy_df = function(data, variable, pivot = FALSE, average = FALSE) {
     
     if("region" %in% colnames(data)) {
       data = data |>
-        group_by(country, region, year) |>
+        group_by(iso3_code, country, region, year) |>
         summarize(!!variable := mean(value))
     }
     
     else {
         data = data |>
-          group_by(country, year) |>
+          group_by(iso3_code, country, year) |>
           summarize(!!variable := mean(value))
     }
     
@@ -320,7 +320,6 @@ homicide_visual_df =
 ```
 
 ## Violence Rate
-
 ```{r}
 violence_visual_df = 
     read_excel(path = "data/unodc/violent_sexual_crime.xlsx",

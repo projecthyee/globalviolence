@@ -3,7 +3,7 @@ output_dir: "."
 navbar:
   title: "Home"
   right:
-    - text: "Data Cleaning"
+    - text: "Data"
       href: cleaning.html
     - text: "EDA"
       href: eda.html
@@ -17,4 +17,4 @@ navbar:
       href: https://github.com/projecthyee/p8105_fp_violence
 output:
   html_document:
-    theme: darkly
+    theme: cosmo

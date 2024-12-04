@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Data Cleaning</title>
+
+<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="cleaning.html">Data</a>
+</li>
+<li>
+  <a href="eda.html">EDA</a>
+</li>
+<li>
+  <a href="regression.html">Regression</a>
+</li>
+<li>
+  <a href="shiny.html">Shiny</a>
+</li>
+<li>
+  <a href="report.html">Project Report</a>
+</li>
+<li>
+  <a href="https://github.com/projecthyee/p8105_fp_violence">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Data Cleaning</h1>
+
+</div>
+
+
+<div id="source" class="section level1">
+<h1>Source</h1>
+<p>Since there are many determinants and indicators of violence, we
+chose the indicators and outcomes that seem most relevant and
+interesting in exploring violence from the following sources:</p>
+<ul>
+<li>United Nations Development Program (UNDP):
+<ul>
+<li>Human Development Index</li>
+</ul></li>
+<li>United Nations Office of Drugs and Crime (UNODC)
+<ul>
+<li>Corruption and Economic Crime</li>
+<li>Criminal Justice Personnel</li>
+<li>Human Trafficking</li>
+<li>Intentional Homicide</li>
+<li>Violent and Sexual Crimes</li>
+</ul></li>
+<li>World Bank
+<ul>
+<li>Gross Domestic Product (GDP)</li>
+<li>Inflation Rate (Measured by Consumer Price Index)</li>
+<li>Unemployment Rate</li>
+</ul></li>
+<li>World Health Organization (WHO)
+<ul>
+<li>Alcohol Consumption</li>
+</ul></li>
+</ul>
+<p>Intentional homicide, and violent and sexual crimes were chosen as
+the outcome variable to quantify violence.</p>
+<ul>
+<li>Intentional homicide:
+<ul>
+<li>counting unit: number of homicide victims per 100,000
+population</li>
+<li>classification:
+<ul>
+<li>situational context: organized crime, interpersonal (excluding
+familial/intimate), socio-political</li>
+<li>relationship to perpetrator: intimate partner, family member,
+friend, colleague, etc.</li>
+<li>mechanism: firearm, weapon, physical force</li>
+</ul></li>
+</ul></li>
+<li>Violent and sexual crimes:
+<ul>
+<li>counting unit: number of individual offences per 100,000
+population</li>
+<li>classification of offenses:
+<ul>
+<li>rape</li>
+<li>serious assault</li>
+<li>kidnapping</li>
+<li>sexual violence</li>
+</ul></li>
+<li>NOTE: some countries used other counting unit (a series of offenses
+to form a case, or multiple cases to form an investigation)</li>
+</ul></li>
+</ul>
+</div>
+<div id="scraping-method" class="section level1">
+<h1>Scraping Method</h1>
+<p>The datasets were downloaded from the official websites of the
+sources above. The names of the files were also changed accordingly for
+clarity and to avoid confusion. For example, the alcohol consumption
+data file was renamed from “data.csv” to “alcohol_consumption.csv”.</p>
+</div>
+<div id="eda-data" class="section level1">
+<h1>EDA Data</h1>
+<p>For EDA, since we are interested in exploring the trends of global
+violence, we imported and tidied the datasets for our two outcome
+variables: homicide and violence.</p>
+<div id="homicide" class="section level2">
+<h2>Homicide</h2>
+<pre class="r"><code>homicide_visual_df = 
+    read_excel(path = &quot;data/unodc/intentional_homicide.xlsx&quot;,
+               skip = 2) |&gt;
+  janitor::clean_names() |&gt;
+  filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;,
+         indicator == &quot;Victims of intentional homicide&quot;,
+         category != &quot;Total&quot;,
+         sex != &quot;Total&quot;,
+         between(year, 2015, 2023)) |&gt;
+  select(country, unit_of_measurement, region, category, sex, year, 
+         homicide_rate = value)</code></pre>
+</div>
+<div id="violence" class="section level2">
+<h2>Violence</h2>
+<pre class="r"><code>violence_visual_df = 
+    read_excel(path = &quot;data/unodc/violent_sexual_crime.xlsx&quot;,
+               skip = 2) |&gt;
+  janitor::clean_names() |&gt;
+  filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;,
+         between(year, 2015, 2023)) |&gt;
+  select(country, indicator, unit_of_measurement, region, category, sex, 
+                year, violence_rate = value)</code></pre>
+</div>
+</div>
+<div id="regression-data" class="section level1">
+<h1>Regression Data</h1>
+<p>For regression, the datasets for all the chosen predictors and
+outcomes will be tidied and merged for regression analysis.</p>
+<div id="function-to-tidy-datasets" class="section level2">
+<h2>Function to Tidy Datasets</h2>
+<pre class="r"><code>tidy_df = function(data, variable, pivot = FALSE, average = FALSE) {
+  
+  if(pivot) {
+    data = data |&gt;
+      pivot_longer(cols = -iso3_code,
+                   names_to = &quot;year&quot;,
+                   values_to = variable) |&gt;
+      janitor::clean_names()
+  }
+  
+  data = data |&gt;
+    mutate(year = as.numeric(year),
+           iso3_code = str_replace_all(iso3_code, &quot;^GBR.*&quot;, &quot;GBR&quot;),
+           iso3_code = str_replace_all(iso3_code, &quot;^IRQ.*&quot;, &quot;IRQ&quot;),
+           country = countrycode(iso3_code, origin = &quot;iso3c&quot;,
+                                 destination = &quot;country.name&quot;,
+                                 nomatch = NA, warn = FALSE)) |&gt; 
+    drop_na(country)
+  
+  if(average) {
+    
+    if(&quot;region&quot; %in% colnames(data)) {
+      data = data |&gt;
+        group_by(country, region, year) |&gt;
+        summarize(!!variable := mean(value))
+    }
+    
+    else {
+        data = data |&gt;
+          group_by(country, year) |&gt;
+          summarize(!!variable := mean(value))
+    }
+    
+  }
+  
+  return(data)
+  
+}</code></pre>
+<p>We defined a function <code>tidy_df()</code>to pipe after importing
+each dataset to automatically tidy the datasets. The
+<code>countrycode()</code> function standardizes the country names of
+each dataset since some of the country names are represented
+inconsistently across dataset files. For example, South Korea was
+represented as “Korea (Republic of)” and “Korea, Rep.”</p>
+<p>Moreover, for the countrycode() function, NA is returned if no
+matches are found and warnings are also suppressed by
+<code>nomatch = NA</code> and <code>warn = FALSE</code> respectively
+since some datasets include iso3 codes for entities that are not
+countries. For example, EUU represents the European Union; however, the
+<code>countrycode()</code> function only recognizes iso3 codes for
+countries and returns a warning, but we are interested in countries and
+regions. A boolean parameter called <code>pivot</code> was included to
+indicate if a dataset needs to be pivoted and subsequently perform
+<code>pivot_longer()</code>, since some datasets had years organized as
+different columns, where each column represented values for that
+year.</p>
+<p>Also, some of the datasets include rates for different categories.
+For example, the data for economic crime includes crime rates for fraud,
+burglary and more. Therefore, another boolean parameter called “average”
+was included to pass an option to group by and summarize rates across
+categories and genders of different datasets, since the exact population
+for these categories were not provided.</p>
+</div>
+<div id="economic-determinants" class="section level2">
+<h2>Economic Determinants</h2>
+<pre class="r"><code>gdp_df = 
+  read_excel(path = &quot;data/worldbank/gdp.xls&quot;,
+             sheet = &quot;Data&quot;, skip = 3, na = &quot;&quot;) |&gt;
+  select(iso3_code = 2, &quot;2015&quot;:&quot;2023&quot;) |&gt;
+  tidy_df(&quot;gdp&quot;, pivot = TRUE)
+
+inflation_df = 
+  read_excel(path = &quot;data/worldbank/inflation_rate.xls&quot;, 
+             sheet = &quot;Data&quot;, skip = 3, na = &quot;&quot;) |&gt;
+  select(iso3_code = 2, &quot;2015&quot;:&quot;2023&quot;) |&gt;
+  tidy_df(&quot;inflation_rate&quot;, pivot = TRUE)
+
+unemployment_df =
+  read_excel(path = &quot;data/worldbank/unemployment_rate.xlsx&quot;,
+             range = &quot;A1:BP437&quot;, na = &quot;..&quot;) |&gt;
+  rename_with(str_replace_all, pattern = &quot; \\[.*&quot;, replacement = &quot;&quot;) |&gt;
+  select(iso3_code = 4, &quot;2013&quot;:&quot;2023&quot;) |&gt;
+  tidy_df(&quot;unemployment_rate&quot;, pivot = TRUE)
+
+human_develop_df =
+  read_csv(file = &quot;data/undp/human_development_index.csv&quot;, na = &quot;&quot;) |&gt;
+  head(-11) |&gt;
+  rename_with(str_replace_all, pattern = &quot;hdi_&quot;, replacement = &quot;&quot;) |&gt;
+  select(iso3_code = 1, &quot;2015&quot;:&quot;2022&quot;) |&gt;
+  tidy_df(&quot;hdi&quot;, pivot = TRUE)</code></pre>
+<pre><code>## Rows: 206 Columns: 1076
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr    (4): iso3, country, hdicode, region
+## dbl (1072): hdi_rank_2022, hdi_1990, hdi_1991, hdi_1992, hdi_1993, hdi_1994,...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div id="social-determinants" class="section level2">
+<h2>Social Determinants</h2>
+<pre class="r"><code>econ_crime_df = 
+  read_excel(path = &quot;data/unodc/corruption_economic_crime.xlsx&quot;, skip = 2) |&gt;
+  janitor::clean_names() |&gt;
+  filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
+  tidy_df(&quot;crime_rate&quot;,  average = TRUE)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
+## the `.groups` argument.</code></pre>
+<pre class="r"><code>personnel_df =
+  read_excel(path = &quot;data/unodc/criminal_justice_personnel.xlsx&quot;, skip = 2) |&gt;
+  janitor::clean_names() |&gt;
+  filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;,
+         indicator == &quot;Criminal Justice Personnel&quot;, 
+         sex == &quot;Total&quot;) |&gt;
+  tidy_df(&quot;personnel_rate&quot;, average = TRUE)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
+## the `.groups` argument.</code></pre>
+<pre class="r"><code>trafficking_df =
+  read_excel(path = &quot;data/unodc/human_trafficking.xlsx&quot;, skip = 2) |&gt;
+  janitor::clean_names() |&gt;
+  filter(indicator == &quot;Detected trafficking victims&quot;,
+         category == &quot;Total&quot;, 
+         sex == &quot;Total&quot;,
+         age == &quot;Total&quot;,
+         txt_value != &quot;&lt;5&quot;) |&gt;
+  mutate(value = str_replace_all(txt_value, &quot;,&quot;, &quot;&quot;),
+         value = as.numeric(value)) |&gt;
+  select(iso3_code : region, year, trafficked_victims = value) |&gt;
+  tidy_df(&quot;trafficked_victims&quot;)
+
+alcohol_df =
+  read_csv(file = &quot;data/who/alcohol_consumption.csv&quot;, na = &quot;&quot;) |&gt;
+  janitor::clean_names() |&gt;
+  filter(dim1 == &quot;Both sexes&quot;) |&gt;
+  select(iso3_code = spatial_dim_value_code, 
+         year = period, 
+         value = fact_value_numeric) |&gt;
+  tidy_df(&quot;alcohol_consumption_rate&quot;, average = TRUE)</code></pre>
+<pre><code>## Rows: 11799 Columns: 34
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr  (15): IndicatorCode, Indicator, ValueType, ParentLocationCode, ParentLo...
+## dbl   (4): Period, FactValueNumeric, FactValueNumericLow, FactValueNumericHigh
+## lgl  (14): IsLatestYear, Dim2 type, Dim2, Dim2ValueCode, Dim3 type, Dim3, Di...
+## dttm  (1): DateModified
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+## `summarise()` has grouped output by &#39;country&#39;. You can override using the `.groups` argument.</code></pre>
+</div>
+<div id="outcomes-of-violence" class="section level2">
+<h2>Outcomes of Violence</h2>
+<pre class="r"><code>homicide_df = 
+  read_excel(path = &quot;data/unodc/intentional_homicide.xlsx&quot;, skip = 2) |&gt;
+  janitor::clean_names() |&gt;
+  filter(indicator == &quot;Victims of intentional homicide&quot;,
+         unit_of_measurement == &quot;Rate per 100,000 population&quot;,
+         dimension == &quot;Total&quot;, 
+         sex == &quot;Total&quot;, 
+         age == &quot;Total&quot;) |&gt;
+  tidy_df(&quot;homicide_rate&quot;, average = TRUE)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
+## the `.groups` argument.</code></pre>
+<pre class="r"><code>violence_df = 
+  read_excel(path = &quot;data/unodc/violent_sexual_crime.xlsx&quot;, skip = 2) |&gt;
+  janitor::clean_names() |&gt;
+  filter(indicator == &quot;Violent offences&quot;,
+         unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
+  tidy_df(&quot;violence_rate&quot;, average = TRUE)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;region&#39;. You can override using
+## the `.groups` argument.</code></pre>
+<p>The datasets for economic crimes, criminal justice personnel,
+homicide and violence provided data for both counts and rates per
+100,000 people. Therefore, we filtered to choose rates per 100,000
+people since it allows standardization for comparability by adjusting
+for differences in population size. The human trafficking dataset
+provided data for number of human trafficking victims, instead of
+trafficking rates; the dataset also included a category for total number
+of trafficking victims, so the data was filtered for total category and
+neither the <code>pivot</code> nor <code>average</code> options were set
+to true in the <code>tidy_df()</code> function.</p>
+</div>
+<div id="merge-datasets" class="section level2">
+<h2>Merge Datasets</h2>
+<pre class="r"><code>merged_violence_df =
+  left_join(homicide_df, violence_df) |&gt;
+  left_join(gdp_df) |&gt;
+  left_join(inflation_df) |&gt;
+  left_join(unemployment_df) |&gt;
+  left_join(human_develop_df) |&gt;
+  left_join(econ_crime_df) |&gt;
+  left_join(personnel_df) |&gt;
+  left_join(trafficking_df) |&gt;
+  left_join(alcohol_df) |&gt;
+  mutate(country = as.factor(country),
+         region = as.factor(region)) |&gt;
+  filter(between(year, 2015, 2023)) |&gt;
+  relocate(iso3_code) |&gt;
+  drop_na(violence_rate, homicide_rate)</code></pre>
+<pre><code>## Joining with `by = join_by(country, region, year)`
+## Joining with `by = join_by(country, year)`
+## Joining with `by = join_by(country, year, iso3_code)`
+## Joining with `by = join_by(country, year, iso3_code)`
+## Joining with `by = join_by(country, year, iso3_code)`
+## Joining with `by = join_by(country, region, year)`
+## Joining with `by = join_by(country, region, year)`
+## Joining with `by = join_by(country, region, year, iso3_code)`
+## Joining with `by = join_by(country, year)`</code></pre>
+<pre class="r"><code>head(merged_violence_df)</code></pre>
+<pre><code>## # A tibble: 6 × 14
+## # Groups:   country, region [1]
+##   iso3_code country region  year homicide_rate violence_rate          gdp
+##   &lt;chr&gt;     &lt;fct&gt;   &lt;fct&gt;  &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;        &lt;dbl&gt;
+## 1 ALB       Albania Europe  2015          2.22          5.51 11386853113.
+## 2 ALB       Albania Europe  2016          2.74          4.87 11861199831.
+## 3 ALB       Albania Europe  2017          2.01          4.64 13019726212.
+## 4 ALB       Albania Europe  2018          2.29          4.54 15156424015.
+## 5 ALB       Albania Europe  2019          2.26          5.09 15401826127.
+## 6 ALB       Albania Europe  2020          2.13          4.71 15162734205.
+## # ℹ 7 more variables: inflation_rate &lt;dbl&gt;, unemployment_rate &lt;dbl&gt;, hdi &lt;dbl&gt;,
+## #   crime_rate &lt;dbl&gt;, personnel_rate &lt;dbl&gt;, trafficked_victims &lt;dbl&gt;,
+## #   alcohol_consumption_rate &lt;dbl&gt;</code></pre>
+<pre class="r"><code>write.csv(merged_violence_df, file = &quot;./data/merged_violence.csv&quot;)</code></pre>
+<p>The final merged dataset includes 771 rows and 14 columns, including
+iso3 codes, country, region, year, homicide rate, average violence
+offence rate, gdp, inflation rate, unemployment rate, average crime
+rate, criminal justice personnel rate, total, human trafficking rate and
+alcohol consumption rate as variables. There is a total of 127 distinct
+countries.</p>
+<p>After merging the datasets, country and region were converted to
+categorical variables and the dataset was filtered for the years between
+2015 and 2023, the period of our interest for analysis.</p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
