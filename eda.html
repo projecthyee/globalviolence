@@ -341,13 +341,13 @@ div.tocify {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="https://yousmni3269.shinyapps.io/shiny/">Interactive Map 1</a>
+      <a href="https://yousmni3269.shinyapps.io/shiny/">Prevalence of Violence</a>
     </li>
     <li>
-      <a href="https://yousmni3269.shinyapps.io/shinyapp/">Interactive Map 2</a>
+      <a href="https://yousmni3269.shinyapps.io/shinyapp/">Trends of Violence</a>
     </li>
     <li>
-      <a href="plotly2.html">Predictors</a>
+      <a href="plotly2.html">Homicide vs. Violence</a>
     </li>
   </ul>
 </li>
@@ -400,9 +400,6 @@ div.tocify {
   labs(x = &quot;Year&quot;,
        y = &quot;Average Homicide Rate&quot;,
        Title = &quot;Average Homicide Rate Trend&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;region&#39;, &#39;sex&#39;. You can override using the
-## `.groups` argument.
-## `geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>The Americas and Asia have significantly higher average homicide rate
 across years for male victims compared to the other regions. The average
@@ -423,10 +420,6 @@ Oceania.</p>
        y = &quot;Average Homicide Rate&quot;,
        Title = &quot;Average Homicide Rate Across Category&quot;, 
        fill = &quot;Category&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;category&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<pre><code>## Warning in geom_col(position = &quot;dodge&quot;, bin = 3): Ignoring unknown parameters:
-## `bin`</code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Further exploring homicide in Americas and Asia, the Americas have
 higher homicide rates for most categories compared to Asia. Homicides of
@@ -451,8 +444,6 @@ percent.</p>
        y = &quot;Total Homicide Rate&quot;,
        Title = &quot;Homicide Rate by Category&quot;,
        fill = &quot;Category&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;category&#39;. You can override using the
-## `.groups` argument.</code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>Homicides of unknown types and perpetrator to victim relationship
 unknown are two highest proportions in the total homicide rate,
@@ -478,9 +469,6 @@ instability.</p>
   labs(x = &quot;Year&quot;,
        y = &quot;Average Rate of Violence Offences&quot;,
        Title = &quot;Average Violence Rate Trend&quot;) </code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;region&#39;, &#39;sex&#39;. You can override using the
-## `.groups` argument.
-## `geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Oceania has a significantly high average rate of violent offences
 compared to the other regions. Moreover, the average rate for Oceania
@@ -499,14 +487,12 @@ stable over the years.</p>
   ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
   facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;category&#39;, &#39;year&#39;. You can override using
-## the `.groups` argument.</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-5-1.png" width="672" />
-For every year except 2022, Oceania is the region with the highest rates
-for the serious assault and sexual violence category. Interestingly, the
-gap between Oceania and the Americas decreases greatly in 2022 with
-Oceania’s drop in assault rates.</p>
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="eda_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>For every year except 2022, Oceania is the region with the highest
+rates for the serious assault and sexual violence category.
+Interestingly, the gap between Oceania and the Americas decreases
+greatly in 2022 with Oceania’s drop in assault rates.</p>
 </div>
 <div id="victims-of-sexual-violence" class="section level2">
 <h2>Victims of Sexual Violence</h2>
@@ -521,9 +507,6 @@ Oceania’s drop in assault rates.</p>
   labs(x = &quot;Year&quot;,
        y = &quot;Victim Rate of Sexual Violence&quot;,
        Title = &quot;Average Violence Rate Trend&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;region&#39;, &#39;sex&#39;. You can override using the
-## `.groups` argument.
-## `geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>When exploring victim rate of sexual violence, we can see that in
 overall, there is a higher average victim rate for females; the largest
@@ -550,8 +533,6 @@ region.</p>
        y = &quot;Average Victim Rate&quot;,
        Title = &quot;Average Victim Rate Across Category&quot;, 
        fill = &quot;Category&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;category&#39;, &#39;sex&#39;. You can override using
-## the `.groups` argument.</code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>Further exploring victims of sexual violence, except for perpetrator
 unknown to the victim, Oceania has a higher average victim rate of
@@ -577,8 +558,6 @@ the victim as the category with the highest rate.</p>
        y = &quot;Total Victim Rate&quot;,
        Title = &quot;Victim Rate by Category&quot;,
        fill = &quot;Category&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;category&#39;. You can override using the
-## `.groups` argument.</code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>Relationship to perpetrator is not known is the category with a
 significant proportion to total victim rate of sexual violence compared

@@ -1,9 +1,7 @@
 ---
 title: "P8105 Final Project: Determinants of Global Violence"
 author: "My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top"
-output: 
-  html_document:
-    code_folding: hide
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -180,7 +178,7 @@ provided and each category presented equal importance. The datasets will then
 be merged for regression analysis. 
 
 ### Economic Determinants
-```{r tidy_econ_determinants}
+```{r tidy_econ_determinants, message = FALSE}
 gdp_df = 
   read_excel(path = "data/worldbank/gdp.xls",
              sheet = "Data", skip = 3, na = "") |>
@@ -209,7 +207,7 @@ human_develop_df =
 ```
 
 ### Social Determinants
-```{r import_social_determinants}
+```{r import_social_determinants, message = FALSE}
 econ_crime_df = 
   read_excel(path = "data/unodc/corruption_economic_crime.xlsx", skip = 2) |>
   janitor::clean_names() |>
@@ -248,7 +246,7 @@ alcohol_df =
 ```
 
 ### Outcomes of Violence
-```{r import_violence_outcomes}
+```{r import_violence_outcomes, message = FALSE}
 homicide_df = 
   read_excel(path = "data/unodc/intentional_homicide.xlsx", skip = 2) |>
   janitor::clean_names() |>
@@ -278,7 +276,7 @@ total category and neither the `pivot` nor `average` options were set to true
 in the `tidy_df()` function.
 
 ### Merge Datasets
-```{r merge_datasets}
+```{r merge_datasets, message = FALSE}
 merged_violence_df =
   left_join(homicide_df, violence_df) |>
   left_join(gdp_df) |>
@@ -319,7 +317,7 @@ regression dataset only includes the rates averaged across category, but we are
 also interested in exploring the two outcomes by different categories and 
 genders. 
 
-## Homicide Rate
+### Homicide 
 ```{r}
 homicide_visual_df = 
     read_excel(path = "data/unodc/intentional_homicide.xlsx",
@@ -342,7 +340,7 @@ homicide_visual_df =
 write.csv(homicide_visual_df, file = "./data/homicide_visual.csv")
 ```
 
-## Violence Rate
+### Violence 
 ```{r}
 violence_visual_df = 
     read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
@@ -359,6 +357,7 @@ violence_visual_df =
 write.csv(violence_visual_df, file = "./data/violence_visual.csv")
 ```
 
+
 # EDA
 
 ## Homicide
@@ -373,7 +372,7 @@ merged_violence_df |>
 ```
 
 ### Homicide Trend Across Region
-```{r}
+```{r, message = FALSE}
 homicide_visual_df |>
   group_by(region, sex, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
@@ -390,7 +389,7 @@ years for male victims compared to the other regions. The average homicide rate
 between genders are not significant for Africa, Asia and Oceania. 
 
 ### Homicide Rate Across Category in the Americas and Asia
-```{r}
+```{r, message = FALSE, warning = FALSE}
 homicide_visual_df |>
   filter(region %in% c("Asia", "Americas")) |>
   group_by(category, region) |>
@@ -413,10 +412,10 @@ unknown types is next category with the highest homicide rate in the Americas.
 On the other hand, Asia has a significantly high homicide rate in 
 socio-political homicide compared to the other categories,suggesting high 
 casualties as a result of socio-political activities for countries in Asia. 
-The other categories have a homicide rate lesser than 5 percent. 
+The other categories have a homicide rate less than 5 percent. 
 
 ### Proportion of Homicide Rate by Category 
-```{r}
+```{r message = FALSE}
 homicide_visual_df |>
   group_by(category, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
@@ -438,8 +437,7 @@ The total homicide rate increases sharply from 2015 to 2017 compared to the
 other years possibly due to socioeconomic factors, such as economic instability. 
 
 
-
-I took the average for each country over the time frame and plotted using 
+We took the average for each country over the time frame and plotted using 
 the choropleth. 
 
 ## Violence
@@ -453,7 +451,7 @@ merged_violence_df |>
 ```
 ### Global Violence Rates from 2015-2023
 
-```{r}
+```{r, message = FALSE}
 merged_violence_df |>
   group_by(iso3_code, country) |>
   summarize(avg_homicide = mean(homicide_rate)) |>
@@ -470,7 +468,7 @@ merged_violence_df |>
 
 
 ### Violence Trend by Region
-```{r}
+```{r, message = FALSE}
 violence_visual_df |>
   filter(indicator == "Violent offences") |>
   group_by(region, sex, year) |>
@@ -489,7 +487,7 @@ decrease from 2017 until 2022. Comparatively, the rate of violence offences for
 Americas, Europe and Asia has been stable over the years. 
 
 ### Violence Rates by Category
-```{r}
+```{r, message = FALSE}
 violence_visual_df |>
   filter(indicator == "Violent offences") |>
   group_by(category, year, region) |> 
@@ -500,12 +498,12 @@ violence_visual_df |>
   facet_wrap(~year, ncol=2) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-For every year except 2022, Oceania is the region with the highest rates for the serious assault
-and sexual violence category. Interestingly, the gap between Oceania and the Americas decreases greatly in 2022 with Oceania's drop in assault rates. 
+For every year except 2022, Oceania is the region with the highest rates for 
+the serious assault and sexual violence category. Interestingly, the gap between Oceania and the Americas decreases greatly in 2022 with Oceania's drop in assault rates. 
 
 
 ### Victim of Sexual Violence Trend by Region
-```{r}
+```{r, message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
          region != "Africa") |>
@@ -529,7 +527,7 @@ included because the data was either very small or missing for many countries
 in the region. 
 
 ### Average Victim Rate Across Region
-```{r}
+```{r, message = FALSE, warning = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
          region != "Africa") |>
@@ -555,7 +553,7 @@ has a significantly low average victim rate, having other perpetrator known to
 the victim as the category with the highest rate.
 
 ### Total Victim Rate Across Category
-```{r}
+```{r, message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
          region != "Africa") |>
@@ -578,13 +576,10 @@ the proportion for intimate partner or family member and perpetrator unknown to
 the victim increases over time.
 
 
-Similar to the homicide rate, I took the average of the reported violence rate 
-for each country and plotted using choropleth. However, since there are a lot 
-of missing data for violence rate, I dropped the NAs first and then took the 
-average. 
+Similar to the homicide rate, we took the average of the reported violence rate 
+for each country and plotted using choropleth. 
 
-
-```{r choropleth}
+```{r choropleth, message = FALSE}
 merged_violence_df |>
   drop_na(violence_rate) |>
   group_by(iso3_code, country) |>
@@ -618,4 +613,4 @@ homicide rate, with rates significantly higher than the other regions. This
 trend reflects the persistent issue of violence in the region, affecting not 
 only homicide rates but also broader forms of violence. However, Oceania 
 presented an extreme outlier in terms of victim rates of sexual violence, 
-surpassing even the Americas. In fact, Oceania's violence rate was nearly 
+surpassing even the Americas. 

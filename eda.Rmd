@@ -19,7 +19,7 @@ violence_visual_df = read_csv("./data/violence_visual.csv")
 # Homicide
 
 ## Global Trend
-```{r}
+```{r message = FALSE}
 homicide_visual_df |>
   group_by(region, sex, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
@@ -36,7 +36,7 @@ years for male victims compared to the other regions. The average homicide rate
 between genders are not significant for Africa, Asia and Oceania. 
 
 ## Americas and Asia
-```{r}
+```{r message = FALSE, warning = FALSE}
 homicide_visual_df |>
   filter(region %in% c("Asia", "Americas")) |>
   group_by(category, region) |>
@@ -62,7 +62,7 @@ casualties as a result of socio-political activities for countries in Asia.
 The other categories have a homicide rate lesser than 5 percent. 
 
 ## Proportion of Categories
-```{r}
+```{r message = FALSE}
 homicide_visual_df |>
   group_by(category, year) |>
   summarize(avg_homicide_rate = mean(homicide_rate)) |>
@@ -87,7 +87,7 @@ other years possibly due to socioeconomic factors, such as economic instability.
 # Violence
 
 ## Global Trend
-```{r}
+```{r message = FALSE}
 violence_visual_df |>
   filter(indicator == "Violent offences") |>
   group_by(region, sex, year) |>
@@ -106,7 +106,7 @@ decrease from 2017 until 2022. Comparatively, the rate of violence offences for
 Americas, Europe and Asia has been stable over the years. 
 
 ## Categories of Violence Offences
-```{r}
+```{r message = FALSE, fig.height = 10}
 violence_visual_df |>
   filter(indicator == "Violent offences") |>
   group_by(category, year, region) |> 
@@ -115,13 +115,14 @@ violence_visual_df |>
   ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+
 For every year except 2022, Oceania is the region with the highest rates for the serious assault
 and sexual violence category. Interestingly, the gap between Oceania and the Americas decreases greatly in 2022 with Oceania's drop in assault rates. 
 
 ## Victims of Sexual Violence
-```{r}
+```{r message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
          region != "Africa") |>
@@ -145,7 +146,7 @@ included because the data was either very small or missing for many countries
 in the region. 
 
 ## Categories of Sexual Violence
-```{r}
+```{r message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
          region != "Africa") |>
@@ -171,7 +172,7 @@ has a significantly low average victim rate, having other perpetrator known to
 the victim as the category with the highest rate.
 
 ## Proportion of Categories
-```{r}
+```{r message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
          region != "Africa") |>
