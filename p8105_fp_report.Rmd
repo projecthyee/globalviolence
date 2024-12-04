@@ -339,6 +339,7 @@ homicide_visual_df =
                                     "^Socio-political homicide.*", 
                                     "Socio-political homicide"))
 
+write.csv(homicide_visual_df, file = "./data/homicide_visual.csv")
 ```
 
 ## Violence Rate
@@ -354,6 +355,8 @@ violence_visual_df =
   mutate(category = str_replace_all(category, 
                                     "^Sexual violence.*", 
                                     "Sexual violence"))
+
+write.csv(violence_visual_df, file = "./data/violence_visual.csv")
 ```
 
 # EDA
@@ -616,6 +619,3 @@ trend reflects the persistent issue of violence in the region, affecting not
 only homicide rates but also broader forms of violence. However, Oceania 
 presented an extreme outlier in terms of victim rates of sexual violence, 
 surpassing even the Americas. In fact, Oceania's violence rate was nearly 
-
-
-
