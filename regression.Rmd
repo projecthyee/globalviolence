@@ -7,11 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(readxl)
-library(countrycode)
 library(MASS)
 library(glmnet)
-library(GGally)
 library(leaps)
 library(mgcv)
 set.seed(1)
