@@ -5,9 +5,9 @@ account: yousmni3269
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13522706
-bundleId: 9462752
+bundleId: 9462975
 url: https://yousmni3269.shinyapps.io/shiny/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: _site.yml|cleaning.html|cleaning.Rmd|EDA_Jeff.html|eda.html|eda.Rmd|index.html|index.Rmd|p8105_fp_proposal.md|p8105_fp_proposal.Rmd|p8105_fp_report.html|p8105_fp_report.md|p8105_fp_report.Rmd|plotly.html|plotly.Rmd|plotly2.html|plotly2.Rmd|README.md|regression.md|regression.Rmd|EDA_Jeff_files|p8105_fp_report_files|regression_files|site_libs
+ignoredFiles: _site.yml|cleaning.html|cleaning.Rmd|EDA_Jeff.html|eda.html|eda.Rmd|index.html|index.Rmd|p8105_fp_proposal.html|p8105_fp_proposal.md|p8105_fp_proposal.Rmd|p8105_fp_report.html|p8105_fp_report.md|p8105_fp_report.Rmd|plotly.html|plotly.Rmd|plotly2.html|plotly2.Rmd|README.md|regression.html|regression.md|regression.Rmd|EDA_Jeff_files|p8105_fp_report_files|regression_files|site_libs

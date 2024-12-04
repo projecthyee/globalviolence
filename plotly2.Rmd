@@ -20,7 +20,7 @@ Column {data-width=650}
  
 ### Economic Predictors: Homicide vs. Violence Rate
 
-```{r}
+```{r message = FALSE}
 merged_violence_df |> 
   plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
           text = ~paste('Country', country, 
@@ -42,7 +42,7 @@ Column {data-width=650}
 
 ### Social Predictors: Homicide vs. Violence Rate
 
-```{r}
+```{r message = FALSE}
 merged_violence_df |> 
   plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~crime_rate,
           text = ~paste('Country', country, 
