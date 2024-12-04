@@ -519,6 +519,8 @@ cv_df_violence <-
     ridge = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
                                         alpha = 0, lambda = lambda))
   )
+
+head(cv_df_violence)
 ```
 
 
