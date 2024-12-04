@@ -12,7 +12,7 @@ navbar:
     - text: "Shiny"
       menu:
       - text: "Interactive Map"
-        href: shiny.html
+        href: https://yousmni3269.shinyapps.io/shiny/
       - text: "Shiny 2"
         href: plotly.html
       - text: "Shiny 3"
