@@ -107,10 +107,14 @@ map(train_list, \(x) plot_distributions(pull(boxcox_train_df, x), x))
 
 # Statistical Learning Approaches
 
-## Data Pre-processing 
+## Data Pre-processing
+
 ```{r}
 lambda = 10^(seq(-2, 2.75, 0.1))
+```
 
+
+```{r}
 homicide_df =
   merged_violence_df |> 
   dplyr::ungroup() |> 
@@ -119,12 +123,17 @@ homicide_df =
     -iso3_code) |> 
   drop_na()
 
+homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)
+
 homicide_predictors <- homicide_df %>% 
   dplyr::select(-homicide_rate)
 
 homicide_outcome <- homicide_df %>% 
   pull(homicide_rate)
+```
 
+
+```{r}
 violence_df =
   merged_violence_df |> 
   dplyr::ungroup() |> 
@@ -133,6 +142,8 @@ violence_df =
     -iso3_code) |>
   drop_na()
 
+violence_matrix <- model.matrix(violence_rate ~., data = violence_df)
+  
 violence_predictors <- violence_df %>% 
   dplyr::select(-violence_rate)
 
@@ -148,28 +159,18 @@ Use lasso to find the most important variables in predicting homicide rate and v
 ### Predictors for violence rate:
 To prepare data for lasso (fitting violence rate), I removed variables that are not predictors including iso3_code, country, region, year and homicide rate. I then dropped NA values before performing lasso. 
 
-```{r violence}
-lasso_violence = 
-  merged_violence_df |> 
-  dplyr::select(-iso3_code, -country, -region, -year, -homicide_rate) |> 
-  drop_na()
-
-x = model.matrix(violence_rate ~., data = violence_df)
-y = lasso_violence |> pull(violence_rate)
-
-lambda = 10^(seq(-2, 2.75, 0.1))
-
+```{r}
 lasso_violence_fit = 
-  glmnet(x, y, lambda = lambda)
+  glmnet(violence_matrix, violence_outcome, lambda = lambda)
 
 lasso_violence_cv = 
-  cv.glmnet(x, y, lambda = lambda)
+  cv.glmnet(violence_matrix, violence_outcome, lambda = lambda)
 
 lambda_violence_opt = 
   lasso_violence_cv[["lambda.min"]]
 
 lasso_violence_fit = 
-  glmnet(x, y, lambda = lambda_violence_opt)
+  glmnet(violence_matrix, violence_outcome, lambda = lambda_violence_opt)
 
 lasso_violence_fit |> 
   broom::tidy()
