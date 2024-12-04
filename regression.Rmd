@@ -223,7 +223,7 @@ homicide_outcome <- homicide_df %>%
   pull(homicide_rate)
 ```
 
-###Pre-processing for violence.
+### Pre-processing for violence.
 ```{r}
 violence_df =
   merged_violence_df |> 
@@ -253,7 +253,8 @@ baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate 
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 baseline_MLR_hom %>% 
-  broom::tidy()
+  broom::tidy() %>% 
+  knitr::kable()
 ```
 Results from baseline MLR show that that inflation rate, unemployment rate and hdi are significant predictors of homicide rate at significance level alpha = 0.05. 
 

@@ -673,20 +673,8 @@ and preserves the integrity of the underlying data.</p>
 <div id="multicolliniearity-diagnostics" class="section level2">
 <h2>Multicolliniearity diagnostics</h2>
 <p>We used <code>cor()</code> to find the correlation between the eight
-predictors of homicide rate and violence.</p>
-<pre class="r"><code>cor_matrix = 
-  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,&quot;crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, &quot;alcohol_consumption_rate&quot;)], use = &quot;pairwise.complete.obs&quot;)
-
-
-ggcorrplot(cor_matrix, 
-           method = &quot;circle&quot;,  
-           type = &quot;lower&quot;,  
-           lab = TRUE,        
-           lab_size = 3,      
-           colors = c(&quot;blue&quot;, &quot;white&quot;, &quot;red&quot;), # Color scale (blue = negative, red = positive)
-           title = &quot;Correlation Heatmap&quot;
-)</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+predictors of homicide rate and violence.
+<img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 There is moderate correlation between <code>hdi</code> and
 <code>alcohol_consumption_rate</code>, corr = 0.5, and moderately high
 correlation between <code>trafficked_victims</code> and
