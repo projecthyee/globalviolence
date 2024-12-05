@@ -62,14 +62,13 @@ best_subset = function(predictor, outcome, criterion) {
     optimal_subset_idx <- optimal_subset[[criterion]] %>% which.max()
   }
   
-  
-  list(Criterion = optimal_criterion , 
-       Variable_Selection = optimal_subset$which[optimal_subset_idx,])
+  return(list(Criterion = optimal_criterion , 
+       Variable_Selection = optimal_subset$which[optimal_subset_idx,]))
   
 }
 ```
 This function serves as a wrapper around the leaps function. It performs 
-best subset variable selection and then prints out the optimal model diagnostic 
+best-subset variable selection and then prints out the optimal model diagnostic 
 and the predictor variables included in the regression model.
 
 ## fit_glmnet
@@ -267,7 +266,8 @@ the assumption of approximate normality, our 310 observation dataset suffices
 to be supported by CLT.
 
 ## Multicolliniearity diagnostics
-We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
+We used `cor()` to find the correlation between the eight predictors of 
+homicide rate and violence. 
 ```{r }
 cor_matrix = 
   cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
@@ -485,21 +485,26 @@ to the results from violence, the coefficient for `gdp` was shrunk to 0.
 
 # Criterion-based procedure
 
-## Best Subset Regression for Violence Rate
+## Best-Subset Regression for Violence Rate
 
 ### Predict violence rate using r-squared as criterion
 ```{r }
-best_subset(predictor = violence_predictors, outcome = violence_outcome, 
-            criterion = "adjr2")
+violence_best_subset_rsq <- 
+  best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+              criterion = "adjr2")
+
+violence_best_subset_rsquared
 ```
 
 ### Predict violence_rate using Cp as criterion
 ```{r }
-best_subset(predictor = violence_predictors, outcome = violence_outcome, 
-            criterion = "Cp")
+violence_best_subset_Cp <- 
+  best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+              criterion = "Cp")
+violence_best_subset_Cp
 ```
 
-### Check for co-linearity in best subset violence model 
+### Check for co-linearity in best-subset violence model 
 ```{r }
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
@@ -529,18 +534,22 @@ close to the number of predictors, and highest adjusted R-squared (0.510).
 
 ## Best subset regression for Homicide Rate
 
-## Best subset regression for homicide rate
-
 ### Predict homicide rate using R-squared as criterion
 ```{r }
-best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
-            criterion = "adjr2")
+homicide_best_subset_rsq <- 
+  best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+              criterion = "adjr2")
+
+homicide_best_subset_rsq
 ```
 
 ### Predict Homicide Rates using Cp as criterion
 ```{r }
-best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
-            criterion = "Cp")
+homicide_best_subset_Cp <- 
+  best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+              criterion = "Cp")
+
+homicide_best_subset_Cp
 ```
 
 ### Check for co-linearity in best subset homicide model
@@ -755,11 +764,11 @@ subset_violence_resid_df =
   add_residuals(subset_violence_lm) |>
   add_predictions(subset_violence_lm) 
 
-check_model(subset_homicide_resid_df, "MLR Best Subset Homicide Rate")
-check_model(subset_violence_resid_df, "MLR Best Subset Violence Rate")
+check_model(subset_homicide_resid_df, "MLR Best-Subset Homicide Rate")
+check_model(subset_violence_resid_df, "MLR Best-Subset Violence Rate")
 ```
 
-Examining the QQ-plots for the MLRs using the best subset of predictor variables, 
+Examining the QQ-plots for the MLRs using the best-subset of predictor variables, 
 we once again notice that our assumption of normality of residuals may be in 
 violation, as there appear to many lower-bound and upper-bound outliers that do 
 not fall along the reference line. For the fitted versus residuals plot for 
@@ -797,7 +806,27 @@ for homicide rate shows both possible heteroscedascity and non-linearity.
 
 # Conclusion 
 
-Based on our comparisons of RMSE, we conclude that our best subset regression 
+Based on our comparisons of RMSE, we conclude that our best-subset regression 
 models are most accurate at predicting the outcome: (1) Violence Rate and (2) 
-Homicide Rate. 
+Homicide Rate. The best-subset regression model for predicting violence 
+rate yielded an adjusted r-squared of 
+`r cat(violence_best_subset_rsq[["Criterion"]])` and included 
+the following variables a predictors: GDP, inflation rate, crime rate, 
+personnel rate, trafficked victims, and alcohol consumption rate. The 
+best-subset regression model for predicting homicide rate returned an 
+r-squared of 
+`r cat(subset_homicide_lm %>% broom::glance() %>% pull(adj.r.squared))`. The 
+variables included in this model were inflation rate, unemployment rate, HDI,
+and crime rate. 
+
+Despite moderately high r-squared values for each of these models, we must 
+acknowledge that the models' performance and accuracy may suffer from certain 
+drawbacks. In particular, model diagnostics revealed concerns regarding the 
+normality, linearity, and homosedascity of the dataset used to produce these 
+models. Additionally, transformations to deal with the concerns regarding 
+normality failed to produce more normalized distributions for any of the 
+predictor variables. As a result, the r-squared values for our models may 
+be inaccurate and different forms of modelling, such as a non-linear approach,
+may be better suited for exploring what variables predict violence and homicide 
+rates.
 
