@@ -123,10 +123,10 @@ calculates and returns the rmse.
 
 ## check_model
 ```{r}
-check_model = function(resid_list, observed, predicted, model_name) {
+check_model = function(resid_list, predicted, model_name) {
   diagnostics <- list()
   
-  for (resid_df in resid_list) {
+  for (i in (1:2)) {
     qqplot <- 
       resid_df %>% 
         ggplot(aes(sample = residuals)) +
@@ -138,7 +138,7 @@ check_model = function(resid_list, observed, predicted, model_name) {
     
     resid_fit <- 
       resid_df %>% 
-        ggplot(aes(x = predicted, y = resid_df)) +
+        ggplot(aes(x = predicted[[i]], y = resid_df)) +
         geom_point() +
         geom_hline(yintercept = 0, linetype = "dotted") +
         xlab("Fitted Values") +
@@ -713,7 +713,13 @@ ease of interpretability of beta coefficients.
 
 # Model Diagnostics
 
-#3 All Variables included MLR
+## All Variables included MLR
+
+```{r}
+resid_list <- list(resid(baseline_MLR_hom), resid(baseline_MLR_viol))
+check_model(resid_list, )
+```
+
 
 ### Violence Rates
 
