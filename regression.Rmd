@@ -169,8 +169,11 @@ boxcox_transform = function(value) {
   boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
   lambda = boxcox_result$x[which.max(boxcox_result$y)]  
 
-
-  transformed_value = (value^lambda - 1) / lambda
+  if(lambda != 0) {
+    transformed_value = (value^lambda - 1) / lambda
+  } else {
+    transformed_value = log(value)
+  }
   return(transformed_value)
 }
 
