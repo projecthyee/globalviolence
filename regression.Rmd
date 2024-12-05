@@ -518,9 +518,22 @@ cv_df_violence %>%
   ) %>% 
   ggplot(aes(x = Model, y = RMSE)) +
   geom_violin() +
-  ggtitle("RMSE by Model for Predicting Violence Rate")
+  ggtitle("RMSE by Model for Predicting Violence Rate") +
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
+Examining the distribution of RMSEs for each of the 3 models for 
+predicting violence rate, we see that they are relatively similar. It appears 
+that the MLR including all predictor variables has greater spread than the 
+other two distributions, as it has a higher upper bound for in the violin plot.
+The similarity in performance between all 3 models likely relates to the few
+number of predictor variables that exist in our studied dataset. In general,
+each of the 3 models will not differ by many predictor variables, and therefore
+perform similaly. Comparing the 3 models, the best subset regression model
+may be considered optimal as it reduces model complexity, without the 
+further caveat of difficulty interpreting beta coefficients, as is the case 
+with lasso models.
+
 
 ### Homicide
 ```{r echo=FALSE}
@@ -545,10 +558,12 @@ the distribution of RMSE across 100-fold cross-validation are nearly identical.
 This is likely in regard to the few predictor variables included in our dataset.
 In particular, with such few predictor variables, lasso is likely not most 
 well-suited for this task, as there is not a serious need to reduce model 
-complexity. Consequently, the number of variabls included in each of the 3 
+complexity. Consequently, the number of variables included in each of the 3 
 models is quite similar, and the difference of 1 or 2 included predictors 
-between each of the models does not produce a substnatial change in model 
-effectiveness.
+between each of the models does not produce a substantial change in model 
+effectiveness. Comparing the 3 models, the best subset regression model 
+may be considered the best as it reduces model complexity but maintains 
+ease of interpretability of beta coeficients.
 
 
 # Model Diagnostics
