@@ -381,8 +381,8 @@ lasso_violence_fit |>
   knitr::kable()
 ```
 
-The optimal lambda for violence rate is 0.794. Based on lasso estimates, 
-the coefficient for `gdp` was shrunk to 0. 
+The optimal lambda for violence rate is `r lambda_violence_opt`` Based on 
+lasso estimates, the coefficient for `gdp` was shrunk to 0.
 
 
 ## Predictors for homicide rate.
@@ -405,7 +405,8 @@ lasso_homicide_fit |>
   knitr::kable()
 ```
 
-The optimal lambda for homicide rate is 0.050. Similar to the results from violence, the coefficient for `gdp` was shrunk to 0. 
+The optimal lambda for homicide rate is `r lambda_homicide_opt`. Similar 
+to the results from violence, the coefficient for `gdp` was shrunk to 0. 
 
 # Criterion-based procedure
 
@@ -631,3 +632,5 @@ ease of interpretability of beta coefficients.
 
 ```
 
+
+# Conclusion of Modeling
