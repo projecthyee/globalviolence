@@ -193,11 +193,15 @@ ggcorrplot(cor_matrix,
            title = "Correlation Heatmap"
 )
 ```
+
 There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
 corr = 0.5, and moderately high correlation between `trafficked_victims` and 
 `gdp`, corr = 0.7. 
 
 # Data Pre-processing
+
+In this step, we manipulate the merged_violence_df in preparation for later 
+statistical modelling. 
 
 ## Define Lambda Range
 ```{r}
