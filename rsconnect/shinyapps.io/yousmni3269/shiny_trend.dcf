@@ -1,0 +1,13 @@
+name: shiny_trend
+title: shiny_trend
+username: yousmni3269
+account: yousmni3269
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13525987
+bundleId: 9464202
+url: https://yousmni3269.shinyapps.io/shiny_trend/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: _site.yml|aboutus.html|aboutus.Rmd|cleaning.html|cleaning.Rmd|eda.html|eda.Rmd|index.html|index.Rmd|p8105_fp_proposal.html|p8105_fp_proposal.md|p8105_fp_proposal.Rmd|p8105_fp_report.html|p8105_fp_report.md|p8105_fp_report.Rmd|plotly_vs.html|plotly_vs.Rmd|README.md|Regression_Jeff.Rmd|regression.html|regression.md|regression.Rmd|shiny_prevalence.Rmd|eda_files|p8105_fp_report_files|regression_files|Regression_Jeff_files|site_libs
