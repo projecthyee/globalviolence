@@ -20,17 +20,28 @@ merged_violence_df <- read_csv(
 ```
 
 # Introduction
-Our motivation for doing regression is to determine the significant contributors to two outcomes of violence - homicide rate and violence rate. 
+Our motivation for doing regression is to determine the significant predictors 
+of the two measures of violence: (1) homicide rate and (2) violence rate. 
 
-Violence is a complex and multifaceted issue, especially when considered in a global context. To better understand its various dimensions, we aimed to include a diverse set of predictors that reflect different underlying factors driving violence. Specifically, economic indicators like GDP, inflation rate, and the Human Development Index (HDI) capture aspects of economic inequality, which can influence social unrest and violence. Economic crime rate, personnel rate, and number of trafficked victims 
-serve as indicators of the level of criminal activity in a country, as well as 
-potential efficacy of law enforcement. Such indicators could be predictive of 
-violence in the country. Lastly, alcohol rate is included to address the
-possibility that substance usage could influence the occurrence of violence.
+Violence is a complex and multifaceted issue, especially when considered in a global context. 
+To better understand its various dimensions, we aimed to include a diverse set 
+of predictors that reflect different underlying factors driving violence. 
+Specifically, economic indicators like GDP, inflation rate, and 
+the Human Development Index (HDI) capture aspects of economic inequality, 
+which can influence social unrest and violence. Economic crime rate, 
+personnel rate, and number of trafficked victims serve as indicators of 
+the level of criminal activity in a country, as well as potential efficacy of 
+law enforcement. Such indicators could be predictive of violence in the country. 
+Lastly, alcohol rate is included to address the possibility that substance 
+usage could influence the occurrence of violence.
 
-We hypothesize that homicide rate may be influenced by more "direct" indicators including crime rate, HDI and trafficked_victims. We hypothesize that violence rate may be influenced by all factors we included in this dataset, because violence can exist in multiple forms. 
+Given the plausible theoretical linkage between each of our included 
+predictor variables and the outcome variables of interest, we seek to develop 
+models that can determine which factors are most predictive of homicide and 
+violence rate. 
 
-We perform this analysis to uncover the extent to which different factors influence homicide rate and violence rate as outcomes.
+We perform this analysis to uncover the extent to which 
+different factors influence homicide rate and violence rate as outcomes.
 
 # Functions for Fitting Data
 
