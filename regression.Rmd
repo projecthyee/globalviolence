@@ -633,8 +633,16 @@ ease of interpretability of beta coefficients.
 # Model Diagnostics
 
 ## QQ Plot of All Variable Linear Model
+
+### Violence Rates
+
 ```{r}
 
+```
+
+
+### Homicide Rates
+```{r}
 test_df <- tibble(
   residuals = resid(baseline_MLR_hom)
 )
