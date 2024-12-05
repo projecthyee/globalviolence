@@ -121,6 +121,41 @@ interest, this function predicts the avlues in the test dataset and then
 calculates and returns the rmse. 
 
 
+## check_model
+```{r}
+check_model = function(resid_list, observed, predicted, model_name) {
+  diagnostics <- list()
+  
+  for (resid_df in resid_list) {
+    qqplot <- 
+      resid_df %>% 
+        ggplot(aes(sample = residuals)) +
+        stat_qq() +
+        stat_qq_line(col = "red") +
+        xlab("Theoretical Quantiles") +
+        ylab("Residuals") +
+        ggtitle(str_c("QQ-Plot for ", model_name))
+    
+    resid_fit <- 
+      resid_df %>% 
+        ggplot(aes(x = predicted, y = resid_df)) +
+        geom_point() +
+        geom_hline(yintercept = 0, linetype = "dotted") +
+        xlab("Fitted Values") +
+        ylab("Residuals") +
+        ggtitle(str_c("Fitted Values vs Residuals for ", model_name))
+      
+    diagnostics <- append(diagnostics, list(qqplot, resid_fit))
+  }
+  
+}
+  
+  
+```
+This is a plotting function to combine several different plot types that assess 
+the assumptions of linear models
+
+
 # Exploratory data analysis 
 
 ## Visualizations of distributions
@@ -665,13 +700,12 @@ ease of interpretability of beta coefficients.
 
 # Model Diagnostics
 
-## QQ Plot of All Variable Linear Model
+#3 All Variables included MLR
 
 ### Violence Rates
 
 ```{r echo=FALSE}
 resid_df <- tibble(residuals = resid(baseline_MLR_viol)) 
-
 resid_df %>% 
   ggplot(aes(sample = residuals)) +
   stat_qq() +
