@@ -22,7 +22,11 @@ merged_violence_df <- read_csv(
 # Introduction
 Our motivation for doing regression is to determine the significant contributors to two outcomes of violence - homicide rate and violence rate. 
 
-Violence is a complex and multifaceted issue, especially when considered in a global context. To better understand its various dimensions, we aimed to include a diverse set of predictors that reflect different underlying factors driving violence. Specifically, economic indicators like GDP, inflation rate, and the Human Development Index (HDI) capture aspects of economic inequality, which can influence social unrest and violence. Crime rate and personnel rate serve as proxies for the level of criminal activity and law enforcement presence, respectively, which can contribute to both non-violent and violent crime. Additionally, trafficked victims and alcohol consumption rate are included to explore the role of cultural norms and behaviors, such as organized crime, substance abuse, and social vulnerability, which can be key drivers of violence.
+Violence is a complex and multifaceted issue, especially when considered in a global context. To better understand its various dimensions, we aimed to include a diverse set of predictors that reflect different underlying factors driving violence. Specifically, economic indicators like GDP, inflation rate, and the Human Development Index (HDI) capture aspects of economic inequality, which can influence social unrest and violence. Economic crime rate, personnel rate, and number of trafficked victims 
+serve as indicators of the level of criminal activity in a country, as well as 
+potential efficacy of law enforcement. Such indicators could be predictive of 
+violence in the country. Lastly, alcohol rate is included to address the
+possibility that substance usage could influence the occurrence of violence.
 
 We hypothesize that homicide rate may be influenced by more "direct" indicators including crime rate, HDI and trafficked_victims. We hypothesize that violence rate may be influenced by all factors we included in this dataset, because violence can exist in multiple forms. 
 
@@ -563,7 +567,7 @@ models is quite similar, and the difference of 1 or 2 included predictors
 between each of the models does not produce a substantial change in model 
 effectiveness. Comparing the 3 models, the best subset regression model 
 may be considered the best as it reduces model complexity but maintains 
-ease of interpretability of beta coeficients.
+ease of interpretability of beta coefficients.
 
 
 # Model Diagnostics
