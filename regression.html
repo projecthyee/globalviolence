@@ -9,9 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="My An Huynh" />
 
-<meta name="date" content="2024-11-15" />
 
 <title>Regression</title>
 
@@ -257,7 +255,7 @@ $(document).ready(function () {
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Shiny
+    Shiny &amp; Dashboard
      
     <span class="caret"></span>
   </a>
@@ -269,12 +267,12 @@ $(document).ready(function () {
       <a href="https://yousmni3269.shinyapps.io/shinyapp/">Trends of Violence</a>
     </li>
     <li>
-      <a href="plotly2.html">Homicide vs. Violence</a>
+      <a href="plotly_vs.html">Homicide vs. Violence</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="report.html">Project Report</a>
+  <a href="p8105_fp_report.html">Project Report</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -297,15 +295,15 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Regression</h1>
-<h4 class="author">My An Huynh</h4>
-<h4 class="date">2024-11-15</h4>
 
 </div>
 
 
-<p>#Introduction Our motivation for doing regression is to determine the
-significant contributors to two outcomes of violence - homicide rate and
-violence rate.</p>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Our motivation for doing regression is to determine the significant
+contributors to two outcomes of violence - homicide rate and violence
+rate.</p>
 <p>Violence is a complex and multifaceted issue, especially when
 considered in a global context. To better understand its various
 dimensions, we aimed to include a diverse set of predictors that reflect
@@ -326,8 +324,11 @@ included in this dataset, because violence can exist in multiple
 forms.</p>
 <p>We perform this analysis to uncover the extent to which different
 factors influence homicide rate and violence rate as outcomes.</p>
-<div id="helpful-functions" class="section level1">
-<h1>Helpful Functions</h1>
+</div>
+<div id="functions-for-fitting-data" class="section level1">
+<h1>Functions for Fitting Data</h1>
+<div id="best_subset" class="section level2">
+<h2>Best_subset</h2>
 <pre class="r"><code>best_subset = function(predictor, outcome, criterion) {
   
   optimal_subset &lt;- 
@@ -345,9 +346,15 @@ factors influence homicide rate and violence rate as outcomes.</p>
   print(optimal_rsq) 
   print(optimal_subset$which[optimal_subset_idx,])
 
-}
-
-fit_glmnet = function(df, alpha, outcome, lambda) {
+}</code></pre>
+<p>This function serves as a wrapper around the leaps function. It
+performs best subset variable selection and then prints out the optimal
+model diagnostic and the predictor variables included in the regression
+model.</p>
+</div>
+<div id="fit_glmnet" class="section level2">
+<h2>fit_glmnet</h2>
+<pre class="r"><code>fit_glmnet = function(df, alpha, outcome, lambda) {
   
   outcome_formula &lt;- as.formula(paste(outcome, &quot;~.&quot;))
   predictor &lt;- model.matrix(outcome_formula, data = df)[,-1]
@@ -364,9 +371,16 @@ fit_glmnet = function(df, alpha, outcome, lambda) {
   model_fit &lt;-
     glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
   
-}
-
-rmse_glmnet = function(model, test, outcome) {
+  return(model_fit)
+  
+}</code></pre>
+<p>This function serves as a wrapper for the glmnet fitting processing
+and covers both the fitting and cross-validation process. It returns the
+glmnet object produced after fitting with optimal lambda value.</p>
+</div>
+<div id="rmse_glmnet" class="section level2">
+<h2>rmse_glmnet</h2>
+<pre class="r"><code>rmse_glmnet = function(model, test, outcome) {
   outcome_formula &lt;- as.formula(paste(outcome, &quot;~.&quot;))
   predictor &lt;- model.matrix(outcome_formula, data = test)[,-1]
   predictions &lt;- predict.glmnet(model, model[[&quot;lambda&quot;]], newx = predictor,
@@ -379,10 +393,11 @@ rmse_glmnet = function(model, test, outcome) {
   return(caret::RMSE(predictions, observed))
   
 }</code></pre>
-<p>This function serves as a wrapper around the leaps function. It
-performs best subset variable selection and then prints out the optimal
-model diagnostic and the predictor variables included in the regression
-model.</p>
+<p>This is a wrapper function for the glmnet prediction and evaluation
+process. Given a fitted glmnet model, a test dataset, and an outcome
+variable of interest, this function predicts the avlues in the test
+dataset and then calculates and returns the rmse.</p>
+</div>
 </div>
 <div id="exploratory-data-analysis" class="section level1">
 <h1>Exploratory data analysis</h1>
@@ -658,20 +673,8 @@ and preserves the integrity of the underlying data.</p>
 <div id="multicolliniearity-diagnostics" class="section level2">
 <h2>Multicolliniearity diagnostics</h2>
 <p>We used <code>cor()</code> to find the correlation between the eight
-predictors of homicide rate and violence.</p>
-<pre class="r"><code>cor_matrix = 
-  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,&quot;crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, &quot;alcohol_consumption_rate&quot;)], use = &quot;pairwise.complete.obs&quot;)
-
-
-ggcorrplot(cor_matrix, 
-           method = &quot;circle&quot;,  
-           type = &quot;lower&quot;,  
-           lab = TRUE,        
-           lab_size = 3,      
-           colors = c(&quot;blue&quot;, &quot;white&quot;, &quot;red&quot;), # Color scale (blue = negative, red = positive)
-           title = &quot;Correlation Heatmap&quot;
-)</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+predictors of homicide rate and violence.
+<img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 There is moderate correlation between <code>hdi</code> and
 <code>alcohol_consumption_rate</code>, corr = 0.5, and moderately high
 correlation between <code>trafficked_victims</code> and
@@ -734,35 +737,20 @@ interest.</p>
 <pre class="r"><code>baseline_MLR_hom &lt;- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR_hom)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = homicide_rate ~ gdp + inflation_rate + unemployment_rate + 
-##     hdi + crime_rate + personnel_rate + trafficked_victims + 
-##     alcohol_consumption_rate, data = merged_violence_df)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -23.805  -3.623  -0.431   2.133  82.629 
-## 
-## Coefficients:
-##                            Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)               7.712e+01  6.895e+00  11.185  &lt; 2e-16 ***
-## gdp                       4.365e-13  3.031e-13   1.440 0.150875    
-## inflation_rate           -7.310e-01  1.997e-01  -3.660 0.000298 ***
-## unemployment_rate        -3.801e-01  1.438e-01  -2.644 0.008626 ** 
-## hdi                      -7.976e+01  9.358e+00  -8.523  7.6e-16 ***
-## crime_rate                4.786e-03  3.741e-03   1.279 0.201744    
-## personnel_rate            9.082e-03  6.451e-03   1.408 0.160258    
-## trafficked_victims       -4.297e-04  5.839e-04  -0.736 0.462382    
-## alcohol_consumption_rate -2.166e-01  2.052e-01  -1.055 0.292193    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 9.722 on 301 degrees of freedom
-##   (461 observations deleted due to missingness)
-## Multiple R-squared:  0.3529, Adjusted R-squared:  0.3357 
-## F-statistic: 20.52 on 8 and 301 DF,  p-value: &lt; 2.2e-16</code></pre>
+baseline_MLR_hom %&gt;% 
+  broom::tidy()</code></pre>
+<pre><code>## # A tibble: 9 × 5
+##   term                      estimate std.error statistic  p.value
+##   &lt;chr&gt;                        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)               7.71e+ 1  6.89e+ 0    11.2   1.61e-24
+## 2 gdp                       4.37e-13  3.03e-13     1.44  1.51e- 1
+## 3 inflation_rate           -7.31e- 1  2.00e- 1    -3.66  2.98e- 4
+## 4 unemployment_rate        -3.80e- 1  1.44e- 1    -2.64  8.63e- 3
+## 5 hdi                      -7.98e+ 1  9.36e+ 0    -8.52  7.60e-16
+## 6 crime_rate                4.79e- 3  3.74e- 3     1.28  2.02e- 1
+## 7 personnel_rate            9.08e- 3  6.45e- 3     1.41  1.60e- 1
+## 8 trafficked_victims       -4.30e- 4  5.84e- 4    -0.736 4.62e- 1
+## 9 alcohol_consumption_rate -2.17e- 1  2.05e- 1    -1.06  2.92e- 1</code></pre>
 <p>Results from baseline MLR show that that inflation rate, unemployment
 rate and hdi are significant predictors of homicide rate at significance
 level alpha = 0.05.</p>
@@ -958,65 +946,65 @@ lasso_violence_fit |&gt;
 <tr class="odd">
 <td align="left">(Intercept)</td>
 <td align="right">1</td>
-<td align="right">38.1401915</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">35.1782575</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="even">
 <td align="left">…1</td>
 <td align="right">1</td>
-<td align="right">-0.0200852</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">-0.0142467</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="odd">
 <td align="left">gdp</td>
 <td align="right">1</td>
 <td align="right">0.0000000</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="even">
 <td align="left">inflation_rate</td>
 <td align="right">1</td>
-<td align="right">-1.5199887</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">-1.4142587</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="odd">
 <td align="left">unemployment_rate</td>
 <td align="right">1</td>
-<td align="right">-0.1054106</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">-0.0770963</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="even">
 <td align="left">crime_rate</td>
 <td align="right">1</td>
-<td align="right">0.1120914</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">0.1065574</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="odd">
 <td align="left">personnel_rate</td>
 <td align="right">1</td>
-<td align="right">-0.0501932</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">-0.0424605</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="even">
 <td align="left">trafficked_victims</td>
 <td align="right">1</td>
-<td align="right">0.0088820</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">0.0078471</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 <tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
 <td align="right">1</td>
-<td align="right">-1.4866370</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5315699</td>
+<td align="right">-1.3823676</td>
+<td align="right">0.7943282</td>
+<td align="right">0.5249133</td>
 </tr>
 </tbody>
 </table>
@@ -1054,65 +1042,65 @@ lasso_homicide_fit |&gt;
 <tr class="odd">
 <td align="left">(Intercept)</td>
 <td align="right">1</td>
-<td align="right">76.2863204</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
+<td align="right">74.6709895</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
 </tr>
 <tr class="even">
-<td align="left">…1</td>
-<td align="right">1</td>
-<td align="right">-0.0055324</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
-</tr>
-<tr class="odd">
 <td align="left">gdp</td>
 <td align="right">1</td>
 <td align="right">0.0000000</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">inflation_rate</td>
 <td align="right">1</td>
-<td align="right">-0.6118305</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
+<td align="right">-0.6671610</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">unemployment_rate</td>
 <td align="right">1</td>
-<td align="right">-0.3684458</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
-</tr>
-<tr class="even">
-<td align="left">hdi</td>
-<td align="right">1</td>
-<td align="right">-76.9758914</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
+<td align="right">-0.3409829</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
 </tr>
 <tr class="odd">
-<td align="left">crime_rate</td>
+<td align="left">hdi</td>
 <td align="right">1</td>
-<td align="right">0.0038193</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
+<td align="right">-77.2906554</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
 </tr>
 <tr class="even">
+<td align="left">crime_rate</td>
+<td align="right">1</td>
+<td align="right">0.0040888</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
+</tr>
+<tr class="odd">
 <td align="left">personnel_rate</td>
 <td align="right">1</td>
-<td align="right">0.0097432</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
+<td align="right">0.0082468</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
+</tr>
+<tr class="even">
+<td align="left">trafficked_victims</td>
+<td align="right">1</td>
+<td align="right">-0.0001397</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
 </tr>
 <tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
 <td align="right">1</td>
-<td align="right">-0.1917146</td>
-<td align="right">0.0794328</td>
-<td align="right">0.3619247</td>
+<td align="right">-0.1995430</td>
+<td align="right">0.1</td>
+<td align="right">0.3517353</td>
 </tr>
 </tbody>
 </table>
@@ -1130,7 +1118,7 @@ class="section level3">
 <h3>Predict violence rate using r-squared as criterion</h3>
 <pre class="r"><code>best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = &quot;adjr2&quot;)</code></pre>
-<pre><code>## [1] 0.521327
+<pre><code>## [1] 0.5171375
 ##                     ...1                      gdp           inflation_rate 
 ##                     TRUE                     TRUE                     TRUE 
 ##        unemployment_rate                      hdi               crime_rate 
@@ -1143,7 +1131,7 @@ class="section level3">
 <h3>Predict violence_rate using Cp as criterion</h3>
 <pre class="r"><code>best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = &quot;Cp&quot;)</code></pre>
-<pre><code>## [1] 6.413214
+<pre><code>## [1] 7.123014
 ##                     ...1                      gdp           inflation_rate 
 ##                     TRUE                     TRUE                     TRUE 
 ##        unemployment_rate                      hdi               crime_rate 
@@ -1210,9 +1198,9 @@ class="section level3">
 <h3>Predict homicide rate using R-squared as criterion</h3>
 <pre class="r"><code>best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = &quot;adjr2&quot;)</code></pre>
-<pre><code>## [1] 0.3454581
+<pre><code>## [1] 0.3367418
 ##                     ...1                      gdp           inflation_rate 
-##                     TRUE                     TRUE                     TRUE 
+##                    FALSE                     TRUE                     TRUE 
 ##        unemployment_rate                      hdi               crime_rate 
 ##                     TRUE                     TRUE                     TRUE 
 ##           personnel_rate       trafficked_victims alcohol_consumption_rate 
@@ -1223,13 +1211,13 @@ class="section level3">
 <h3>Predict Homicide Rates using Cp as criterion</h3>
 <pre class="r"><code>best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = &quot;Cp&quot;)</code></pre>
-<pre><code>## [1] 6.758296
+<pre><code>## [1] 5.492935
 ##                     ...1                      gdp           inflation_rate 
-##                     TRUE                     TRUE                     TRUE 
+##                    FALSE                    FALSE                     TRUE 
 ##        unemployment_rate                      hdi               crime_rate 
-##                     TRUE                     TRUE                    FALSE 
+##                     TRUE                     TRUE                     TRUE 
 ##           personnel_rate       trafficked_victims alcohol_consumption_rate 
-##                     TRUE                    FALSE                    FALSE</code></pre>
+##                    FALSE                    FALSE                    FALSE</code></pre>
 </div>
 <div id="check-for-co-linearity-in-best-subset-homicide-model"
 class="section level3">
@@ -1365,14 +1353,15 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
     everything(),
     names_to = &quot;Model&quot;, 
     values_to = &quot;RMSE&quot;,
-    names_prefix = &quot;RMSE_&quot;
+    names_prefix = &quot;rmse_&quot;
   ) %&gt;% 
   mutate(
     Model = fct_inorder(Model)
   ) %&gt;% 
   ggplot(aes(x = Model, y = RMSE)) +
-  geom_violin()</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+  geom_violin() +
+  ggtitle(&quot;RMSE by Model for Predicting Violence Rate&quot;)</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 </div>
 <div id="homicide-1" class="section level3">
 <h3>Homicide</h3>
@@ -1381,14 +1370,15 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
     everything(),
     names_to = &quot;Model&quot;, 
     values_to = &quot;RMSE&quot;,
-    names_prefix = &quot;RMSE_&quot;
+    names_prefix = &quot;rmse_&quot;
   )%&gt;% 
   mutate(
     Model = fct_inorder(Model)
   ) %&gt;% 
   ggplot(aes(x = Model, y = RMSE)) +
-  geom_violin()</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+  geom_violin() +
+  ggtitle(&quot;RMSE by Model for Predicting Homicide Rate&quot;)</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
 </div>
 </div>
