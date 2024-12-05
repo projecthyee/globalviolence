@@ -40,7 +40,7 @@ predictor variables and the outcome variables of interest, we seek to develop
 models that can determine which factors are most predictive of homicide and 
 violence rate. 
 
-We perform this analysis to uncover the extent to which 
+We performed this analysis to uncover the extent to which 
 different factors influence homicide rate and violence rate as outcomes.
 
 # Functions for Fitting Data
@@ -139,14 +139,14 @@ merged_violence_df |>
 ```
 
 All variables are skewed right, except for human development index which is 
-bimodal and slightly left-skewed. We will apply ln transformations and 
-Box-Cox transformations to these variables, in order to account for concerns 
+bimodal and slightly left-skewed. Hence, we decided to apply ln transformations 
+and Box-Cox transformations to these variables in order to account for concerns 
 regarding the constancy of variance in linear models. Transformations are 
-intened to approximately normalize the data.
+intended to approximately normalize the data.
 
 ## Transformations
 Transformation step involves writing a function for natural log transformation 
-and a function for Box-Cox transformation. The functions will be mapped into the 
+and a function for Box-Cox transformation. The functions are mapped into the 
 nested list col which includes all continuous variables in 
 the `merged_violence_df` dataset. 
 
@@ -204,20 +204,31 @@ boxcox_df |>
 
 ```
 
-While initial EDA suggested that logarithmic and Box-Cox transformations might be useful for improving normality, the results indicate that these transformations are not entirely necessary. The primary motivation for using these transformations is often to address skewness. However, after reviewing the data and the results of the transformations, we found that the original data already provides a reasonable representation of the underlying distribution.
+While the initial EDA suggested that logarithmic and Box-Cox transformations 
+might be useful for improving normality, the results indicate that these 
+transformations are not entirely necessary. The primary motivation for using 
+these transformations is often to address skewness. 
+However, after reviewing the data and the results of the transformations, 
+we found that the original data already provides a reasonable representation of
+the underlying distribution.
 
-While the natural logarithm helped with normality, the Box-Cox transformation did not substantially improve the data's distribution. Box-Cox transformation requires shifting data to be strictly positive, which could introduce unnecessary complexity.
+
+While the natural logarithm helped with normality, the Box-Cox transformation 
+did not substantially improve the data's distribution. Box-Cox transformation
+requires shifting data to be strictly positive, which could introduce 
+unnecessary complexity.
+
 
 Box-Cox and ln transformations were performed with intentions of improving 
-the approximate normality of each of the predictor distribtuions. However, 
+the approximate normality of each of the predictor distributions. However, 
 neither transformation substantially approved the shapes of the distributions.
 Since no major improvements in normality were observed with the transformations, 
-we ultimately decided that to use the original data. Concerns regarding the 
-normality of the distributions are alleviated by the central limit theorem. 
-With a suffeciently large amount of data points, we can assume that the sampling 
-distribution is approximately. Using the convention that n > 30 allows for 
+we ultimately decided to use the original data. Concerns regarding the 
+normality of the distributions are alleviated by the Central Limit Theorem. 
+With a sufficiently large amount of data points, we can assume that the sampling 
+distribution is approximately normal. Using the convention that n > 30 allows for 
 the assumption of approximate normality, our 310 observation dataset suffices
-to be supported by clt.
+to be supported by CLT.
 
 ## Multicolliniearity diagnostics
 We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
