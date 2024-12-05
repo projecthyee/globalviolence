@@ -138,12 +138,16 @@ check_model = function(data, name) {
 
   qqplot = 
     data |>
+      filter(is.finite(resid)) |>
       ggplot(aes(sample = resid)) +
       stat_qq() +
       stat_qq_line(col = "red") +
       xlab("Theoretical Quantiles") +
       ylab("Residuals") +
       ggtitle(name)
+  
+  qqnorm(pull(data, resid), main = "QQ Plot of Residuals")
+  qqline(pull(data, resid), col = "red")
       
   diagnostics = append(diagnostics, list(qqplot, resid_fit))
   patchwork::wrap_plots(diagnostics)
