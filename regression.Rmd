@@ -237,8 +237,8 @@ ggcorrplot(cor_matrix,
 ```
 
 There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
-corr = 0.5, and moderately high correlation between `trafficked_victims` and 
-`gdp`, corr = 0.7. 
+corr = 0.56, and moderately high correlation between `trafficked_victims` and 
+`gdp`, corr = 0.77. 
 
 # Data Pre-processing
 
@@ -249,6 +249,14 @@ statistical modelling.
 ```{r}
 lambda = 10^(seq(-2, 2.75, 0.1))
 ```
+
+## Approach to pre-processing data 
+
+Prior to performing any model fitting, we split our intial dataset into 
+separate homicide and violence datasets, each of which includes the outcome 
+variable and all numeric predictor variables. Specific predictor and outcome 
+dataframes, and an outcome matrix, are created for later use in linear models, 
+as well as lasso.
 
 ## Pre-processing for homicide.
 ```{r}
@@ -290,7 +298,11 @@ violence_outcome <- violence_df %>%
 ```
 
 # Baseline MLR with additive effects
-First, we will fit a baseline MLR with additive effects from all possible predictor variables to use as a point of reference for our modeling process. This step provides basic understanding of the extent to which different covariates contribute to the outcomes of interest. 
+
+First, we will fit a baseline MLR with additive effects from all possible 
+predictor variables to use as a point of reference for our modeling process. 
+This step provides basic understanding of the extent to which different 
+covariates contribute to the outcomes of interest. 
 
 ## Predict Homicide Rates
 ```{r echo=FALSE}
@@ -301,7 +313,9 @@ baseline_MLR_hom %>%
   broom::tidy() %>% 
   knitr::kable()
 ```
-Results from baseline MLR show that that inflation rate, unemployment rate and hdi are significant predictors of homicide rate at significance level alpha = 0.05. 
+Results from baseline MLR show that that inflation rate, unemployment rate and 
+hdi are significant predictors of homicide rate at 
+alpha = 0.05. 
 
 ## Check Baseline Homicide Prediction Model for Colinearity
 ```{r echo=FALSE}
@@ -327,7 +341,9 @@ baseline_MLR_viol %>%
   broom::tidy() %>% 
   knitr::kable()
 ```
-Results from MLR show that gdp, inflation rate, crime rate, personnel rate, number of trafficked victims per 100,000 and alcohol consumption rates are significant predictors of violence rate at significance level alpha = 0.01. 
+Results from MLR show that gdp, inflation rate, crime rate, personnel rate, 
+number of trafficked victims per 100,000 and alcohol consumption rates are 
+significant predictors of violence rate at significance level alpha = 0.01. 
 
 ## Calculate VIF for baseline violence MLR
 ```{r echo=FALSE}
@@ -343,11 +359,10 @@ vif_baseline_viol_MLR %>%
 Results from VIF show that there is no multicollinearity issue (VIF < 5).
 
 # Lasso 
-We used Lasso to as a feature selection tool to find the most important variables in predicting homicide rate and violence rate. 
+We used Lasso to as a feature selection tool to find the most important 
+variables in predicting homicide rate and violence rate. 
 
 ## Predictors for violence rate:
-To prepare data for Lasso (fitting violence rate), we removed variables that are not predictors including iso3_code, country, region, year and homicide rate. We then dropped NA values before performing Lasso. 
-
 ```{r echo=FALSE}
 lasso_violence_fit = 
   glmnet(violence_matrix, violence_outcome, lambda = lambda)
