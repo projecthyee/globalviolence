@@ -543,3 +543,22 @@ cv_df_homicide %>%
 ```
 
 # Model Diagnostics
+
+## QQ Plot of All Variable Linear Model
+
+```{r}
+
+```
+
+## QQ Plot of Best Subset Linear Model 
+
+```{r}
+
+```
+
+## QQ Plot of Lasso Model
+
+```{r}
+
+```
+
