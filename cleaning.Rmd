@@ -122,7 +122,7 @@ comparability.
 # Regression Data
 
 For regression, the datasets for all the chosen predictors and outcomes will be 
-tidied and merged for regression analysis. 
+tidied and merged for modeling process and analysis. 
 
 ## Function to Tidy Datasets
 ```{r pivot_tidy_function}
@@ -184,10 +184,10 @@ as different columns, where each column represented values for that year.
 
 Also, some of the datasets include rates for different categories. For example, 
 the data for economic crime includes crime rates for fraud, burglary and more. 
-Therefore, another boolean parameter called "average" was included to pass an 
+Therefore, another boolean parameter called `average` was included to pass an 
 option to group by and summarize rates across categories and genders of 
-different datasets, since the exact population for these categories were not 
-provided. 
+different datasets, in order to provide a standardized measure and reduce 
+complexity for analysis.
 
 ## Economic Determinants
 ```{r tidy_econ_determinants, message = FALSE}
@@ -226,7 +226,8 @@ The following variables were identified as economic prdictors of violence:
 * `human development index`
 
 The `pivot` parameter of the `tidy_df()` function was set to true for these 
-datasets, since all of them had the different years as data columns. 
+datasets, since all of them had the different years as data columns, which 
+needs to be pivoted accordingly. 
 
 ## Social Determinants
 ```{r import_social_determinants, message = FALSE}
@@ -305,7 +306,8 @@ violence_df =
 
 Unlike the tidied dataset for EDA, the datasets for homicide and violence had 
 their respective rates averaged across category, since we are interested in 
-the average rates of homicide and violence for regression analysis.
+the average rates of homicide victims and violent offences for regression 
+analysis. 
 
 ## Merge Datasets
 ```{r merge_datasets, message = FALSE}
@@ -326,7 +328,6 @@ merged_violence_df =
   drop_na(violence_rate, homicide_rate)
 
 head(merged_violence_df)
-
 write.csv(merged_violence_df, file = "./data/merged_violence.csv")
 ```
 
@@ -342,4 +343,6 @@ After merging the datasets, country and region were converted to categorical
 variables and the dataset was filtered for the years between 2015 and 2023, 
 the period of our interest for analysis. Although the datasets were merged with 
 matching country names tidied by the `countrycode()`, the iso3 codes were 
-retained, since they are required for plotting maps. 
+retained, since they are required for plotting maps which can be found under the 
+shiny section of this website. 
+
