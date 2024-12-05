@@ -109,7 +109,7 @@ calculates and returns the rmse.
 # Exploratory data analysis 
 
 ## Visualizations of distributions
-```{r distributions, fig.width = 10, fig.height = 10}
+```{r distributions, fig.width = 10, fig.height = 10, warning = FALSE, message = FALSE, echo = FALSE}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
     plot = ggplot(merged_violence_df, aes(x = column)) +
@@ -122,14 +122,15 @@ list = merged_violence_df |>
   select(homicide_rate:alcohol_consumption_rate) |>
   colnames()
 
-map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
+hide = map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
 
 ## GGPairs (Also shows correlation)
 merged_violence_df |>
   select(homicide_rate:alcohol_consumption_rate) |>
   ggpairs()
-
 ```
+
+
 
 All variables are skewed right, except for human development index which is bimodal and slightly left-skewed. We will apply ln transformations and Box-Cox transformations to these variables. Even though it is not necessary to normalize the distribution of predictors, this step will stabilize variance and reduce heteroscedasticity. We believe it will be helpful for further steps with model.
 
@@ -138,7 +139,7 @@ Transformation step involves writing a function for natural log transformation a
 nested list col which includes all continuous variables in the `merged_violence_df` dataset. 
 
 ## Natural Log Transform.
-```{r ln-transform}
+```{r ln-transform, warning = FALSE}
 ln_transform = function(value) {
   return(log(abs(value)))
 }
@@ -152,7 +153,7 @@ map(list, \(x) plot_distributions(pull(ln_df, x), x))
 ```
 
 ## Box-Cox Transform. 
-```{r boxcox}
+```{r boxcox, warning = FALSE}
 boxcox_transform = function(value) {
   if (all(is.na(value))) {
     return(value) 
@@ -174,7 +175,6 @@ boxcox_transform = function(value) {
   transformed_value = (value^lambda - 1) / lambda
   return(transformed_value)
 }
-
 
 boxcox_df = merged_violence_df |> 
   mutate(across(c(homicide_rate:alcohol_consumption_rate), 

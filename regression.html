@@ -405,73 +405,7 @@ dataset and then calculates and returns the rmse.</p>
 <h1>Exploratory data analysis</h1>
 <div id="visualizations-of-distributions" class="section level2">
 <h2>Visualizations of distributions</h2>
-<pre class="r"><code>plot_distributions = function(column, name) {
-  if(is.numeric(column) &amp; name != &quot;year&quot;) {
-    plot = ggplot(merged_violence_df, aes(x = column)) +
-            geom_density() +
-            labs(title = paste(&quot;Distribution of&quot;, name))
-  }
-}
-
-list = colnames(merged_violence_df)
-map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))</code></pre>
-<pre><code>## [[1]]
-## NULL
-## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]</code></pre>
-<p><img src="regression_files/figure-html/distributions-1.png" width="672" /></p>
-<pre><code>## 
-## [[6]]</code></pre>
-<p><img src="regression_files/figure-html/distributions-2.png" width="672" /></p>
-<pre><code>## 
-## [[7]]</code></pre>
-<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-3.png" width="672" /></p>
-<pre><code>## 
-## [[8]]</code></pre>
-<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-4.png" width="672" /></p>
-<pre><code>## 
-## [[9]]</code></pre>
-<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-5.png" width="672" /></p>
-<pre><code>## 
-## [[10]]</code></pre>
-<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-6.png" width="672" /></p>
-<pre><code>## 
-## [[11]]</code></pre>
-<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-7.png" width="672" /></p>
-<pre><code>## 
-## [[12]]</code></pre>
-<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-8.png" width="672" /></p>
-<pre><code>## 
-## [[13]]</code></pre>
-<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-9.png" width="672" /></p>
-<pre><code>## 
-## [[14]]</code></pre>
-<pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distributions-10.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-1.png" width="960" /></p>
 <p>All variables are skewed right, except for human development index
 which is bimodal and slightly left-skewed. We will apply ln
 transformations and Box-Cox transformations to these variables. Even
@@ -498,66 +432,34 @@ ln_df =
                 ln_transform))
 
 map(list, \(x) plot_distributions(pull(ln_df, x), x))</code></pre>
-<pre><code>## [[1]]
-## NULL
-## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]</code></pre>
-<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+<pre><code>## [[1]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-1.png" width="672" /></p>
 <pre><code>## 
-## [[6]]</code></pre>
-<pre><code>## Warning: Removed 3 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[2]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-2.png" width="672" /></p>
 <pre><code>## 
-## [[7]]</code></pre>
-<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[3]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-3.png" width="672" /></p>
 <pre><code>## 
-## [[8]]</code></pre>
-<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[4]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-4.png" width="672" /></p>
 <pre><code>## 
-## [[9]]</code></pre>
-<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[5]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-5.png" width="672" /></p>
 <pre><code>## 
-## [[10]]</code></pre>
-<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[6]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-6.png" width="672" /></p>
 <pre><code>## 
-## [[11]]</code></pre>
-<pre><code>## Warning: Removed 38 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[7]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-7.png" width="672" /></p>
 <pre><code>## 
-## [[12]]</code></pre>
-<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[8]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-8.png" width="672" /></p>
 <pre><code>## 
-## [[13]]</code></pre>
-<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[9]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-9.png" width="672" /></p>
 <pre><code>## 
-## [[14]]</code></pre>
-<pre><code>## Warning: Removed 213 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[10]]</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-10.png" width="672" /></p>
 </div>
 <div id="box-cox-transform." class="section level2">
@@ -576,7 +478,7 @@ map(list, \(x) plot_distributions(pull(ln_df, x), x))</code></pre>
     return(value) 
   }
 
-  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
   lambda = boxcox_result$x[which.max(boxcox_result$y)]  
 
 
@@ -584,68 +486,39 @@ map(list, \(x) plot_distributions(pull(ln_df, x), x))</code></pre>
   return(transformed_value)
 }
 
-
 boxcox_df = merged_violence_df |&gt; 
   mutate(across(c(homicide_rate:alcohol_consumption_rate), 
                 ~ boxcox_transform(.)))
 
 map(list, \(x) plot_distributions(pull(boxcox_df, x), x))</code></pre>
-<pre><code>## [[1]]
-## NULL
-## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]</code></pre>
+<pre><code>## [[1]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-1.png" width="672" /></p>
 <pre><code>## 
-## [[6]]</code></pre>
+## [[2]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-2.png" width="672" /></p>
 <pre><code>## 
-## [[7]]</code></pre>
-<pre><code>## Warning: Removed 771 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[3]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-3.png" width="672" /></p>
 <pre><code>## 
-## [[8]]</code></pre>
-<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[4]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-4.png" width="672" /></p>
 <pre><code>## 
-## [[9]]</code></pre>
-<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[5]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-5.png" width="672" /></p>
 <pre><code>## 
-## [[10]]</code></pre>
-<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[6]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-6.png" width="672" /></p>
 <pre><code>## 
-## [[11]]</code></pre>
-<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[7]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-7.png" width="672" /></p>
 <pre><code>## 
-## [[12]]</code></pre>
-<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[8]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-8.png" width="672" /></p>
 <pre><code>## 
-## [[13]]</code></pre>
-<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[9]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-9.png" width="672" /></p>
 <pre><code>## 
-## [[14]]</code></pre>
-<pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
+## [[10]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-10.png" width="672" /></p>
 <p>While initial EDA suggested that logarithmic and Box-Cox
 transformations might be useful for improving normality, the results
