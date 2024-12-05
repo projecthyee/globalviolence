@@ -405,7 +405,7 @@ dataset and then calculates and returns the rmse.</p>
 <h1>Exploratory data analysis</h1>
 <div id="visualizations-of-distributions" class="section level2">
 <h2>Visualizations of distributions</h2>
-<p><img src="regression_files/figure-html/distributions-1.png" width="960" /></p>
+<p><img src="regression_files/figure-html/distributions-1.png" width="1920" /></p>
 <p>All variables are skewed right, except for human development index
 which is bimodal and slightly left-skewed. We will apply ln
 transformations and Box-Cox transformations to these variables. Even
@@ -431,36 +431,10 @@ ln_df =
   mutate(across(c(homicide_rate:alcohol_consumption_rate), 
                 ln_transform))
 
-map(list, \(x) plot_distributions(pull(ln_df, x), x))</code></pre>
-<pre><code>## [[1]]</code></pre>
+ln_df |&gt;
+  select(homicide_rate:alcohol_consumption_rate) |&gt;
+  ggpairs()</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-1.png" width="672" /></p>
-<pre><code>## 
-## [[2]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-2.png" width="672" /></p>
-<pre><code>## 
-## [[3]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-3.png" width="672" /></p>
-<pre><code>## 
-## [[4]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-4.png" width="672" /></p>
-<pre><code>## 
-## [[5]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-5.png" width="672" /></p>
-<pre><code>## 
-## [[6]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-6.png" width="672" /></p>
-<pre><code>## 
-## [[7]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-7.png" width="672" /></p>
-<pre><code>## 
-## [[8]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-8.png" width="672" /></p>
-<pre><code>## 
-## [[9]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-9.png" width="672" /></p>
-<pre><code>## 
-## [[10]]</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-10.png" width="672" /></p>
 </div>
 <div id="box-cox-transform." class="section level2">
 <h2>Box-Cox Transform.</h2>
@@ -493,36 +467,10 @@ boxcox_df = merged_violence_df |&gt;
   mutate(across(c(homicide_rate:alcohol_consumption_rate), 
                 ~ boxcox_transform(.)))
 
-map(list, \(x) plot_distributions(pull(boxcox_df, x), x))</code></pre>
-<pre><code>## [[1]]</code></pre>
+boxcox_df |&gt;
+  select(homicide_rate:alcohol_consumption_rate) |&gt;
+  ggpairs()</code></pre>
 <p><img src="regression_files/figure-html/boxcox-1.png" width="672" /></p>
-<pre><code>## 
-## [[2]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-2.png" width="672" /></p>
-<pre><code>## 
-## [[3]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-3.png" width="672" /></p>
-<pre><code>## 
-## [[4]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-4.png" width="672" /></p>
-<pre><code>## 
-## [[5]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-5.png" width="672" /></p>
-<pre><code>## 
-## [[6]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-6.png" width="672" /></p>
-<pre><code>## 
-## [[7]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-7.png" width="672" /></p>
-<pre><code>## 
-## [[8]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-8.png" width="672" /></p>
-<pre><code>## 
-## [[9]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-9.png" width="672" /></p>
-<pre><code>## 
-## [[10]]</code></pre>
-<p><img src="regression_files/figure-html/boxcox-10.png" width="672" /></p>
 <p>While initial EDA suggested that logarithmic and Box-Cox
 transformations might be useful for improving normality, the results
 indicate that these transformations are not entirely necessary. The
@@ -562,8 +510,8 @@ later statistical modelling.</p>
 <h2>Pre-processing for homicide.</h2>
 <pre class="r"><code>homicide_df =
   merged_violence_df |&gt; 
-  dplyr::ungroup() |&gt; 
-  dplyr::select(
+  ungroup() |&gt; 
+  select(
     homicide_rate, everything(), -violence_rate, -year, -country, -region, 
     -iso3_code) |&gt; 
   drop_na()
@@ -571,7 +519,7 @@ later statistical modelling.</p>
 homicide_matrix &lt;- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
 
 homicide_predictors &lt;- homicide_df %&gt;% 
-  dplyr::select(-homicide_rate)
+  select(-homicide_rate)
 
 homicide_outcome &lt;- homicide_df %&gt;% 
   pull(homicide_rate)</code></pre>
@@ -580,8 +528,8 @@ homicide_outcome &lt;- homicide_df %&gt;%
 <h2>Pre-processing for violence.</h2>
 <pre class="r"><code>violence_df =
   merged_violence_df |&gt; 
-  dplyr::ungroup() |&gt; 
-  dplyr::select(
+  ungroup() |&gt; 
+  select(
     violence_rate, everything(), -year, -homicide_rate, -country, -region, 
     -iso3_code) |&gt;
   drop_na()
@@ -589,7 +537,7 @@ homicide_outcome &lt;- homicide_df %&gt;%
 violence_matrix &lt;- model.matrix(violence_rate ~., data = violence_df)[,-1]
   
 violence_predictors &lt;- violence_df %&gt;% 
-  dplyr::select(-violence_rate)
+  select(-violence_rate)
 
 violence_outcome &lt;- violence_df %&gt;% 
   pull(violence_rate)</code></pre>
@@ -1228,7 +1176,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
     rmse_lasso = map2_dbl(
       lasso, test, \(mod, test) rmse_glmnet(mod, test, &quot;violence_rate&quot;))
   ) %&gt;% 
-  dplyr::select(starts_with(&quot;rmse_&quot;))</code></pre>
+  select(starts_with(&quot;rmse_&quot;))</code></pre>
 </div>
 <div id="homicide" class="section level3">
 <h3>Homicide</h3>
@@ -1249,7 +1197,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
     rmse_lasso = map2_dbl(
       lasso, test, \(mod, test) rmse_glmnet(mod, test, &quot;homicide_rate&quot;))
   ) %&gt;% 
-  dplyr::select(starts_with(&quot;rmse_&quot;))</code></pre>
+  select(starts_with(&quot;rmse_&quot;))</code></pre>
 </div>
 </div>
 <div id="compare-rmse" class="section level2">
@@ -1262,6 +1210,18 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
 <h3>Homicide</h3>
 <p><img src="regression_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
+</div>
+</div>
+<div id="model-diagnostics" class="section level1">
+<h1>Model Diagnostics</h1>
+<div id="qq-plot-of-all-variable-linear-model" class="section level2">
+<h2>QQ Plot of All Variable Linear Model</h2>
+</div>
+<div id="qq-plot-of-best-subset-linear-model" class="section level2">
+<h2>QQ Plot of Best Subset Linear Model</h2>
+</div>
+<div id="qq-plot-of-lasso-model" class="section level2">
+<h2>QQ Plot of Lasso Model</h2>
 </div>
 </div>
 
