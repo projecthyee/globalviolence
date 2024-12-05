@@ -498,7 +498,7 @@ violence_best_subset_rsq <-
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
               criterion = "adjr2")
 
-violence_best_subset_rsquared
+violence_best_subset_rsq
 ```
 
 ### Predict violence_rate using Cp as criterion

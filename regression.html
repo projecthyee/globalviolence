@@ -29,6 +29,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -221,6 +224,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -228,6 +294,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -342,13 +418,12 @@ factors influence homicide rate and violence rate as outcomes.</p>
     optimal_subset_idx &lt;- optimal_subset[[criterion]] %&gt;% which.max()
   }
   
-  
-  list(Criterion = optimal_criterion , 
-       Variable_Selection = optimal_subset$which[optimal_subset_idx,])
+  return(list(Criterion = optimal_criterion , 
+       Variable_Selection = optimal_subset$which[optimal_subset_idx,]))
   
 }</code></pre>
 <p>This function serves as a wrapper around the leaps function. It
-performs best subset variable selection and then prints out the optimal
+performs best-subset variable selection and then prints out the optimal
 model diagnostic and the predictor variables included in the regression
 model.</p>
 </div>
@@ -1139,12 +1214,15 @@ to 0.</p>
 <h1><em>Criterion-based procedure</em></h1>
 <div id="best-subset-regression-for-violence-rate"
 class="section level2">
-<h2>Best Subset Regression for Violence Rate</h2>
+<h2>Best-Subset Regression for Violence Rate</h2>
 <div id="predict-violence-rate-using-r-squared-as-criterion"
 class="section level3">
 <h3>Predict violence rate using r-squared as criterion</h3>
-<pre class="r"><code>best_subset(predictor = violence_predictors, outcome = violence_outcome, 
-            criterion = &quot;adjr2&quot;)</code></pre>
+<pre class="r"><code>violence_best_subset_rsq &lt;- 
+  best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+              criterion = &quot;adjr2&quot;)
+
+violence_best_subset_rsq</code></pre>
 <pre><code>## $Criterion
 ## [1] 0.5103599
 ## 
@@ -1159,8 +1237,10 @@ class="section level3">
 <div id="predict-violence_rate-using-cp-as-criterion"
 class="section level3">
 <h3>Predict violence_rate using Cp as criterion</h3>
-<pre class="r"><code>best_subset(predictor = violence_predictors, outcome = violence_outcome, 
-            criterion = &quot;Cp&quot;)</code></pre>
+<pre class="r"><code>violence_best_subset_Cp &lt;- 
+  best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+              criterion = &quot;Cp&quot;)
+violence_best_subset_Cp</code></pre>
 <pre><code>## $Criterion
 ## [1] 5.363491
 ## 
@@ -1174,7 +1254,7 @@ class="section level3">
 </div>
 <div id="check-for-co-linearity-in-best-subset-violence-model"
 class="section level3">
-<h3>Check for co-linearity in best subset violence model</h3>
+<h3>Check for co-linearity in best-subset violence model</h3>
 <pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
@@ -1244,8 +1324,11 @@ class="section level2">
 <div id="predict-homicide-rate-using-r-squared-as-criterion"
 class="section level3">
 <h3>Predict homicide rate using R-squared as criterion</h3>
-<pre class="r"><code>best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
-            criterion = &quot;adjr2&quot;)</code></pre>
+<pre class="r"><code>homicide_best_subset_rsq &lt;- 
+  best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+              criterion = &quot;adjr2&quot;)
+
+homicide_best_subset_rsq</code></pre>
 <pre><code>## $Criterion
 ## [1] 0.3367418
 ## 
@@ -1260,8 +1343,11 @@ class="section level3">
 <div id="predict-homicide-rates-using-cp-as-criterion"
 class="section level3">
 <h3>Predict Homicide Rates using Cp as criterion</h3>
-<pre class="r"><code>best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
-            criterion = &quot;Cp&quot;)</code></pre>
+<pre class="r"><code>homicide_best_subset_Cp &lt;- 
+  best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+              criterion = &quot;Cp&quot;)
+
+homicide_best_subset_Cp</code></pre>
 <pre><code>## $Criterion
 ## [1] 6.511243
 ## 
@@ -1481,7 +1567,20 @@ baseline_viol_resid_df =
 check_model(baseline_hom_resid_df, &quot;MLR All Predictors Homicide Rate&quot;) </code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-26-1.png" width="672" /><img src="regression_files/figure-html/unnamed-chunk-26-2.png" width="672" /></p>
 <pre class="r"><code>check_model(baseline_viol_resid_df, &quot;MLR All Predictors Violence Rate&quot;)</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-26-3.png" width="672" /><img src="regression_files/figure-html/unnamed-chunk-26-4.png" width="672" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-26-3.png" width="672" /><img src="regression_files/figure-html/unnamed-chunk-26-4.png" width="672" />
+Examining the QQ-plots for the MLRs with all predictor variables
+included, we notice that our assumption of normality of residuals may be
+in violation, as there appear to many lower-bound and upper-bound
+outliers that do not fall along the reference line. Regarding the plots
+of fitted values versus residuals, we see differing results based on
+whether homicide rate or violence rate is the outcome variable. With
+homicide as the outcome variable, we can see residuals oscillate above
+and below the reference line, indicating approximate linearity of the
+relationship between the predictors and the outcome variables. However,
+the greater variability in the residuals as fitted values increase,
+suggests that we are seeing heteroscedasticity. Regarding violence rate
+as the outcome variable, we see both issues with heteroscedasticity and
+linearity.</p>
 </div>
 <div id="best-subset-mlr" class="section level2">
 <h2>Best Subset MLR</h2>
@@ -1495,10 +1594,20 @@ subset_violence_resid_df =
   add_residuals(subset_violence_lm) |&gt;
   add_predictions(subset_violence_lm) 
 
-check_model(subset_homicide_resid_df, &quot;MLR Best Subset Homicide Rate&quot;)</code></pre>
+check_model(subset_homicide_resid_df, &quot;MLR Best-Subset Homicide Rate&quot;)</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-27-1.png" width="672" /><img src="regression_files/figure-html/unnamed-chunk-27-2.png" width="672" /></p>
-<pre class="r"><code>check_model(subset_violence_resid_df, &quot;MLR Best Subset Violence Rate&quot;)</code></pre>
+<pre class="r"><code>check_model(subset_violence_resid_df, &quot;MLR Best-Subset Violence Rate&quot;)</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-27-3.png" width="672" /><img src="regression_files/figure-html/unnamed-chunk-27-4.png" width="672" /></p>
+<p>Examining the QQ-plots for the MLRs using the best-subset of
+predictor variables, we once again notice that our assumption of
+normality of residuals may be in violation, as there appear to many
+lower-bound and upper-bound outliers that do not fall along the
+reference line. For the fitted versus residuals plot for homicide rate,
+we see violations of both linearity and homosecdascity. The equivalent
+plot for violence rate presents similar concerns regarding
+homoscedascity, but shows a greater spread of residuals along the
+horizontal reference line, and therefore better implies linearity of
+relationship between predictor variables and outcome.</p>
 </div>
 <div id="lasso-1" class="section level2">
 <h2><em>Lasso</em></h2>
@@ -1518,14 +1627,44 @@ check_model(lasso_homicide_resid_df, &quot;Lasso Homicide Rate&quot;)</code></pr
 <p><img src="regression_files/figure-html/warning-FALSE-1.png" width="672" /><img src="regression_files/figure-html/warning-FALSE-2.png" width="672" /></p>
 <pre class="r"><code>check_model(lasso_violence_resid_df, &quot;Lasso Violence Rate&quot;)</code></pre>
 <p><img src="regression_files/figure-html/warning-FALSE-3.png" width="672" /><img src="regression_files/figure-html/warning-FALSE-4.png" width="672" /></p>
+<p>Consistent with results from the QQ-plots of the previous two MLR
+models, lasso models for both homicide rate and violence rate show
+potential violations of the assumption of normality, as many lower-bound
+and upper-bound outlier residuals do not fall along the reference line.
+For the fitted versus residuals plot of homicide rate, we see possible
+heteroscedascity, while the equivalent plot for homicide rate shows both
+possible heteroscedascity and non-linearity.</p>
 </div>
 </div>
 <div id="conclusion" class="section level1">
 <h1><em>Conclusion</em></h1>
+<p>Based on our comparisons of RMSE, we can conclude that our
+best-subset regression models are most accurate at predicting the
+outcomes: (1) Violence Rate and (2) Homicide Rate.</p>
+<p>The best-subset regression model for predicting violence rate yielded
+an adjusted r-squared of and included the following variables a
+predictors: GDP, inflation rate, crime rate, personnel rate, trafficked
+victims, and alcohol consumption rate. The best-subset regression model
+for predicting homicide rate returned an r-squared of . The variables
+included in this model were inflation rate, unemployment rate, HDI, and
+crime rate.</p>
+<p>Despite moderately high R-squared values for each of these models, we
+must acknowledge that the models’ performance and accuracy may suffer
+from certain drawbacks. In particular, model diagnostics revealed
+concerns regarding the normality, linearity, and homoscedascity of the
+dataset used to produce these models. Additionally, transformations
+applied to cope with the concerns regarding normality failed to produce
+more normalized distributions for any of the predictor variables. As a
+result, the R-squared values for our models may be inaccurate and
+different forms of modelling, such as a non-linear approach, may be
+better suited for exploring what variables predict violence and homicide
+rates.</p>
 </div>
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -1558,6 +1697,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
