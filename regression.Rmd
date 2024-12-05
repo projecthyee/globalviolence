@@ -141,7 +141,7 @@ check_model = function(resid_list, predicted, model_name) {
         xlab("Theoretical Quantiles") +
         ylab("Residuals") +
         ggtitle(model_name[[i]])
-    
+
     resid_fit <- 
       resid_df %>% 
         ggplot(aes(x = residuals, y = fitted)) +
@@ -725,76 +725,36 @@ ease of interpretability of beta coefficients.
 resid_list <- list(resid(baseline_MLR_hom), resid(baseline_MLR_viol))
 fitted_list <- list(baseline_MLR_hom_fitted, baseline_MLR_viol_fitted)
 model_names <- list("MLR All Predictors Homicide Rate", 
-                    "MLR All Predictors Homicide Rate")
+                    "MLR All Predictors Violence Rate")
 check_model(resid_list, fitted_list, model_names)
 ```
 
 
-### Violence Rates
+## Best Subset MLR 
 
-```{r }
-resid_df <- tibble(residuals = resid(baseline_MLR_viol)) 
-resid_df %>% 
-  ggplot(aes(sample = residuals)) +
-  stat_qq() +
-  stat_qq_line(col = "red")
+```{r}
+resid_list <- list(resid(subset_homicide_lm), resid(subset_violence_lm))
+fitted_list <- list(subset_homicide_fitted, subset_violence_fitted)
+model_names <- list("MLR Best Subset Homicide Rate", 
+                    "MLR Best Subset Violence Rate") 
 
+check_model(resid_list, fitted_list, model_names)
 ```
 
 
-### Homicide Rates
-```{r }
-resid_df <- tibble(residuals = resid(baseline_MLR_hom)) 
+## Lasso
 
-resid_df %>% 
-  ggplot(aes(sample = residuals)) +
-  stat_qq() +
-  stat_qq_line(col = "red")
+```{r}
+lasso_homicide_resid <- lasso_homicide_resid %>% 
+  pull(residuals)
+lasso_violence_resid <- lasso_violence_resid %>% 
+  pull(residuals)
 
-```
+resid_list <- list(lasso_homicide_resid, lasso_violence_resid) 
+fitted_list <- list(lasso_predict_homicide, lasso_predict_violence)
+model_names <- list("Lasso Homicide Rate", "Lasso Violence Rate")
 
-## QQ Plot of Best Subset Linear Model 
-
-### Violence Rate
-```{r }
-resid_df <- tibble(residuals = resid(subset_violence_lm)) 
-
-resid_df %>% 
-  ggplot(aes(sample = residuals)) +
-  stat_qq() +
-  stat_qq_line(col = "red")
-
-```
-
-### Homicide Rate
-```{r echp=FALSE}
-resid_df <- tibble(residuals = resid(subset_homicide_lm)) 
-
-resid_df %>% 
-  ggplot(aes(sample = residuals)) +
-  stat_qq() +
-  stat_qq_line(col = "red")
-
-```
-
-## QQ Plot of Lasso Model
-
-
-### Violence Rate
-```{r }
-lasso_violence_resid %>% 
-  ggplot(aes(sample = residuals)) +
-  stat_qq() +
-  stat_qq_line(col = "red")
-
-```
-
-### Homicide Rate
-```{r }
-lasso_homicide_resid %>% 
-  ggplot(aes(sample = residuals)) +
-  stat_qq() +
-  stat_qq_line(col = "red")
+check_model(resid_list, fitted_list, model_names)
 
 ```
 
