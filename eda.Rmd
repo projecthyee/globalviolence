@@ -224,7 +224,8 @@ homicide rate also reported the violence rate.
 
 The drop in 2022 may imply that there was a potential shift or improvement in 
 the region, but it could also mean that there are some missing data in that 
-year, leading a bias or misinterpretation. When examining violence rates, the Americas followed a similar trend to the 
+year, leading a bias or misinterpretation. When examining violence rates, 
+the Americas followed a similar trend to the 
 homicide rate, with rates significantly higher than the other regions. This 
 trend reflects the persistent issue of violence in the region, affecting not 
 only homicide rates but also broader forms of violence. However, Oceania 
@@ -237,8 +238,8 @@ countries or countries who just have reported more crimes. It is very important
 to address that these outcome data are compiled by  UNODC but the data itself comes
 from each nation's respective administrative registers, often managed by law enforcement
 agencies. Additionally, UNODC comes by this data not through requirement but by the 
-United Nations Survey of Crime
-Trends and Operations of Criminal Justice Systems (UN-CTS). This means that countries
-voluntarily supply their information. However, a safety-guard is that UNODC does check for consistency and
+United Nations Survey of Crime Trends and Operations of Criminal Justice Systems
+(UN-CTS). This means that countries voluntarily supply their information. 
+However, a safety-guard is that UNODC does check for consistency and
 coherence with other data sources. 
 
