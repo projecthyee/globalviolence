@@ -270,13 +270,10 @@ to be supported by CLT.
 
 
 ## Multicolliniearity diagnostics
-<<<<<<< HEAD
 
-We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
-=======
 We used `cor()` to find the correlation between the eight predictors of 
 homicide rate and violence. 
->>>>>>> 1e845c2471f6a8c7aba231895da1351942852f70
+
 ```{r }
 cor_matrix = 
   cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
@@ -806,6 +803,7 @@ lasso_violence_resid_df =
 check_model(lasso_homicide_resid_df, "Lasso Homicide Rate")
 check_model(lasso_violence_resid_df, "Lasso Violence Rate")
 ```
+
 Consistent with results from the QQ-plots of the previous two MLR models, lasso 
 models for both homicide rate and violence rate show potential violations of the 
 assumption of normality, as many lower-bound and upper-bound outlier residuals
@@ -815,9 +813,11 @@ for homicide rate shows both possible heteroscedascity and non-linearity.
 
 # *Conclusion* 
 
-Based on our comparisons of RMSE, we conclude that our best-subset regression 
-models are most accurate at predicting the outcome: (1) Violence Rate and (2) 
-Homicide Rate. The best-subset regression model for predicting violence 
+Based on our comparisons of RMSE, we can conclude that our best-subset regression 
+models are most accurate at predicting the outcomes: (1) Violence Rate and (2) 
+Homicide Rate. 
+
+The best-subset regression model for predicting violence 
 rate yielded an adjusted r-squared of 
 `r cat(violence_best_subset_rsq[["Criterion"]])` and included 
 the following variables a predictors: GDP, inflation rate, crime rate, 
@@ -828,13 +828,13 @@ r-squared of
 variables included in this model were inflation rate, unemployment rate, HDI,
 and crime rate. 
 
-Despite moderately high r-squared values for each of these models, we must 
+Despite moderately high R-squared values for each of these models, we must 
 acknowledge that the models' performance and accuracy may suffer from certain 
 drawbacks. In particular, model diagnostics revealed concerns regarding the 
-normality, linearity, and homosedascity of the dataset used to produce these 
-models. Additionally, transformations to deal with the concerns regarding 
+normality, linearity, and homoscedascity of the dataset used to produce these 
+models. Additionally, transformations applied to cope with the concerns regarding 
 normality failed to produce more normalized distributions for any of the 
-predictor variables. As a result, the r-squared values for our models may 
+predictor variables. As a result, the R-squared values for our models may 
 be inaccurate and different forms of modelling, such as a non-linear approach,
 may be better suited for exploring what variables predict violence and homicide 
 rates.
