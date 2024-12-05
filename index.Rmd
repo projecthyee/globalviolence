@@ -7,7 +7,7 @@ output:
     toc_float: true
 ---
 
-## Motivation
+# Motivation
 
 Globally, violence undermines social and economic development, with its impacts 
 being more pronounced in "developing" countries. Communities lacking adequate 
@@ -18,35 +18,27 @@ education, transportation, and economic conditions. This project seeks to
 explore the factors driving serious assault, sexual violence, and intentional 
 homicide worldwide from 2015 to 2023. 
 
-We dplyr::selected this time frame because it includes significant global events, 
+Selected this time frame because it includes significant global events, 
 including the COVID-19 pandemic and various conflicts, which have greatly 
 influenced patterns of violence. Also, even though there are a lot of missing 
 data for year 2023, we decided to include the year because this time period 
 provides insight into the contemporary factors shaping violence worldwide. 
 
-Moreover, we modeled with both homicide rate and violence rate as our outcomes 
-instead of just one because we can see a more nuanced understanding of the 
-global violence landscape and real-world complexity of violence. 
-These two outcomes represent different forms of violence with potentially 
-different causes and implications. Though homicide and violence rate may be 
-related, capture different dimension of violent behavior: homicide rate 
-specifically measures the occurrence of fatal violence, such as murders, 
-whereas violence rate focuses on a broader violence, including non-fatal ones. 
-For example, assaults, sexual violences and armed conflicts. 
+# Related Work
 
+Conflict trends in 2023 revealed increasing threats to the state of global peace. 
+New York Times (NYT) Journalist, Marc Lacey, titled NYT’s annual photojournalism 
+review [“A Weary World”](https://www.nytimes.com/interactive/2023/world/year-in-pictures.html). 
+Though 2024 comes to a close , the conflicts in Russia, Gaza, Ethiopia, and 
+Sudan rage on, and more understanding of violence trends is needed. Tensions 
+within and across countries have major implications for not just conflict 
+prevention but also social and economic preservation which are often more fragile 
+in vulnerable areas.
 
+# Initial Questions
 
-## Related Work
-
-
-
-
-
-
-## Initial Questions
-
-
-(1) What are indicators of violence (which has most influence - answered by regression)?
-(2) How do rates of both indicator and outcome differ by region/country?
-(3) 
+1. How can we best predict violence and homicide rates (i.e. what are its indicators)? 
+2. How do rates of indicators compare across global regions and countries? 
+3. How do rates of violence and homicide compare across global and regions and countries? 
+4. What categories of violent are most prevalent? 
 

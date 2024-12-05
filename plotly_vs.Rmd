@@ -1,0 +1,77 @@
+---
+title: "Violence Predictors"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plotly)
+library(flexdashboard)
+
+merged_violence_df = 
+  read_csv("./data/merged_violence.csv")
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+ 
+### Economic Predictors: Homicide vs. Violence Rate
+
+```{r message = FALSE, warning=FALSE}
+merged_violence_df |> 
+  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
+          text = ~paste('Country', country, 
+                        '<br>Year:', year, 
+                        '<br>HDI:', hdi,
+                        '<br>GDP:', gdp, 
+                        '<br>Inflation Rate:', inflation_rate,
+                        '<br>Unemployment Rate:', unemployment_rate), 
+          type = 'scatter', 
+          mode = 'markers', 
+          color = ~region,
+          marker = list(symbol = 'circle', 
+                        sizemode = 'diameter',
+                        line = list(width = 2, color = '#FFFFFF')))
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Social Predictors: Homicide vs. Violence Rate
+
+```{r message = FALSE, warning=FALSE}
+merged_violence_df |> 
+  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~crime_rate,
+          text = ~paste('Country', country, 
+                        '<br>Year:', year, 
+                        '<br>Economic Crime Rate:', crime_rate,
+                        '<br>Personnel Rate:', personnel_rate, 
+                        '<br>Alcohol Consumption Rate:', alcohol_consumption_rate,
+                        '<br>Trafficed Victims:', trafficked_victims), 
+          type = 'scatter', 
+          mode = 'markers', 
+          color = ~region,
+          marker = list(symbol = 'circle', 
+                        sizemode = 'diameter',
+                        line = list(width = 2, color = '#FFFFFF')))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
