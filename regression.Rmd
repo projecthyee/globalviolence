@@ -113,9 +113,9 @@ calculates and returns the rmse.
 ```{r distributions, fig.width = 10, fig.height = 10}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
-    ggplot(merged_violence_df, aes(x = column)) +
-    geom_density() +
-    labs(title = paste("Distribution of", name))
+    plot = ggplot(merged_violence_df, aes(x = column)) +
+            geom_density() +
+            labs(title = paste("Distribution of", name))
   }
 }
 
@@ -129,6 +129,7 @@ map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
 merged_violence_df |>
   select(homicide_rate:alcohol_consumption_rate) |>
   ggpairs()
+
 ```
 
 All variables are skewed right, except for human development index which is bimodal and slightly left-skewed. We will apply ln transformations and Box-Cox transformations to these variables. Even though it is not necessary to normalize the distribution of predictors, this step will stabilize variance and reduce heteroscedasticity. We believe it will be helpful for further steps with model.
