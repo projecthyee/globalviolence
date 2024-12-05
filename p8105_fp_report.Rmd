@@ -614,3 +614,12 @@ trend reflects the persistent issue of violence in the region, affecting not
 only homicide rates but also broader forms of violence. However, Oceania 
 presented an extreme outlier in terms of victim rates of sexual violence, 
 surpassing even the Americas. 
+
+### Sources
+
+* UNODC (2024), UNODC Research - Data Portal – Access and
+functioning of justice. https://dataunodc.un.org/dp-cjs-persons-convicted (Accessed on Nov. 2024).
+* UNODC (2024), UNODC Research - Data Portal – Corruption and
+Economic Crime. https://dataunodc.un.org/dp-crime-corruption-offences (Accessed on Nov. 2024).
+* UNODC (2024), UNODC Research - Data Portal - Violent and Sexual
+Crime. https://dataunodc.un.org/dp-crime-violent-offences (Accessed on Nov. 2024)
