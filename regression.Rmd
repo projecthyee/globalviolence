@@ -140,7 +140,7 @@ check_model = function(resid_list, predicted, model_name) {
         stat_qq_line(col = "red") +
         xlab("Theoretical Quantiles") +
         ylab("Residuals") +
-        ggtitle(str_c("QQ-Plot for ", model_name))
+        ggtitle(model_name[[i]])
     
     resid_fit <- 
       resid_df %>% 
@@ -149,7 +149,7 @@ check_model = function(resid_list, predicted, model_name) {
         geom_hline(yintercept = 0, linetype = "dotted") +
         xlab("Fitted Values") +
         ylab("Residuals") +
-        ggtitle(str_c("Fitted Values vs Residuals for ", model_name[[i]]))
+        ggtitle(model_name[[i]])
       
     diagnostics <- append(diagnostics, list(qqplot, resid_fit))
   }
@@ -273,7 +273,7 @@ to be supported by CLT.
 
 ## Multicolliniearity diagnostics
 We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
-```{r echo=FALSE}
+```{r }
 cor_matrix = 
   cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
 
@@ -357,7 +357,7 @@ This step provides basic understanding of the extent to which different
 covariates contribute to the outcomes of interest. 
 
 ## Predict Homicide Rates
-```{r echo=FALSE}
+```{r }
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
@@ -373,7 +373,7 @@ hdi are significant predictors of homicide rate at
 alpha = 0.05. 
 
 ## Check Baseline Homicide Prediction Model for Colinearity
-```{r echo=FALSE}
+```{r }
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %>% 
   tibble(
@@ -388,7 +388,7 @@ vif_baseline_hom_MLR %>%
 Results from VIF show that there is no multicollinearity issue (VIF < 5).
 
 ## Predict Violence Rates
-```{r echo=FALSE}
+```{r }
 baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
@@ -404,7 +404,7 @@ number of trafficked victims per 100,000 and alcohol consumption rates are
 significant predictors of violence rate at significance level alpha = 0.01. 
 
 ## Calculate VIF for baseline violence MLR
-```{r echo=FALSE}
+```{r }
 vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %>% 
   tibble(
@@ -421,7 +421,7 @@ We used Lasso to as a feature selection tool to find the most important
 variables in predicting homicide rate and violence rate. 
 
 ## Predictors for violence rate:
-```{r echo=FALSE}
+```{r }
 lasso_violence_fit = 
   glmnet(violence_matrix, violence_outcome, lambda = lambda)
 
@@ -456,7 +456,7 @@ lasso estimates, the coefficient for `gdp` was shrunk to 0.
 
 ## Predictors for homicide rate.
 
-```{r echo=FALSE}
+```{r }
 lasso_homicide_fit = 
   glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
 
@@ -493,19 +493,19 @@ to the results from violence, the coefficient for `gdp` was shrunk to 0.
 ## Best Subset Regression for Violence Rate
 
 ### Predict violence rate using r-squared as criterion
-```{r echo=FALSE}
+```{r }
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "adjr2")
 ```
 
 ### Predict violence_rate using Cp as criterion
-```{r echo=FALSE}
+```{r }
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "Cp")
 ```
 
 ### Check for co-linearity in best subset violence model 
-```{r echo=FALSE}
+```{r }
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
@@ -537,19 +537,19 @@ close to the number of predictors, and highest adjusted R-squared (0.510).
 ## Best subset regression for homicide rate
 
 ### Predict homicide rate using R-squared as criterion
-```{r echo=FALSE}
+```{r }
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = "adjr2")
 ```
 
 ### Predict Homicide Rates using Cp as criterion
-```{r echo=FALSE}
+```{r }
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = "Cp")
 ```
 
 ### Check for co-linearity in best subset homicide model
-```{r echo=FALSE}
+```{r }
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + crime_rate, data = homicide_df)
 
@@ -656,7 +656,7 @@ cv_df_homicide <-
 ## Compare RMSE
 
 ### Violence
-```{r echo=FALSE}
+```{r }
 cv_df_violence %>%
   pivot_longer(
     everything(),
@@ -687,7 +687,7 @@ with lasso models.
 
 
 ### Homicide
-```{r echo=FALSE}
+```{r }
 cv_df_homicide %>%
   pivot_longer(
     everything(),
@@ -732,7 +732,7 @@ check_model(resid_list, fitted_list, model_names)
 
 ### Violence Rates
 
-```{r echo=FALSE}
+```{r }
 resid_df <- tibble(residuals = resid(baseline_MLR_viol)) 
 resid_df %>% 
   ggplot(aes(sample = residuals)) +
@@ -743,7 +743,7 @@ resid_df %>%
 
 
 ### Homicide Rates
-```{r echo=FALSE}
+```{r }
 resid_df <- tibble(residuals = resid(baseline_MLR_hom)) 
 
 resid_df %>% 
@@ -756,7 +756,7 @@ resid_df %>%
 ## QQ Plot of Best Subset Linear Model 
 
 ### Violence Rate
-```{r echo=FALSE}
+```{r }
 resid_df <- tibble(residuals = resid(subset_violence_lm)) 
 
 resid_df %>% 
@@ -781,7 +781,7 @@ resid_df %>%
 
 
 ### Violence Rate
-```{r echo=FALSE}
+```{r }
 lasso_violence_resid %>% 
   ggplot(aes(sample = residuals)) +
   stat_qq() +
@@ -790,7 +790,7 @@ lasso_violence_resid %>%
 ```
 
 ### Homicide Rate
-```{r echo=FALSE}
+```{r }
 lasso_homicide_resid %>% 
   ggplot(aes(sample = residuals)) +
   stat_qq() +
