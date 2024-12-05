@@ -149,7 +149,8 @@ check_model = function(resid_list, predicted, model_name) {
         geom_hline(yintercept = 0, linetype = "dotted") +
         xlab("Fitted Values") +
         ylab("Residuals") +
-        ggtitle(model_name[[i]])
+        ggtitle(model_name[[i]]) +
+        geom_smooth(method = "lm")
       
     diagnostics <- append(diagnostics, list(qqplot, resid_fit))
   }
