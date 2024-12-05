@@ -118,11 +118,11 @@ plot_distributions = function(column, name) {
   }
 }
 
-list = merged_violence_df |> 
-  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
-  colnames()
+#list = merged_violence_df |> 
+  #dplyr::select(homicide_rate:alcohol_consumption_rate) |>
+  #colnames()
 
-map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
+#map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
 
 merged_violence_df |>
   dplyr::select(homicide_rate:alcohol_consumption_rate) |>
@@ -539,3 +539,4 @@ cv_df_homicide %>%
   ggtitle("RMSE by Model for Predicting Homicide Rate")
 ```
 
+# Model Diagnostics
