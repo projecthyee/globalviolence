@@ -11,6 +11,9 @@ output:
 library(tidyverse)
 library(plotly)
 
+theme_set(theme_minimal() + 
+  theme(plot.title = element_text(hjust = 0.5)))
+
 merged_violence_df = read_csv("./data/merged_violence.csv")
 homicide_visual_df = read_csv("./data/homicide_visual.csv")
 violence_visual_df = read_csv("./data/violence_visual.csv")
@@ -29,7 +32,7 @@ homicide_visual_df |>
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Year",
        y = "Average Rate of Homicide Victims",
-       title = "Homicide Victims Across Region")
+       title = "Homicide Victims Worldwide")
 ```
 
 The Americas and Asia have significantly higher average homicide rate across 
@@ -98,7 +101,7 @@ violence_visual_df |>
   facet_wrap(~region, ncol=2) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = "bottom") + 
-  labs(title = "Violent Offences Across Region",
+  labs(title = "Violent Offences Worldwide",
        x = "Year", 
        y = "Average Rate of Violent Offences") +
   guides(color = guide_legend(nrow = 3))
@@ -121,7 +124,7 @@ violence_visual_df |>
         legend.position = "bottom") +
   labs(x = "Category", 
        y = "Average Rate of Violent Offences",
-       title = "Violent Offences Across Category and Time") 
+       title = "Violent Offences by Category Across Time") 
 ```
 
 The plot above shows similar trends to the line graph above, but allows us to compare more closely
@@ -148,7 +151,7 @@ violence_visual_df |>
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Year",
        y = "Average Rate of Sexual Violence Victims",
-       title = "Sexual Violence Across Region")
+       title = "Sexual Violence Worldwide")
 ```
 
 When exploring victim rate of sexual violence, we can see that in overall, 
@@ -160,7 +163,7 @@ over the years, while Asia has experienced a decline from 2019. Africa was not
 included because the data was either very small or missing for many countries 
 in the region. 
 
-## Categories of Sexual Violence
+## Investigating Sexual Violence
 ```{r message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
@@ -174,7 +177,7 @@ violence_visual_df |>
   labs(x = "Region",
        y = "Average Rate of Sexual Violence Victims",
        fill = "Category",
-       title = "Sexual Violence By Category")
+       title = "Sexual Violence By Category Across Region")
 ```
 
 Further exploring victims of sexual violence, except for perpetrator unknown to 
