@@ -123,41 +123,31 @@ calculates and returns the rmse.
 
 ## check_model
 ```{r}
-check_model = function(resid_list, predicted, model_name) {
-  diagnostics <- list()
+check_model = function(data, name) {
   
-  for (i in (1:2)) {
-    resid_df <- 
-      tibble(
-        residuals = resid_list[[i]],
-        fitted = predicted[[i]]
-      )
-    
-    qqplot <- 
-      resid_df %>% 
-        ggplot(aes(sample = residuals)) +
-        stat_qq() +
-        stat_qq_line(col = "red") +
-        xlab("Theoretical Quantiles") +
-        ylab("Residuals") +
-        ggtitle(model_name[[i]])
+  diagnostics = list()
+  
+  resid_fit =
+    data |>
+    ggplot(aes(y = resid, x = pred)) +
+    geom_point() +
+    geom_smooth(method = "lm") + 
+    labs(title = name,
+         y = "Residual", 
+         x = "Fitted Value")
 
-    resid_fit <- 
-      resid_df %>% 
-        ggplot(aes(x = residuals, y = fitted)) +
-        geom_point() +
-        geom_hline(yintercept = 0, linetype = "dotted") +
-        xlab("Fitted Values") +
-        ylab("Residuals") +
-        ggtitle(model_name[[i]]) +
-        geom_smooth(method = "lm")
+  qqplot = 
+    data |>
+      ggplot(aes(sample = resid)) +
+      stat_qq() +
+      stat_qq_line(col = "red") +
+      xlab("Theoretical Quantiles") +
+      ylab("Residuals") +
+      ggtitle(name)
       
-    diagnostics <- append(diagnostics, list(qqplot, resid_fit))
-  }
-  
+  diagnostics = append(diagnostics, list(qqplot, resid_fit))
   patchwork::wrap_plots(diagnostics)
 }
-  
 ```
 This is a plotting function to combine several different plot types that assess 
 the assumptions of linear models
@@ -723,40 +713,56 @@ ease of interpretability of beta coefficients.
 ## All Variables included MLR
 
 ```{r}
-resid_list <- list(resid(baseline_MLR_hom), resid(baseline_MLR_viol))
-fitted_list <- list(baseline_MLR_hom_fitted, baseline_MLR_viol_fitted)
-model_names <- list("MLR All Predictors Homicide Rate", 
-                    "MLR All Predictors Violence Rate")
-check_model(resid_list, fitted_list, model_names)
+baseline_hom_resid_df = 
+  merged_violence_df |>
+  add_residuals(baseline_MLR_hom) |>
+  add_predictions(baseline_MLR_hom) 
+
+baseline_viol_resid_df = 
+  merged_violence_df |>
+  add_residuals(baseline_MLR_viol) |>
+  add_predictions(baseline_MLR_viol) 
+
+check_model(baseline_hom_resid_df, "MLR All Predictors Homicide Rate")
+check_model(baseline_viol_resid_df, "MLR All Predictors Violence Rate")
 ```
 
 
 ## Best Subset MLR 
 
 ```{r}
-resid_list <- list(resid(subset_homicide_lm), resid(subset_violence_lm))
-fitted_list <- list(subset_homicide_fitted, subset_violence_fitted)
-model_names <- list("MLR Best Subset Homicide Rate", 
-                    "MLR Best Subset Violence Rate") 
+subset_homicide_resid_df = 
+  merged_violence_df |>
+  add_residuals(subset_homicide_lm) |>
+  add_predictions(subset_homicide_lm) 
 
-check_model(resid_list, fitted_list, model_names)
+subset_violence_resid_df = 
+  merged_violence_df |>
+  add_residuals(subset_violence_lm) |>
+  add_predictions(subset_violence_lm) 
+
+check_model(subset_homicide_resid_df, "MLR Best Subset Homicide Rate")
+check_model(subset_violence_resid_df, "MLR Best Subset Violence Rate")
 ```
 
 
 ## Lasso
 
 ```{r}
-lasso_homicide_resid <- lasso_homicide_resid %>% 
-  pull(residuals)
-lasso_violence_resid <- lasso_violence_resid %>% 
-  pull(residuals)
+lasso_homicide_resid_df =
+  lasso_homicide_resid |> 
+  pull(residuals) |>
+  bind_cols(lasso_predict_homicide) |>
+  rename(resid = "...1", pred = "...2")
 
-resid_list <- list(lasso_homicide_resid, lasso_violence_resid) 
-fitted_list <- list(lasso_predict_homicide, lasso_predict_violence)
-model_names <- list("Lasso Homicide Rate", "Lasso Violence Rate")
+lasso_violence_resid_df =
+  lasso_violence_resid |> 
+  pull(residuals) |>
+  bind_cols(lasso_predict_violence) |>
+  rename(resid = "...1", pred = "...2")
 
-check_model(resid_list, fitted_list, model_names)
-
+check_model(lasso_homicide_resid_df, "Lasso Homicide Rate")
+check_model(lasso_violence_resid_df, "Lasso Violence Rate")
 ```
 
 
