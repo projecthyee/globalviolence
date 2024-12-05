@@ -138,11 +138,17 @@ merged_violence_df |>
   ggpairs()
 ```
 
-All variables are skewed right, except for human development index which is bimodal and slightly left-skewed. We will apply ln transformations and Box-Cox transformations to these variables. Even though it is not necessary to normalize the distribution of predictors, this step will stabilize variance and reduce heteroscedasticity. We believe it will be helpful for further steps with model.
+All variables are skewed right, except for human development index which is 
+bimodal and slightly left-skewed. We will apply ln transformations and 
+Box-Cox transformations to these variables, in order to account for concerns 
+regarding the constancy of variance in linear models. Transformations are 
+intened to approximately normalize the data.
 
 ## Transformations
-Transformation step involves writing a function for natural log transformation and a function for Box-Cox transformation. The functions will be mapped into the 
-nested list col which includes all continuous variables in the `merged_violence_df` dataset. 
+Transformation step involves writing a function for natural log transformation 
+and a function for Box-Cox transformation. The functions will be mapped into the 
+nested list col which includes all continuous variables in 
+the `merged_violence_df` dataset. 
 
 ## Natural Log Transform.
 ```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
@@ -202,7 +208,16 @@ While initial EDA suggested that logarithmic and Box-Cox transformations might b
 
 While the natural logarithm helped with normality, the Box-Cox transformation did not substantially improve the data's distribution. Box-Cox transformation requires shifting data to be strictly positive, which could introduce unnecessary complexity.
 
-Since no major improvements in normality were observed with the transformations, we ultimately decided that it would be more appropriate to use the original data. This approach avoids unnecessary manipulation and preserves the integrity of the underlying data.
+Box-Cox and ln transformations were performed with intentions of improving 
+the approximate normality of each of the predictor distribtuions. However, 
+neither transformation substantially approved the shapes of the distributions.
+Since no major improvements in normality were observed with the transformations, 
+we ultimately decided that to use the original data. Concerns regarding the 
+normality of the distributions are alleviated by the central limit theorem. 
+With a suffeciently large amount of data points, we can assume that the sampling 
+distribution is approximately. Using the convention that n > 30 allows for 
+the assumption of approximate normality, our 310 observation dataset suffices
+to be supported by clt.
 
 ## Multicolliniearity diagnostics
 We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
