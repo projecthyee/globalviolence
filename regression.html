@@ -674,8 +674,8 @@ and preserves the integrity of the underlying data.</p>
 <h2>Multicolliniearity diagnostics</h2>
 <p>We used <code>cor()</code> to find the correlation between the eight
 predictors of homicide rate and violence.
-<img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="672" />
-There is moderate correlation between <code>hdi</code> and
+<img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>There is moderate correlation between <code>hdi</code> and
 <code>alcohol_consumption_rate</code>, corr = 0.5, and moderately high
 correlation between <code>trafficked_victims</code> and
 <code>gdp</code>, corr = 0.7.</p>
@@ -683,6 +683,8 @@ correlation between <code>trafficked_victims</code> and
 </div>
 <div id="data-pre-processing" class="section level1">
 <h1>Data Pre-processing</h1>
+<p>In this step, we manipulate the merged_violence_df in preparation for
+later statistical modelling.</p>
 <div id="define-lambda-range" class="section level2">
 <h2>Define Lambda Range</h2>
 <pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))</code></pre>
@@ -1176,10 +1178,8 @@ estimates, the coefficient for <code>gdp</code> was shrunk to 0.</p>
 </table>
 <p>The optimal lambda for homicide rate is 0.050. Similar to the results
 from violence, the coefficient for <code>gdp</code> was shrunk to 0.</p>
+<p><u># Criterion-based procedure</p>
 </div>
-</div>
-<div id="criterion-based-procedure" class="section level1">
-<h1>Criterion-based procedure</h1>
 <div id="best-subset-regression-for-violence-rate"
 class="section level2">
 <h2>Best Subset Regression for Violence Rate</h2>

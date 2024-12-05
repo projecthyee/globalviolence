@@ -14,7 +14,9 @@ library(modelr)
 set.seed(1)
 
 merged_violence_df <- read_csv(
-  file = "data/merged_violence.csv" )
+  file = "data/merged_violence.csv",
+  col_select = c(2:15))
+
 ```
 
 # Introduction
@@ -37,16 +39,18 @@ best_subset = function(predictor, outcome, criterion) {
       method = criterion, names = names(predictor))
   
   if (criterion == "Cp") {
-    optimal_rsq <- optimal_subset[[criterion]] %>% min()
+    optimal_criterion <- optimal_subset[[criterion]] %>% min()
     optimal_subset_idx <- optimal_subset[[criterion]] %>% which.min()
+    
   } else {
-    optimal_rsq <- optimal_subset[[criterion]] %>% max()
+    optimal_criterion <- optimal_subset[[criterion]] %>% max()
     optimal_subset_idx <- optimal_subset[[criterion]] %>% which.max()
   }
   
-  print(optimal_rsq) 
-  print(optimal_subset$which[optimal_subset_idx,])
-
+  
+  list(Criterion = optimal_criterion , 
+       Variable_Selection = optimal_subset$which[optimal_subset_idx,])
+  
 }
 ```
 This function serves as a wrapper around the leaps function. It performs 
@@ -350,7 +354,6 @@ lasso_homicide_fit |>
 The optimal lambda for homicide rate is 0.050. Similar to the results from violence, the coefficient for `gdp` was shrunk to 0. 
 
 # Criterion-based procedure
-
 
 ## Best Subset Regression for Violence Rate
 
