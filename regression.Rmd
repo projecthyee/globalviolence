@@ -127,6 +127,12 @@ check_model = function(resid_list, predicted, model_name) {
   diagnostics <- list()
   
   for (i in (1:2)) {
+    resid_df <- 
+      tibble(
+        residuals = resid_list[[i]],
+        fitted = predicted[[i]]
+      )
+    
     qqplot <- 
       resid_df %>% 
         ggplot(aes(sample = residuals)) +
@@ -138,12 +144,12 @@ check_model = function(resid_list, predicted, model_name) {
     
     resid_fit <- 
       resid_df %>% 
-        ggplot(aes(x = predicted[[i]], y = resid_df)) +
+        ggplot(aes(x = residuals, y = fitted)) +
         geom_point() +
         geom_hline(yintercept = 0, linetype = "dotted") +
         xlab("Fitted Values") +
         ylab("Residuals") +
-        ggtitle(str_c("Fitted Values vs Residuals for ", model_name))
+        ggtitle(str_c("Fitted Values vs Residuals for ", model_name[[i]]))
       
     diagnostics <- append(diagnostics, list(qqplot, resid_fit))
   }
@@ -717,7 +723,10 @@ ease of interpretability of beta coefficients.
 
 ```{r}
 resid_list <- list(resid(baseline_MLR_hom), resid(baseline_MLR_viol))
-check_model(resid_list, )
+fitted_list <- list(baseline_MLR_hom_fitted, baseline_MLR_viol_fitted)
+model_names <- list("MLR All Predictors Homicide Rate", 
+                    "MLR All Predictors Homicide Rate")
+check_model(resid_list, fitted_list, model_names)
 ```
 
 
