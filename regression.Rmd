@@ -11,6 +11,7 @@ library(leaps)
 library(mgcv)
 library(ggcorrplot)
 library(modelr)
+library(GGally)
 set.seed(1)
 
 merged_violence_df <- read_csv(
@@ -109,7 +110,7 @@ calculates and returns the rmse.
 # Exploratory data analysis 
 
 ## Visualizations of distributions
-```{r distributions}
+```{r distributions, fig.width = 10, fig.height = 10}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
     ggplot(merged_violence_df, aes(x = column)) +
@@ -118,9 +119,16 @@ plot_distributions = function(column, name) {
   }
 }
 
-list = colnames(merged_violence_df)
+list = merged_violence_df |> 
+  select(homicide_rate:alcohol_consumption_rate) |>
+  colnames()
+
 map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
 
+## GGPairs (Also shows correlation)
+merged_violence_df |>
+  select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
 
 ```
 
