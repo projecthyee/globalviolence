@@ -1,5 +1,5 @@
 ---
-title: "Data Cleaning"
+title: "**Data Cleaning**"
 output: 
   html_document:
     toc: true
@@ -14,7 +14,7 @@ library(readxl)
 library(countrycode)
 ```
 
-# Source
+# *Source*
 
 Since there are many determinants and indicators of violence, we chose the 
 indicators and outcomes that seem most relevant and interesting in 
@@ -57,14 +57,14 @@ variable to quantify violence.
   - NOTE: some countries used other counting unit (a series of offenses to form 
   a case, or multiple cases to form an investigation)
 
-# Scraping Method
+# *Scraping Method*
 
 The datasets were downloaded from the official websites of the sources above. 
 The names of the files were also changed accordingly for clarity and to avoid 
 confusion. For example, the alcohol consumption data file was renamed from 
 "data.csv" to "alcohol_consumption.csv".
 
-# EDA Data
+# *EDA Data*
 
 For EDA, since we are interested in exploring the trends of global violence, 
 we imported and tidied the datasets for our two outcome variables: homicide 
@@ -119,7 +119,7 @@ for violence (violent offences and victims) which will be explored further in
 EDA. Rates per 100,000 people were chosen also for this dataset for 
 comparability. 
 
-# Regression Data
+# *Regression Data*
 
 For regression, the datasets for all the chosen predictors and outcomes will be 
 tidied and merged for modeling process and analysis. 

@@ -1,5 +1,5 @@
 ---
-title: "P8105 Final Project: Determinants of Global Violence"
+title: "**P8105 Final Project: Determinants of Global Violence**"
 author: "My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top"
 output: html_document
 ---
@@ -12,7 +12,7 @@ library(tidyverse)
 
 ```
 
-# Motivation
+# *Motivation*
 
 Globally, violence undermines social and economic development, with its impacts 
 being more pronounced in "developing" countries. Communities lacking adequate 
@@ -29,7 +29,7 @@ influenced patterns of violence. Also, even though there are a lot of missing
 data for year 2023, we decided to include the year because this time period 
 provides insight into the contemporary factors shaping violence worldwide. 
 
-# Related Work
+# *Related Work*
 
 Conflict trends in 2023 revealed increasing threats to the state of global peace. 
 New York Times (NYT) Journalist, Marc Lacey, titled NYT’s annual photojournalism 
@@ -40,14 +40,14 @@ within and across countries have major implications for not just conflict
 prevention but also social and economic preservation which are often more fragile 
 in vulnerable areas.
 
-# Initial Questions
+# *Initial Questions*
 
 1. How can we best predict violence and homicide rates (i.e. what are its indicators)? 
 2. How do rates of indicators compare across global regions and countries? 
-3. How do rates of violence and homicide compare across global and regions and countries? 
+3. How do rates of violence and homicide compare across global and regions and countries?
 4. What categories of violent are most prevalent? 
 
-# Data
+# *Data*
 
 ## Source
 
@@ -150,13 +150,13 @@ violence_visual_df =
 
 The tidied violence dataset includes country, region, indicator, category of 
 violence, sex, year and violence rate. The indicator includes different rates 
-for violence (violent offences and victims) which will be explored further in 
+for violence (violent offences and victims) which are explored further in 
 EDA. Rates per 100,000 people were chosen also for this dataset for 
 comparability. 
 
 ## Regression Data
 
-For regression, the datasets for all the chosen predictors and outcomes will be 
+For regression, the datasets for all the chosen predictors and outcomes are 
 tidied and merged for modeling process and analysis. 
 
 ### Function to Tidy Datasets
@@ -381,7 +381,7 @@ matching country names tidied by the `countrycode()`, the iso3 codes were
 retained, since they are required for plotting maps which can be found under the 
 shiny section of this website. 
 
-# Exploratory Data Analysis
+# *Exploratory Data Analysis*
 
 ## Homicide Victims
 
@@ -471,8 +471,10 @@ violence_visual_df |>
   guides(color = guide_legend(nrow = 3))
 ```
 
-Africa's most common violent offence category was serious assault, with the Americas trading off
-between serious assault and acts intended to induce fear or emotional distress. From 2015-2021 Oceania clearly has the highest rates of serious assault, but it drops severely in 2022. 
+Africa's most common violent offence category was serious assault, with the 
+Americas trading off between serious assault and acts intended to induce fear 
+or emotional distress. From 2015-2021 Oceania clearly has the highest rates of 
+serious assault, but it drops severely in 2022. 
 
 ### Exploring Violent Offences
 ```{r message = FALSE, fig.height = 10, fig.width = 8}
@@ -498,10 +500,11 @@ assaults in 2022, Americas and Oceania have similar trends.
  
 
 ### Victims of Sexual Violence
-Even in 2024, it is still ever-important to discuss sexual violence crimes. Violence against
-women is a public health issue and any type of sexual violence is a violation of human rights, harming 
-physical, mental, sexual, and reproductive health. We are interested in seeing more specifically
-trends in sexual violence across the years for regions with sufficient data. 
+Even in 2024, it is still ever-important to discuss sexual violence crimes. 
+Violence against women is a public health issue and any type of sexual violence 
+is a violation of human rights, harming physical, mental, sexual, and reproductive 
+health. We are interested in seeing more specifically trends in sexual violence 
+across the years for regions with sufficient data. 
 
 ```{r message = FALSE}
 violence_visual_df |>
@@ -569,14 +572,14 @@ violence_visual_df |>
        fill = "Category")
 ```
 
-Relationship to perpetrator is not known is the category with a significant 
+Relationship to perpetrator is not known in the category with a significant 
 proportion to total victim rate of sexual violence compared to the other 
 categories across the years. The proportion of victim rates for the other three 
 categories become approximately equal to each other from 2019. Specifically, 
 the proportion for intimate partner or family member and perpetrator unknown to 
 the victim increases over time.
 
-## Global Prevalence of Violence 
+## Global Prevalence of Violence
 
 Across the time period from 2015 to 2023, the Americas consistently exhibited 
 a significantly higher homicide rate compared to other regions. The difference 
@@ -588,12 +591,12 @@ homicide rate also reported the violence rate.
 
 The drop in 2022 may imply that there was a potential shift or improvement in 
 the region, but it could also mean that there are some missing data in that 
-year, leading a bias or misinterpretation. When examining violence rates, the Americas followed a similar trend to the 
-homicide rate, with rates significantly higher than the other regions. This 
-trend reflects the persistent issue of violence in the region, affecting not 
-only homicide rates but also broader forms of violence. However, Oceania 
-presented an extreme outlier in terms of victim rates of sexual violence, 
-surpassing even the Americas.
+year, leading a bias or misinterpretation. When examining violence rates, 
+the Americas followed a similar trend to the homicide rate, with rates significantly 
+higher than the other regions. This trend reflects the persistent issue of violence 
+in the region, affecting not only homicide rates but also broader forms of violence. 
+However, Oceania presented an extreme outlier in terms of victim rates of sexual 
+violence, surpassing even the Americas.
 
 Putting these results against our own knowledge, Oceania's rates seem higher
 than expected. This raises the question of if higher rates mean more violent
@@ -601,19 +604,18 @@ countries or countries who just have reported more crimes. It is very important
 to address that these outcome data are compiled by  UNODC but the data itself comes
 from each nation's respective administrative registers, often managed by law enforcement
 agencies. Additionally, UNODC comes by this data not through requirement but by the 
-United Nations Survey of Crime
-Trends and Operations of Criminal Justice Systems (UN-CTS). This means that countries
-voluntarily supply their information. However, a safety-guard is that UNODC does check for consistency and
-coherence with other data sources. 
+United Nations Survey of Crime Trends and Operations of Criminal Justice Systems (UN-CTS). 
+This means that countries voluntarily supply their information. However, a safety-guard 
+is that UNODC does check for consistency and coherence with other data sources. 
 
 
-# Regression
+# *Regression*
 
 
 (NEED TO ADD REGRESSION)
 
 
-# Citation
+# *Citation*
 
 * UNODC (2024), UNODC Research - Data Portal – Access and
 functioning of justice. https://dataunodc.un.org/dp-cjs-persons-convicted (Accessed on Nov. 2024).

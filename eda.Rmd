@@ -1,5 +1,5 @@
 ---
-title: "EDA"
+title: "**EDA**"
 output: 
   html_document:
     toc: true
@@ -19,7 +19,7 @@ homicide_visual_df = read_csv("./data/homicide_visual.csv")
 violence_visual_df = read_csv("./data/violence_visual.csv")
 ```
 
-# Homicide Victims
+# *Homicide Victims*
 
 ## Global Trends of Homicide Victims
 ```{r message = FALSE}
@@ -88,7 +88,7 @@ The total homicide rate increases sharply from 2015 to 2017 compared to the
 other years possibly due to socioeconomic factors, such as economic instability. 
 
 
-# Violence: Offences & Victims
+# *Violence: Offences & Victims*
 
 ## Global Trends of Violent Offences
 ```{r message = FALSE, fig.height = 10}
@@ -212,7 +212,7 @@ categories become approximately equal to each other from 2019. Specifically,
 the proportion for intimate partner or family member and perpetrator unknown to 
 the victim increases over time.
 
-# Global Prevalence of Violence 
+# *Global Prevalence of Violence*
 
 Across the time period from 2015 to 2023, the Americas consistently exhibited 
 a significantly higher homicide rate compared to other regions. The difference 

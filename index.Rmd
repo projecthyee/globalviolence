@@ -1,5 +1,5 @@
 ---
-title: "Global Violence"
+title: "**Global Violence**"
 author: "My An Huynh, Jeffrey Lin, Soo Min You, Hyun Kim, Malika Top"
 output: 
   html_document:
@@ -7,7 +7,7 @@ output:
     toc_float: true
 ---
 
-# Motivation
+# *Motivation*
 
 Globally, violence undermines social and economic development, with its impacts 
 being more pronounced in "developing" countries. Communities lacking adequate 
@@ -24,7 +24,7 @@ influenced patterns of violence. Also, even though there are a lot of missing
 data for year 2023, we decided to include the year because this time period 
 provides insight into the contemporary factors shaping violence worldwide. 
 
-# Related Work
+# *Related Work*
 
 Conflict trends in 2023 revealed increasing threats to the state of global peace. 
 New York Times (NYT) Journalist, Marc Lacey, titled NYT’s annual photojournalism 
@@ -35,7 +35,7 @@ within and across countries have major implications for not just conflict
 prevention but also social and economic preservation which are often more fragile 
 in vulnerable areas.
 
-# Initial Questions
+# *Initial Questions*
 
 1. How can we best predict violence and homicide rates (i.e. what are its indicators)? 
 2. How do rates of indicators compare across global regions and countries? 

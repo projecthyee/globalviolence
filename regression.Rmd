@@ -1,6 +1,9 @@
 ---
-title: "Regression"
-output: html_document
+title: "**Regression**"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -19,7 +22,7 @@ merged_violence_df <- read_csv(
 
 ```
 
-# Introduction
+# *Introduction*
 Our motivation for doing regression is to determine the significant predictors 
 of the two measures of violence: (1) homicide rate and (2) violence rate. 
 
@@ -43,7 +46,7 @@ violence rate.
 We performed this analysis to uncover the extent to which 
 different factors influence homicide rate and violence rate as outcomes.
 
-# Functions for Fitting Data
+# *Functions for Fitting Data*
 
 ## Best_subset
 ```{r }
@@ -157,7 +160,7 @@ This is a plotting function to combine several different plot types that assess
 the assumptions of linear models
 
 
-# Exploratory data analysis 
+# *Exploratory data analysis *
 
 ## Visualizations of distributions
 ```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
@@ -186,7 +189,7 @@ and a function for Box-Cox transformation. The functions are mapped into the
 nested list col which includes all continuous variables in 
 the `merged_violence_df` dataset. 
 
-## Natural Log Transform.
+## Natural Log Transform
 ```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
 ln_transform = function(value) {
   return(log(abs(value)))
@@ -203,7 +206,7 @@ ln_df |>
 
 ```
 
-## Box-Cox Transform. 
+## Box-Cox Transform
 ```{r boxcox, fig.width = 20, fig.height = 20, warning = FALSE}
 boxcox_transform = function(value) {
   if (all(is.na(value))) {
@@ -266,7 +269,9 @@ distribution is approximately normal. Using the convention that n > 30 allows fo
 the assumption of approximate normality, our 310 observation dataset suffices
 to be supported by CLT.
 
+
 ## Multicolliniearity diagnostics
+
 We used `cor()` to find the correlation between the eight predictors of homicide rate and violence. 
 ```{r }
 cor_matrix = 
@@ -287,7 +292,7 @@ There is moderate correlation between `hdi` and `alcohol_consumption_rate`,
 corr = 0.56, and moderately high correlation between `trafficked_victims` and 
 `gdp`, corr = 0.77. 
 
-# Data Pre-processing
+# *Data Pre-processing*
 
 In this step, we manipulate the merged_violence_df in preparation for later 
 statistical modelling. 
@@ -297,7 +302,7 @@ statistical modelling.
 lambda = 10^(seq(-2, 2.75, 0.1))
 ```
 
-## Approach to pre-processing data 
+## Approach to pre-processing data
 
 Prior to performing any model fitting, we split our intial dataset into 
 separate homicide and violence datasets, each of which includes the outcome 
@@ -305,7 +310,7 @@ variable and all numeric predictor variables. Specific predictor and outcome
 dataframes, and an outcome matrix, are created for later use in linear models, 
 as well as lasso.
 
-## Pre-processing for homicide.
+## Pre-processing for homicide
 ```{r}
 homicide_df =
   merged_violence_df |> 
@@ -324,7 +329,7 @@ homicide_outcome <- homicide_df %>%
   pull(homicide_rate)
 ```
 
-## Pre-processing for violence.
+## Pre-processing for violence
 ```{r }
 violence_df =
   merged_violence_df |> 
@@ -344,9 +349,9 @@ violence_outcome <- violence_df %>%
 
 ```
 
-# Baseline MLR with additive effects
+# *Baseline MLR with additive effects*
 
-First, we will fit a baseline MLR with additive effects from all possible 
+First, we decided to fit a baseline MLR with additive effects from all possible 
 predictor variables to use as a point of reference for our modeling process. 
 This step provides basic understanding of the extent to which different 
 covariates contribute to the outcomes of interest. 
@@ -411,11 +416,11 @@ vif_baseline_viol_MLR %>%
 ```
 Results from VIF show that there is no multicollinearity issue (VIF < 5).
 
-# Lasso 
-We used Lasso to as a feature selection tool to find the most important 
+# *Lasso* 
+We used lasso to as a feature selection tool to find the most important 
 variables in predicting homicide rate and violence rate. 
 
-## Predictors for violence rate:
+## Predictors for violence rate
 ```{r }
 lasso_violence_fit = 
   glmnet(violence_matrix, violence_outcome, lambda = lambda)
@@ -445,12 +450,11 @@ lasso_violence_resid <- tibble(
 
 ```
 
-The optimal lambda for violence rate is `r lambda_violence_opt`` Based on 
+The optimal lambda for violence rate is `r lambda_violence_opt`. Based on 
 lasso estimates, the coefficient for `gdp` was shrunk to 0.
 
 
-## Predictors for homicide rate.
-
+## Predictors for homicide rate
 ```{r }
 lasso_homicide_fit = 
   glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
@@ -483,7 +487,7 @@ lasso_homicide_resid <- tibble(
 The optimal lambda for homicide rate is `r lambda_homicide_opt`. Similar 
 to the results from violence, the coefficient for `gdp` was shrunk to 0. 
 
-# Criterion-based procedure
+# *Criterion-based procedure*
 
 ## Best Subset Regression for Violence Rate
 
@@ -529,8 +533,6 @@ close to the number of predictors, and highest adjusted R-squared (0.510).
 
 ## Best subset regression for Homicide Rate
 
-## Best subset regression for homicide rate
-
 ### Predict homicide rate using R-squared as criterion
 ```{r }
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
@@ -575,7 +577,7 @@ inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a
 better trade-off.
 
 
-# Model Comparison 
+# *Model Comparison *
 
 ## Create Training and Testing Datasets
 ```{r}
@@ -648,7 +650,7 @@ cv_df_homicide <-
 ```
 
 
-## Compare RMSE
+## Comparing the RMSE
 
 ### Violence
 ```{r }
@@ -666,16 +668,17 @@ cv_df_violence %>%
   geom_violin() +
   ggtitle("RMSE by Model for Predicting Violence Rate") +
   theme(plot.title = element_text(hjust = 0.5))
-
 ```
+
 Examining the distribution of RMSEs for each of the 3 models for 
 predicting violence rate, we see that they are relatively similar. It appears 
 that the MLR including all predictor variables has greater spread than the 
-other two distributions, as it has a higher upper bound for in the violin plot.
-The similarity in performance between all 3 models likely relates to the few
+other two distributions, as it has a higher upper bound in the violin plot.
+
+The similarity in performance among all 3 models likely relates to the few
 number of predictor variables that exist in our studied dataset. In general,
 each of the 3 models will not differ by many predictor variables, and therefore
-perform similaly. Comparing the 3 models, the best subset regression model
+perform similarly. Comparing the 3 models, the best subset regression model
 may be considered optimal as it reduces model complexity, without the 
 further caveat of difficulty interpreting beta coefficients, as is the case 
 with lasso models.
@@ -702,7 +705,7 @@ cv_df_homicide %>%
 Examining the three models we used to predict homicide rate, we see that 
 the distribution of RMSE across 100-fold cross-validation are nearly identical. 
 This is likely in regard to the few predictor variables included in our dataset.
-In particular, with such few predictor variables, lasso is likely not most 
+In particular, with such few predictor variables, lasso is likely not the most 
 well-suited for this task, as there is not a serious need to reduce model 
 complexity. Consequently, the number of variables included in each of the 3 
 models is quite similar, and the difference of 1 or 2 included predictors 
@@ -712,11 +715,11 @@ may be considered the best as it reduces model complexity but maintains
 ease of interpretability of beta coefficients.
 
 
-# Model Diagnostics
+# *Model Diagnostics*
 
 ## All Variables included MLR
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 baseline_hom_resid_df = 
   merged_violence_df |>
   add_residuals(baseline_MLR_hom) |>
@@ -727,14 +730,14 @@ baseline_viol_resid_df =
   add_residuals(baseline_MLR_viol) |>
   add_predictions(baseline_MLR_viol) 
 
-check_model(baseline_hom_resid_df, "MLR All Predictors Homicide Rate")
+check_model(baseline_hom_resid_df, "MLR All Predictors Homicide Rate") 
 check_model(baseline_viol_resid_df, "MLR All Predictors Violence Rate")
 ```
 
 
-## Best Subset MLR 
+## Best Subset MLR
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 subset_homicide_resid_df = 
   merged_violence_df |>
   add_residuals(subset_homicide_lm) |>
@@ -750,9 +753,9 @@ check_model(subset_violence_resid_df, "MLR Best Subset Violence Rate")
 ```
 
 
-## Lasso
+## *Lasso*
 
-```{r}
+```{r, message = FALSE, warning - FALSE}
 lasso_homicide_resid_df =
   lasso_homicide_resid |> 
   pull(residuals) |>
@@ -770,7 +773,7 @@ check_model(lasso_violence_resid_df, "Lasso Violence Rate")
 ```
 
 
-# Conclusion 
+# *Conclusion* 
 
 
 
