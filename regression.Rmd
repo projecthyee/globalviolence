@@ -224,7 +224,7 @@ homicide_outcome <- homicide_df %>%
 ```
 
 ## Pre-processing for violence.
-```{r}
+```{r }
 violence_df =
   merged_violence_df |> 
   dplyr::ungroup() |> 
@@ -247,7 +247,7 @@ violence_outcome <- violence_df %>%
 First, we will fit a baseline MLR with additive effects from all possible predictor variables to use as a point of reference for our modeling process. This step provides basic understanding of the extent to which different covariates contribute to the outcomes of interest. 
 
 ## Predict Homicide Rates
-```{r}
+```{r echo=FALSE}
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
@@ -258,7 +258,7 @@ baseline_MLR_hom %>%
 Results from baseline MLR show that that inflation rate, unemployment rate and hdi are significant predictors of homicide rate at significance level alpha = 0.05. 
 
 ## Check Baseline Homicide Prediction Model for Colinearity
-```{r}
+```{r echo=FALSE}
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %>% 
   tibble(
@@ -273,7 +273,7 @@ vif_baseline_hom_MLR %>%
 Results from VIF show that there is no multicollinearity issue (VIF < 5).
 
 ## Predict Violence Rates
-```{r}
+```{r echo=FALSE}
 baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
@@ -284,7 +284,7 @@ baseline_MLR_viol %>%
 Results from MLR show that gdp, inflation rate, crime rate, personnel rate, number of trafficked victims per 100,000 and alcohol consumption rates are significant predictors of violence rate at significance level alpha = 0.01. 
 
 ## Calculate VIF for baseline violence MLR
-```{r}
+```{r echo=FALSE}
 vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %>% 
   tibble(
@@ -302,7 +302,7 @@ We used Lasso to as a feature selection tool to find the most important variable
 ## Predictors for violence rate:
 To prepare data for Lasso (fitting violence rate), we removed variables that are not predictors including iso3_code, country, region, year and homicide rate. We then dropped NA values before performing Lasso. 
 
-```{r}
+```{r echo=FALSE}
 lasso_violence_fit = 
   glmnet(violence_matrix, violence_outcome, lambda = lambda)
 
@@ -325,7 +325,7 @@ The optimal lambda for violence rate is 0.794. Based on lasso estimates, the coe
 
 ## Predictors for homicide rate.
 
-```{r}
+```{r echo=FALSE}
 lasso_homicide_fit = 
   glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
 
@@ -350,19 +350,19 @@ The optimal lambda for homicide rate is 0.050. Similar to the results from viole
 ## Best Subset Regression for Violence Rate
 
 ### Predict violence rate using r-squared as criterion
-```{r}
+```{r echo=FALSE}
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "adjr2")
 ```
 
 ### Predict violence_rate using Cp as criterion
-```{r}
+```{r echo=FALSE}
 best_subset(predictor = violence_predictors, outcome = violence_outcome, 
             criterion = "Cp")
 ```
 
 ### Check for co-linearity in best subset violence model 
-```{r}
+```{r echo=FALSE}
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
@@ -380,20 +380,20 @@ vif_subset_violence_model %>%
 ## Best subset regression for Homicide Rate
 
 ### Predict homicide rate using R-squared as criterion
-```{r}
+```{r echo=FALSE}
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = "adjr2")
 ```
 
 ### Predict Homicide Rates using Cp as criterion
-```{r}
+```{r echo=FALSE}
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = "Cp")
 ```
 
 
 ### Check for co-linearity in best subset homicide model
-```{r}
+```{r echo=FALSE}
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + crime_rate, data = homicide_df)
 
@@ -488,7 +488,7 @@ cv_df_homicide <-
 ## Compare RMSE
 
 ### Violence
-```{r}
+```{r echo=FALSE}
 cv_df_violence %>%
   pivot_longer(
     everything(),
@@ -506,7 +506,7 @@ cv_df_violence %>%
 ```
 
 ### Homicide
-```{r}
+```{r echo=FALSE}
 cv_df_homicide %>%
   pivot_longer(
     everything(),
