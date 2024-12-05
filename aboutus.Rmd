@@ -1,22 +1,28 @@
 ---
-title: "Team Members"
+title: "About Us"
 output:  
   html_document:
     toc: true
     toc_float: true
 ---
 
+Welcome to our project! Meet our team members. 
+
+
 # **My An Huynh**
 
-MS in Biostatistics
+MS Biostatistics 
 
 # **Jeffrey Lin**
 
 MS in Biostatistics
 
+
 # **Soo Min You**
 
-MS in Biostatistics
+[Soomin You](https://yousmni3269.github.io) is a first year MS Biostatistics 
+student in Theory and Methods Track. 
+
 
 # **Hyun Kim** 
 

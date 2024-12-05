@@ -302,26 +302,24 @@ $(document).ready(function () {
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>Our motivation for doing regression is to determine the significant
-contributors to two outcomes of violence - homicide rate and violence
-rate.</p>
+predictors of the two measures of violence: (1) homicide rate and (2)
+violence rate.</p>
 <p>Violence is a complex and multifaceted issue, especially when
 considered in a global context. To better understand its various
 dimensions, we aimed to include a diverse set of predictors that reflect
 different underlying factors driving violence. Specifically, economic
 indicators like GDP, inflation rate, and the Human Development Index
 (HDI) capture aspects of economic inequality, which can influence social
-unrest and violence. Crime rate and personnel rate serve as proxies for
-the level of criminal activity and law enforcement presence,
-respectively, which can contribute to both non-violent and violent
-crime. Additionally, trafficked victims and alcohol consumption rate are
-included to explore the role of cultural norms and behaviors, such as
-organized crime, substance abuse, and social vulnerability, which can be
-key drivers of violence.</p>
-<p>We hypothesize that homicide rate may be influenced by more “direct”
-indicators including crime rate, HDI and trafficked_victims. We
-hypothesize that violence rate may be influenced by all factors we
-included in this dataset, because violence can exist in multiple
-forms.</p>
+unrest and violence. Economic crime rate, personnel rate, and number of
+trafficked victims serve as indicators of the level of criminal activity
+in a country, as well as potential efficacy of law enforcement. Such
+indicators could be predictive of violence in the country. Lastly,
+alcohol rate is included to address the possibility that substance usage
+could influence the occurrence of violence.</p>
+<p>Given the plausible theoretical linkage between each of our included
+predictor variables and the outcome variables of interest, we seek to
+develop models that can determine which factors are most predictive of
+homicide and violence rate.</p>
 <p>We perform this analysis to uncover the extent to which different
 factors influence homicide rate and violence rate as outcomes.</p>
 </div>
@@ -408,10 +406,10 @@ dataset and then calculates and returns the rmse.</p>
 <p><img src="regression_files/figure-html/distributions-1.png" width="1920" /></p>
 <p>All variables are skewed right, except for human development index
 which is bimodal and slightly left-skewed. We will apply ln
-transformations and Box-Cox transformations to these variables. Even
-though it is not necessary to normalize the distribution of predictors,
-this step will stabilize variance and reduce heteroscedasticity. We
-believe it will be helpful for further steps with model.</p>
+transformations and Box-Cox transformations to these variables, in order
+to account for concerns regarding the constancy of variance in linear
+models. Transformations are intened to approximately normalize the
+data.</p>
 </div>
 <div id="transformations" class="section level2">
 <h2>Transformations</h2>
@@ -434,7 +432,7 @@ ln_df =
 ln_df |&gt;
   select(homicide_rate:alcohol_consumption_rate) |&gt;
   ggpairs()</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-1.png" width="672" /></p>
+<p><img src="regression_files/figure-html/ln-transform-1.png" width="1920" /></p>
 </div>
 <div id="box-cox-transform." class="section level2">
 <h2>Box-Cox Transform.</h2>
@@ -470,7 +468,7 @@ boxcox_df = merged_violence_df |&gt;
 boxcox_df |&gt;
   select(homicide_rate:alcohol_consumption_rate) |&gt;
   ggpairs()</code></pre>
-<p><img src="regression_files/figure-html/boxcox-1.png" width="672" /></p>
+<p><img src="regression_files/figure-html/boxcox-1.png" width="1920" /></p>
 <p>While initial EDA suggested that logarithmic and Box-Cox
 transformations might be useful for improving normality, the results
 indicate that these transformations are not entirely necessary. The
@@ -482,10 +480,17 @@ reasonable representation of the underlying distribution.</p>
 transformation did not substantially improve the data’s distribution.
 Box-Cox transformation requires shifting data to be strictly positive,
 which could introduce unnecessary complexity.</p>
-<p>Since no major improvements in normality were observed with the
-transformations, we ultimately decided that it would be more appropriate
-to use the original data. This approach avoids unnecessary manipulation
-and preserves the integrity of the underlying data.</p>
+<p>Box-Cox and ln transformations were performed with intentions of
+improving the approximate normality of each of the predictor
+distribtuions. However, neither transformation substantially approved
+the shapes of the distributions. Since no major improvements in
+normality were observed with the transformations, we ultimately decided
+that to use the original data. Concerns regarding the normality of the
+distributions are alleviated by the central limit theorem. With a
+suffeciently large amount of data points, we can assume that the
+sampling distribution is approximately. Using the convention that n &gt;
+30 allows for the assumption of approximate normality, our 310
+observation dataset suffices to be supported by clt.</p>
 </div>
 <div id="multicolliniearity-diagnostics" class="section level2">
 <h2>Multicolliniearity diagnostics</h2>
@@ -493,9 +498,9 @@ and preserves the integrity of the underlying data.</p>
 predictors of homicide rate and violence.
 <img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>There is moderate correlation between <code>hdi</code> and
-<code>alcohol_consumption_rate</code>, corr = 0.5, and moderately high
+<code>alcohol_consumption_rate</code>, corr = 0.56, and moderately high
 correlation between <code>trafficked_victims</code> and
-<code>gdp</code>, corr = 0.7.</p>
+<code>gdp</code>, corr = 0.77.</p>
 </div>
 </div>
 <div id="data-pre-processing" class="section level1">
@@ -505,6 +510,14 @@ later statistical modelling.</p>
 <div id="define-lambda-range" class="section level2">
 <h2>Define Lambda Range</h2>
 <pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))</code></pre>
+</div>
+<div id="approach-to-pre-processing-data" class="section level2">
+<h2>Approach to pre-processing data</h2>
+<p>Prior to performing any model fitting, we split our intial dataset
+into separate homicide and violence datasets, each of which includes the
+outcome variable and all numeric predictor variables. Specific predictor
+and outcome dataframes, and an outcome matrix, are created for later use
+in linear models, as well as lasso.</p>
 </div>
 <div id="pre-processing-for-homicide." class="section level2">
 <h2>Pre-processing for homicide.</h2>
@@ -636,8 +649,8 @@ interest.</p>
 </tbody>
 </table>
 <p>Results from baseline MLR show that that inflation rate, unemployment
-rate and hdi are significant predictors of homicide rate at significance
-level alpha = 0.05.</p>
+rate and hdi are significant predictors of homicide rate at alpha =
+0.05.</p>
 </div>
 <div id="check-baseline-homicide-prediction-model-for-colinearity"
 class="section level2">
@@ -832,10 +845,6 @@ class="section level2">
 important variables in predicting homicide rate and violence rate.</p>
 <div id="predictors-for-violence-rate" class="section level2">
 <h2>Predictors for violence rate:</h2>
-<p>To prepare data for Lasso (fitting violence rate), we removed
-variables that are not predictors including iso3_code, country, region,
-year and homicide rate. We then dropped NA values before performing
-Lasso.</p>
 <table>
 <thead>
 <tr class="header">
@@ -898,8 +907,9 @@ Lasso.</p>
 </tr>
 </tbody>
 </table>
-<p>The optimal lambda for violence rate is 0.794. Based on lasso
-estimates, the coefficient for <code>gdp</code> was shrunk to 0.</p>
+<p>The optimal lambda for violence rate is
+0.7943282<code>Based on  lasso estimates, the coefficient for</code>gdp`
+was shrunk to 0.</p>
 </div>
 <div id="predictors-for-homicide-rate." class="section level2">
 <h2>Predictors for homicide rate.</h2>
@@ -979,8 +989,9 @@ estimates, the coefficient for <code>gdp</code> was shrunk to 0.</p>
 </tr>
 </tbody>
 </table>
-<p>The optimal lambda for homicide rate is 0.050. Similar to the results
-from violence, the coefficient for <code>gdp</code> was shrunk to 0.</p>
+<p>The optimal lambda for homicide rate is 0.0630957. Similar to the
+results from violence, the coefficient for <code>gdp</code> was shrunk
+to 0.</p>
 </div>
 </div>
 <div id="criterion-based-procedure" class="section level1">
@@ -1053,11 +1064,26 @@ class="section level3">
 </tr>
 </tbody>
 </table>
+<p>All variables have VIF value below 5, suggesting that there is no
+multi-colinearity concerns.</p>
+</div>
+<div id="interpretation" class="section level3">
+<h3>Interpretation</h3>
+<p>The results from criterion-based procedures suggest that significant
+predictors for violence_rate are gdp, inflation_rate, crime_rate,
+personnel_rate, trafficked_victims and alcohol_consumption rate, with a
+total of 6 predictors. This yields the most appropriate Cp value
+(5.363), which is approximately close to the number of predictors, and
+highest adjusted R-squared (0.510).</p>
 </div>
 </div>
 <div id="best-subset-regression-for-homicide-rate"
 class="section level2">
 <h2>Best subset regression for Homicide Rate</h2>
+</div>
+<div id="best-subset-regression-for-homicide-rate-1"
+class="section level2">
+<h2>Best subset regression for homicide rate</h2>
 <div id="predict-homicide-rate-using-r-squared-as-criterion"
 class="section level3">
 <h3>Predict homicide rate using R-squared as criterion</h3>
@@ -1115,15 +1141,14 @@ class="section level3">
 </tr>
 </tbody>
 </table>
-<p>The results from criterion-based procedures suggest that significant
-predictors for violence_rate are gdp, inflation_rate, crime_rate,
-personnel_rate, trafficked_victims and alcohol_consumption rate, with a
-total of 6 predictors. This yields the most appropriate Cp value
-(5.363), which is approximately close to the number of predictors, and
-highest adjusted R-squared (0.510).</p>
+<p>All variables have VIF value below 5, suggesting that there is no
+multi-colinearity concerns.</p>
+</div>
+<div id="interpretation-1" class="section level3">
+<h3>Interpretation</h3>
 <p>For homicide_rate, the results are not as straightforward. The best
 model based on Cp and R-squared seems to be the model with 4 predictors
-because it has the lowest Cp (6.36), and a decently high adjusted
+because it has the lowest Cp (6.36), and a relatively high adjusted
 R-squared (0.331), indicating a good balance between fit and complexity.
 As more predictors are added, R-squared adjusts slightly but Cp levels
 off at around 6 predictors. The model with 4 predictors, which includes
@@ -1204,11 +1229,35 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
 <h2>Compare RMSE</h2>
 <div id="violence-1" class="section level3">
 <h3>Violence</h3>
-<p><img src="regression_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-23-1.png" width="672" />
+Examining the distribution of RMSEs for each of the 3 models for
+predicting violence rate, we see that they are relatively similar. It
+appears that the MLR including all predictor variables has greater
+spread than the other two distributions, as it has a higher upper bound
+for in the violin plot. The similarity in performance between all 3
+models likely relates to the few number of predictor variables that
+exist in our studied dataset. In general, each of the 3 models will not
+differ by many predictor variables, and therefore perform similaly.
+Comparing the 3 models, the best subset regression model may be
+considered optimal as it reduces model complexity, without the further
+caveat of difficulty interpreting beta coefficients, as is the case with
+lasso models.</p>
 </div>
 <div id="homicide-1" class="section level3">
 <h3>Homicide</h3>
 <p><img src="regression_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>Examining the three models we used to predict homicide rate, we see
+that the distribution of RMSE across 100-fold cross-validation are
+nearly identical. This is likely in regard to the few predictor
+variables included in our dataset. In particular, with such few
+predictor variables, lasso is likely not most well-suited for this task,
+as there is not a serious need to reduce model complexity. Consequently,
+the number of variables included in each of the 3 models is quite
+similar, and the difference of 1 or 2 included predictors between each
+of the models does not produce a substantial change in model
+effectiveness. Comparing the 3 models, the best subset regression model
+may be considered the best as it reduces model complexity but maintains
+ease of interpretability of beta coefficients.</p>
 </div>
 </div>
 </div>
@@ -1223,6 +1272,9 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
 <div id="qq-plot-of-lasso-model" class="section level2">
 <h2>QQ Plot of Lasso Model</h2>
 </div>
+</div>
+<div id="conclusion-of-modeling" class="section level1">
+<h1>Conclusion of Modeling</h1>
 </div>
 
 
