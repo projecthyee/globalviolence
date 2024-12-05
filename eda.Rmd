@@ -11,14 +11,23 @@ output:
 library(tidyverse)
 library(plotly)
 
+theme_set(theme_minimal() + 
+  theme(legend.position = "bottom", 
+      plot.title = element_text(hjust = 0.5)))
+
+knitr::opts_chunk$set(
+	fig.width = 8, 
+  fig.height = 6
+)
+
 merged_violence_df = read_csv("./data/merged_violence.csv")
 homicide_visual_df = read_csv("./data/homicide_visual.csv")
 violence_visual_df = read_csv("./data/violence_visual.csv")
 ```
 
-# Exploring Homicide Victim Outcomes
+# Homicide Victims
 
-## Global Trends
+## Global Trends of Homicide Victims
 ```{r message = FALSE}
 homicide_visual_df |>
   group_by(region, sex, year) |>
@@ -26,9 +35,10 @@ homicide_visual_df |>
   ggplot(aes(y = avg_homicide_rate, x = year, color = sex)) +
   geom_smooth(se = FALSE) +
   facet_grid(~region) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Year",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Trend")
+       y = "Average Rate of Homicide Victims",
+       title = "Homicide Victims Across Region")
 ```
 
 The Americas and Asia have significantly higher average homicide rate across 
@@ -46,8 +56,8 @@ homicide_visual_df |>
   geom_col(position = "dodge", bin = 3.0) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Region",
-       y = "Average Homicide Rate",
-       Title = "Average Homicide Rate Across Category", 
+       y = "Average Rate of Homicide Victims",
+       title = "Homicide in America & Asia", 
        fill = "Category")
 ```
 
@@ -61,7 +71,7 @@ socio-political homicide compared to the other categories,suggesting high
 casualties as a result of socio-political activities for countries in Asia. 
 The other categories have a homicide rate lesser than 5 percent. 
 
-## Homicide Breakdown by Categories
+## Breakdown of Homicide
 ```{r message = FALSE}
 homicide_visual_df |>
   group_by(category, year) |>
@@ -69,9 +79,9 @@ homicide_visual_df |>
   ggplot(aes(y = avg_homicide_rate, x = as.factor(year), fill = 
                reorder(category, avg_homicide_rate))) +
   geom_bar(stat = "identity") + 
-  labs(x = "Year",
-       y = "Total Homicide Rate",
-       Title = "Homicide Rate by Category",
+  labs(title = "Distribution of Homicide by Category",
+       x = "Year",
+       y = "Total Rate of Homicide Victims",
        fill = "Category")
 ```
 
@@ -84,11 +94,10 @@ The total homicide rate increases sharply from 2015 to 2017 compared to the
 other years possibly due to socioeconomic factors, such as economic instability. 
 
 
-# Exploring Violent Offences
+# Violence: Offences & Victims
 
-## Violence Trends by Region, Category, and Year
+## Global Trends of Violent Offences
 ```{r message = FALSE}
-
 violence_visual_df |> 
   filter(indicator == "Violent offences") |> 
   group_by(category, year, region) |> 
@@ -97,14 +106,15 @@ violence_visual_df |>
   geom_line() +
   facet_wrap(~region, ncol=2) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  labs(title = "Average Violence Rate by Category Across Region through Time",
-         x = "Year", y = "Rate of offences (per 100,000 population)")
+  labs(title = "Violent Offences Across Region",
+       x = "Year", 
+       y = "Average Rate of Violent Offences")
 ```
 
 Africa's most common violent offence category was serious assault, with the Americas trading off
 between serious assault and acts intended to induce fear or emotional distress. From 2015-2021 Oceania clearly has the highest rates of serious assault, but it drops severely in 2022. 
 
-## Categories of Violence Offences
+## Exploring Violent Offences
 ```{r message = FALSE, fig.height = 10}
 violence_visual_df |>
   filter(indicator == "Violent offences") |>
@@ -113,11 +123,13 @@ violence_visual_df |>
   mutate(category = fct_reorder(category, avg_violence_rate)) |>
   ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Violence Category", y = "Rate of offences (per 100,000 population)") + 
+  labs(x = "Category", 
+       y = "Average Rate of Violent Offences",
+       title = "Violent Offences Across Category and Time") + 
   facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-
+  theme(axis.text.x = element_text(angle = 80, hjust = 1)) 
 ```
+
 The plot above shows similar trends to the line graph above, but allows us to compare more closely
 the rates for categories that are less visible such as sexual violence, where Oceania appears
 to have the highest rates of as well. We see more clearly that with Oceania's drop in serious
@@ -139,9 +151,10 @@ violence_visual_df |>
   ggplot(aes(y = avg_victim_rate, x = year, color = sex)) +
   geom_smooth(se = FALSE) +
   facet_grid(~region) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Year",
-       y = "Victim Rate of Sexual Violence (per 100,000 population)",
-       title = "Average Violence Rate of Sexual Violence by Gender Across Region")
+       y = "Average Rate of Sexual Violence Victims",
+       title = "Sexual Violence Across Region")
 ```
 
 When exploring victim rate of sexual violence, we can see that in overall, 
@@ -165,10 +178,9 @@ violence_visual_df |>
   geom_col(position = "dodge") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Region",
-       y = "Average Victim Rate",
-       Title = "Average Victim Rate By Category of Perpetrator-Victim Relationship
-       Across Region", 
-       fill = "Category")
+       y = "Average Rate of Sexual Violence Victims",
+       fill = "Category",
+       title = "Sexual Violence By Category")
 ```
 
 Further exploring victims of sexual violence, except for perpetrator unknown to 
@@ -180,7 +192,7 @@ connection with the victims for most sexual violence. On the other hand, Asia
 has a significantly low average victim rate, having other perpetrator known to 
 the victim as the category with the highest rate.
 
-## Proportion of Categories
+## Breakdown of Sexual Violence
 ```{r message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
@@ -191,8 +203,8 @@ violence_visual_df |>
              fill = reorder(category, avg_victim_rate))) +
   geom_bar(stat = "identity") + 
   labs(x = "Year",
-       y = "Total Victim Rate",
-       Title = "Proportion of Sexual Violence Crimes by Category through Time",
+       y = "Total Rate of Sexual Violence Victims",
+       title = "Distribution of Sexual Violence by Category",
        fill = "Category")
 ```
 
@@ -215,9 +227,7 @@ homicide rate also reported the violence rate.
 
 The drop in 2022 may imply that there was a potential shift or improvement in 
 the region, but it could also mean that there are some missing data in that 
-year, leading a bias or misinterpretation. 
-
-When examining violence rates, the Americas followed a similar trend to the 
+year, leading a bias or misinterpretation. When examining violence rates, the Americas followed a similar trend to the 
 homicide rate, with rates significantly higher than the other regions. This 
 trend reflects the persistent issue of violence in the region, affecting not 
 only homicide rates but also broader forms of violence. However, Oceania 
