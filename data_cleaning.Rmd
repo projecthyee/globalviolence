@@ -345,4 +345,3 @@ the period of our interest for analysis. Although the datasets were merged with
 matching country names tidied by the `countrycode()`, the iso3 codes were 
 retained, since they are required for plotting maps which can be found under the 
 shiny section of this website. 
-
