@@ -11,7 +11,7 @@ Welcome to our project! Meet our team members.
 
 # **My An Huynh**
 
-MS in Biostatistics
+MS Biostatistics 
 
 # **Jeffrey Lin**
 
@@ -22,7 +22,6 @@ MS in Biostatistics
 
 [Soomin You](https://yousmni3269.github.io) is a first year MS Biostatistics 
 student in Theory and Methods Track. 
-
 
 
 # **Hyun Kim** 
