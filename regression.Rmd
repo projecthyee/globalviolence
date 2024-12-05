@@ -109,7 +109,7 @@ calculates and returns the rmse.
 # Exploratory data analysis 
 
 ## Visualizations of distributions
-```{r distributions, fig.width = 10, fig.height = 10, warning = FALSE, message = FALSE, echo = FALSE}
+```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
     ggplot(merged_violence_df, aes(x = column)) +
@@ -119,7 +119,7 @@ plot_distributions = function(column, name) {
 }
 
 merged_violence_df |>
-  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
+  select(homicide_rate:alcohol_consumption_rate) |>
   ggpairs()
 ```
 
@@ -130,7 +130,7 @@ Transformation step involves writing a function for natural log transformation a
 nested list col which includes all continuous variables in the `merged_violence_df` dataset. 
 
 ## Natural Log Transform.
-```{r ln-transform, warning = FALSE}
+```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
 ln_transform = function(value) {
   return(log(abs(value)))
 }
@@ -141,13 +141,13 @@ ln_df =
                 ln_transform))
 
 ln_df |>
-  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
+  select(homicide_rate:alcohol_consumption_rate) |>
   ggpairs()
 
 ```
 
 ## Box-Cox Transform. 
-```{r boxcox, warning = FALSE}
+```{r boxcox, fig.width = 20, fig.height = 20, warning = FALSE}
 boxcox_transform = function(value) {
   if (all(is.na(value))) {
     return(value) 
@@ -178,7 +178,7 @@ boxcox_df = merged_violence_df |>
                 ~ boxcox_transform(.)))
 
 boxcox_df |>
-  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
+  select(homicide_rate:alcohol_consumption_rate) |>
   ggpairs()
 
 ```
@@ -224,8 +224,8 @@ lambda = 10^(seq(-2, 2.75, 0.1))
 ```{r}
 homicide_df =
   merged_violence_df |> 
-  dplyr::ungroup() |> 
-  dplyr::select(
+  ungroup() |> 
+  select(
     homicide_rate, everything(), -violence_rate, -year, -country, -region, 
     -iso3_code) |> 
   drop_na()
@@ -233,7 +233,7 @@ homicide_df =
 homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
 
 homicide_predictors <- homicide_df %>% 
-  dplyr::select(-homicide_rate)
+  select(-homicide_rate)
 
 homicide_outcome <- homicide_df %>% 
   pull(homicide_rate)
@@ -243,8 +243,8 @@ homicide_outcome <- homicide_df %>%
 ```{r }
 violence_df =
   merged_violence_df |> 
-  dplyr::ungroup() |> 
-  dplyr::select(
+  ungroup() |> 
+  select(
     violence_rate, everything(), -year, -homicide_rate, -country, -region, 
     -iso3_code) |>
   drop_na()
@@ -252,7 +252,7 @@ violence_df =
 violence_matrix <- model.matrix(violence_rate ~., data = violence_df)[,-1]
   
 violence_predictors <- violence_df %>% 
-  dplyr::select(-violence_rate)
+  select(-violence_rate)
 
 violence_outcome <- violence_df %>% 
   pull(violence_rate)
@@ -281,7 +281,7 @@ vif_baseline_hom_MLR %>%
     variable = names(vif_baseline_hom_MLR),
     VIF = vif_baseline_hom_MLR
   ) %>% 
-  dplyr::select(variable, VIF) %>% 
+  select(variable, VIF) %>% 
   knitr::kable()
 
 ```
@@ -307,7 +307,7 @@ vif_baseline_viol_MLR %>%
     variable = names(vif_baseline_viol_MLR),
     VIF = vif_baseline_viol_MLR
   ) %>% 
-  dplyr::select(variable, VIF) %>% 
+  select(variable, VIF) %>% 
   knitr::kable()
 ```
 Results from VIF show that there is no multicollinearity issue (VIF < 5).
@@ -390,7 +390,7 @@ vif_subset_violence_model %>%
     variable = names(vif_subset_violence_model),
     VIF = vif_subset_violence_model
   ) %>% 
-  dplyr::select(variable, VIF) %>% 
+  select(variable, VIF) %>% 
   knitr::kable()
 ```
 
@@ -420,7 +420,7 @@ vif_subset_homicide_model %>%
     variable = names(vif_subset_homicide_model),
     VIF = vif_subset_homicide_model
   ) %>% 
-  dplyr::select(variable, VIF) %>% 
+  select(variable, VIF) %>% 
   knitr::kable()
 ```
 
@@ -475,7 +475,7 @@ cv_df_violence <-
     rmse_lasso = map2_dbl(
       lasso, test, \(mod, test) rmse_glmnet(mod, test, "violence_rate"))
   ) %>% 
-  dplyr::select(starts_with("rmse_"))
+  select(starts_with("rmse_"))
 
 ```
 
@@ -498,7 +498,7 @@ cv_df_homicide <-
     rmse_lasso = map2_dbl(
       lasso, test, \(mod, test) rmse_glmnet(mod, test, "homicide_rate"))
   ) %>% 
-  dplyr::select(starts_with("rmse_"))
+  select(starts_with("rmse_"))
 ```
 
 
