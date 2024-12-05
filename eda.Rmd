@@ -16,9 +16,9 @@ homicide_visual_df = read_csv("./data/homicide_visual.csv")
 violence_visual_df = read_csv("./data/violence_visual.csv")
 ```
 
-# Homicide
+# Exploring Homicide Victim Outcomes
 
-## Global Trend
+## Global Trends
 ```{r message = FALSE}
 homicide_visual_df |>
   group_by(region, sex, year) |>
@@ -35,7 +35,7 @@ The Americas and Asia have significantly higher average homicide rate across
 years for male victims compared to the other regions. The average homicide rate 
 between genders are not significant for Africa, Asia and Oceania. 
 
-## Americas and Asia
+## Comparing the Americas and Asia
 ```{r message = FALSE, warning = FALSE}
 homicide_visual_df |>
   filter(region %in% c("Asia", "Americas")) |>
@@ -61,7 +61,7 @@ socio-political homicide compared to the other categories,suggesting high
 casualties as a result of socio-political activities for countries in Asia. 
 The other categories have a homicide rate lesser than 5 percent. 
 
-## Proportion of Categories
+## Homicide Breakdown by Categories
 ```{r message = FALSE}
 homicide_visual_df |>
   group_by(category, year) |>
@@ -84,26 +84,25 @@ The total homicide rate increases sharply from 2015 to 2017 compared to the
 other years possibly due to socioeconomic factors, such as economic instability. 
 
 
-# Violence
+# Exploring Violent Offences
 
-## Global Trend
+## Violence Trends by Region, Category, and Year
 ```{r message = FALSE}
-violence_visual_df |>
-  filter(indicator == "Violent offences") |>
-  group_by(region, sex, year) |>
-  summarize(avg_violence_rate = mean(violence_rate)) |>
-  ggplot(aes(y = avg_violence_rate, x = year, color = region)) +
-  geom_smooth(se = FALSE) +
-  labs(x = "Year",
-       y = "Average Rate of Violence Offences",
-       Title = "Average Violence Rate Trend") 
+
+violence_visual_df |> 
+  filter(indicator == "Violent offences") |> 
+  group_by(category, year, region) |> 
+  summarise(grp_mean_rate = mean(violence_rate)) |> 
+  ggplot(aes(x = year, y = grp_mean_rate, color = category)) +
+  geom_line() +
+  facet_wrap(~region, ncol=2) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  labs(title = "Average Violence Rate by Category Across Region through Time",
+         x = "Year", y = "Rate of offences (per 100,000 population)")
 ```
 
-Oceania has a significantly high average rate of violent offences compared to 
-the other regions. Moreover, the average rate for Oceania increases at 2020, 
-but declines significantly until 2022. The rate for Africa has shown a steady 
-decrease from 2017 until 2022. Comparatively, the rate of violence offences for 
-Americas, Europe and Asia has been stable over the years. 
+Africa's most common violent offence category was serious assault, with the Americas trading off
+between serious assault and acts intended to induce fear or emotional distress. From 2015-2021 Oceania clearly has the highest rates of serious assault, but it drops severely in 2022. 
 
 ## Categories of Violence Offences
 ```{r message = FALSE, fig.height = 10}
@@ -114,14 +113,23 @@ violence_visual_df |>
   mutate(category = fct_reorder(category, avg_violence_rate)) |>
   ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Violence Category", y = "Rate of offences (per 100,000 population)") + 
   facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 
-For every year except 2022, Oceania is the region with the highest rates for the serious assault
-and sexual violence category. Interestingly, the gap between Oceania and the Americas decreases greatly in 2022 with Oceania's drop in assault rates. 
+```
+The plot above shows similar trends to the line graph above, but allows us to compare more closely
+the rates for categories that are less visible such as sexual violence, where Oceania appears
+to have the highest rates of as well. We see more clearly that with Oceania's drop in serious
+assaults in 2022, Americas and Oceania have similar trends.  
+ 
 
 ## Victims of Sexual Violence
+Even in 2024, it is still ever-important to discuss sexual violence crimes. Violence against
+women is a public health issue and any type of sexual violence is a violation of human rights, harming 
+physical, mental, sexual, and reproductive health. We are interested in seeing more specifically
+trends in sexual violence across the years for regions with sufficient data. 
+
 ```{r message = FALSE}
 violence_visual_df |>
   filter(indicator == "Victims of sexual violence",
@@ -132,8 +140,8 @@ violence_visual_df |>
   geom_smooth(se = FALSE) +
   facet_grid(~region) +
   labs(x = "Year",
-       y = "Victim Rate of Sexual Violence",
-       Title = "Average Violence Rate Trend")
+       y = "Victim Rate of Sexual Violence (per 100,000 population)",
+       title = "Average Violence Rate of Sexual Violence by Gender Across Region")
 ```
 
 When exploring victim rate of sexual violence, we can see that in overall, 
@@ -158,7 +166,8 @@ violence_visual_df |>
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Region",
        y = "Average Victim Rate",
-       Title = "Average Victim Rate Across Category", 
+       Title = "Average Victim Rate By Category of Perpetrator-Victim Relationship
+       Across Region", 
        fill = "Category")
 ```
 
@@ -183,7 +192,7 @@ violence_visual_df |>
   geom_bar(stat = "identity") + 
   labs(x = "Year",
        y = "Total Victim Rate",
-       Title = "Victim Rate by Category",
+       Title = "Proportion of Sexual Violence Crimes by Category through Time",
        fill = "Category")
 ```
 
@@ -214,3 +223,15 @@ trend reflects the persistent issue of violence in the region, affecting not
 only homicide rates but also broader forms of violence. However, Oceania 
 presented an extreme outlier in terms of victim rates of sexual violence, 
 surpassing even the Americas.
+
+Putting these results against our own knowledge, Oceania's rates seem higher
+than expected. This raises the question of if higher rates mean more violent
+countries or countries who just have reported more crimes. It is very important
+to address that these outcome data are compiled by  UNODC but the data itself comes
+from each nation's respective administrative registers, often managed by law enforcement
+agencies. Additionally, UNODC comes by this data not through requirement but by the 
+United Nations Survey of Crime
+Trends and Operations of Criminal Justice Systems (UN-CTS). This means that countries
+voluntarily supply their information. However, a safety-guard is that UNODC does check for consistency and
+coherence with other data sources. 
+
