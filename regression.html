@@ -13,7 +13,7 @@
 
 <title>Regression</title>
 
-<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -32,8 +32,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -336,16 +336,18 @@ factors influence homicide rate and violence rate as outcomes.</p>
       method = criterion, names = names(predictor))
   
   if (criterion == &quot;Cp&quot;) {
-    optimal_rsq &lt;- optimal_subset[[criterion]] %&gt;% min()
+    optimal_criterion &lt;- optimal_subset[[criterion]] %&gt;% min()
     optimal_subset_idx &lt;- optimal_subset[[criterion]] %&gt;% which.min()
+    
   } else {
-    optimal_rsq &lt;- optimal_subset[[criterion]] %&gt;% max()
+    optimal_criterion &lt;- optimal_subset[[criterion]] %&gt;% max()
     optimal_subset_idx &lt;- optimal_subset[[criterion]] %&gt;% which.max()
   }
   
-  print(optimal_rsq) 
-  print(optimal_subset$which[optimal_subset_idx,])
-
+  
+  list(Criterion = optimal_criterion , 
+       Variable_Selection = optimal_subset$which[optimal_subset_idx,])
+  
 }</code></pre>
 <p>This function serves as a wrapper around the leaps function. It
 performs best subset variable selection and then prints out the optimal
@@ -405,74 +407,259 @@ dataset and then calculates and returns the rmse.</p>
 <h2>Visualizations of distributions</h2>
 <pre class="r"><code>plot_distributions = function(column, name) {
   if(is.numeric(column) &amp; name != &quot;year&quot;) {
-    ggplot(merged_violence_df, aes(x = column)) +
-    geom_density() +
-    labs(title = paste(&quot;Distribution of&quot;, name))
+    plot = ggplot(merged_violence_df, aes(x = column)) +
+            geom_density() +
+            labs(title = paste(&quot;Distribution of&quot;, name))
   }
 }
 
-list = colnames(merged_violence_df)
+list = merged_violence_df |&gt; 
+  select(homicide_rate:alcohol_consumption_rate) |&gt;
+  colnames()
+
 map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))</code></pre>
 <pre><code>## [[1]]</code></pre>
-<p><img src="regression_files/figure-html/distribution-1.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-1.png" width="960" /></p>
 <pre><code>## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]
-## NULL
-## 
-## [[6]]</code></pre>
-<p><img src="regression_files/figure-html/distribution-2.png" width="672" /></p>
+## [[2]]</code></pre>
+<p><img src="regression_files/figure-html/distributions-2.png" width="960" /></p>
 <pre><code>## 
-## [[7]]</code></pre>
-<p><img src="regression_files/figure-html/distribution-3.png" width="672" /></p>
-<pre><code>## 
-## [[8]]</code></pre>
+## [[3]]</code></pre>
 <pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-4.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-3.png" width="960" /></p>
 <pre><code>## 
-## [[9]]</code></pre>
+## [[4]]</code></pre>
 <pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-5.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-4.png" width="960" /></p>
 <pre><code>## 
-## [[10]]</code></pre>
+## [[5]]</code></pre>
 <pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-6.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-5.png" width="960" /></p>
 <pre><code>## 
-## [[11]]</code></pre>
+## [[6]]</code></pre>
 <pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-7.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-6.png" width="960" /></p>
 <pre><code>## 
-## [[12]]</code></pre>
+## [[7]]</code></pre>
 <pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-8.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-7.png" width="960" /></p>
 <pre><code>## 
-## [[13]]</code></pre>
+## [[8]]</code></pre>
 <pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-9.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-8.png" width="960" /></p>
 <pre><code>## 
-## [[14]]</code></pre>
+## [[9]]</code></pre>
 <pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-10.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-9.png" width="960" /></p>
 <pre><code>## 
-## [[15]]</code></pre>
+## [[10]]</code></pre>
 <pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/distribution-11.png" width="672" /></p>
+<p><img src="regression_files/figure-html/distributions-10.png" width="960" /></p>
+<pre class="r"><code>## GGPairs (Also shows correlation)
+merged_violence_df |&gt;
+  select(homicide_rate:alcohol_consumption_rate) |&gt;
+  ggpairs()</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 6 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 46 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 42 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 20 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 31 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 246 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 298 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 211 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 6 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 46 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 42 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 20 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 31 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 246 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 298 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 211 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 6 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 6 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 48 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 45 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 23 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 35 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 247 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 301 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 214 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 46 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 46 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 48 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 74 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 54 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 75 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 278 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 315 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 230 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 42 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 42 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 45 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 74 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 56 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 72 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 277 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 298 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 233 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 20 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 20 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 23 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 54 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 56 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 50 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 259 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 298 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 211 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 31 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 31 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 35 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 75 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 72 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 50 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 256 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 316 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 239 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 246 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 246 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 247 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 278 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 277 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 259 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 256 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 404 rows containing missing values</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 354 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 298 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 298 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 301 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 315 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 298 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 298 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 316 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 404 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<pre><code>## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 344 rows containing missing values</code></pre>
+<pre><code>## Warning: Removed 211 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+## Removed 211 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 214 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 230 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 233 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 211 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 239 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 354 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 344 rows containing missing values or values outside the scale range
+## (`geom_point()`).</code></pre>
+<pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
+<p><img src="regression_files/figure-html/distributions-11.png" width="960" /></p>
 <p>All variables are skewed right, except for human development index
 which is bimodal and slightly left-skewed. We will apply ln
 transformations and Box-Cox transformations to these variables. Even
@@ -500,69 +687,54 @@ ln_df =
 
 map(list, \(x) plot_distributions(pull(ln_df, x), x))</code></pre>
 <pre><code>## [[1]]</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-1.png" width="672" /></p>
 <pre><code>## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]
-## NULL
-## 
-## [[6]]</code></pre>
-<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
+## [[2]]</code></pre>
+<pre><code>## Warning: Removed 3 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-2.png" width="672" /></p>
 <pre><code>## 
-## [[7]]</code></pre>
-<pre><code>## Warning: Removed 3 rows containing non-finite outside the scale range
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-3.png" width="672" /></p>
 <pre><code>## 
-## [[8]]</code></pre>
-<pre><code>## Warning: Removed 6 rows containing non-finite outside the scale range
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-4.png" width="672" /></p>
 <pre><code>## 
-## [[9]]</code></pre>
-<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-5.png" width="672" /></p>
 <pre><code>## 
-## [[10]]</code></pre>
-<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-6.png" width="672" /></p>
 <pre><code>## 
-## [[11]]</code></pre>
-<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 38 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-7.png" width="672" /></p>
 <pre><code>## 
-## [[12]]</code></pre>
-<pre><code>## Warning: Removed 38 rows containing non-finite outside the scale range
+## [[8]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-8.png" width="672" /></p>
 <pre><code>## 
-## [[13]]</code></pre>
-<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
+## [[9]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-9.png" width="672" /></p>
 <pre><code>## 
-## [[14]]</code></pre>
-<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-10.png" width="672" /></p>
-<pre><code>## 
-## [[15]]</code></pre>
+## [[10]]</code></pre>
 <pre><code>## Warning: Removed 213 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/ln-transform-11.png" width="672" /></p>
+<p><img src="regression_files/figure-html/ln-transform-10.png" width="672" /></p>
 </div>
 <div id="box-cox-transform." class="section level2">
 <h2>Box-Cox Transform.</h2>
@@ -580,7 +752,7 @@ map(list, \(x) plot_distributions(pull(ln_df, x), x))</code></pre>
     return(value) 
   }
 
-  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
   lambda = boxcox_result$x[which.max(boxcox_result$y)]  
 
 
@@ -597,63 +769,48 @@ map(list, \(x) plot_distributions(pull(boxcox_df, x), x))</code></pre>
 <pre><code>## [[1]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-1.png" width="672" /></p>
 <pre><code>## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]
-## NULL
-## 
-## [[6]]</code></pre>
+## [[2]]</code></pre>
 <p><img src="regression_files/figure-html/boxcox-2.png" width="672" /></p>
 <pre><code>## 
-## [[7]]</code></pre>
+## [[3]]</code></pre>
+<pre><code>## Warning: Removed 771 rows containing non-finite outside the scale range
+## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/boxcox-3.png" width="672" /></p>
 <pre><code>## 
-## [[8]]</code></pre>
-<pre><code>## Warning: Removed 771 rows containing non-finite outside the scale range
+## [[4]]</code></pre>
+<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/boxcox-4.png" width="672" /></p>
 <pre><code>## 
-## [[9]]</code></pre>
-<pre><code>## Warning: Removed 46 rows containing non-finite outside the scale range
+## [[5]]</code></pre>
+<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/boxcox-5.png" width="672" /></p>
 <pre><code>## 
-## [[10]]</code></pre>
-<pre><code>## Warning: Removed 42 rows containing non-finite outside the scale range
+## [[6]]</code></pre>
+<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/boxcox-6.png" width="672" /></p>
 <pre><code>## 
-## [[11]]</code></pre>
-<pre><code>## Warning: Removed 20 rows containing non-finite outside the scale range
+## [[7]]</code></pre>
+<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/boxcox-7.png" width="672" /></p>
 <pre><code>## 
-## [[12]]</code></pre>
-<pre><code>## Warning: Removed 31 rows containing non-finite outside the scale range
+## [[8]]</code></pre>
+<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/boxcox-8.png" width="672" /></p>
 <pre><code>## 
-## [[13]]</code></pre>
-<pre><code>## Warning: Removed 246 rows containing non-finite outside the scale range
+## [[9]]</code></pre>
+<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
 <p><img src="regression_files/figure-html/boxcox-9.png" width="672" /></p>
 <pre><code>## 
-## [[14]]</code></pre>
-<pre><code>## Warning: Removed 298 rows containing non-finite outside the scale range
-## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/boxcox-10.png" width="672" /></p>
-<pre><code>## 
-## [[15]]</code></pre>
+## [[10]]</code></pre>
 <pre><code>## Warning: Removed 211 rows containing non-finite outside the scale range
 ## (`stat_density()`).</code></pre>
-<p><img src="regression_files/figure-html/boxcox-11.png" width="672" /></p>
+<p><img src="regression_files/figure-html/boxcox-10.png" width="672" /></p>
 <p>While initial EDA suggested that logarithmic and Box-Cox
 transformations might be useful for improving normality, the results
 indicate that these transformations are not entirely necessary. The
@@ -1033,65 +1190,51 @@ Lasso.</p>
 <tr class="odd">
 <td align="left">(Intercept)</td>
 <td align="right">1</td>
-<td align="right">35.1782575</td>
+<td align="right">29.5432748</td>
 <td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
+<td align="right">0.5165853</td>
 </tr>
 <tr class="even">
-<td align="left">…1</td>
-<td align="right">1</td>
-<td align="right">-0.0142467</td>
-<td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
-</tr>
-<tr class="odd">
 <td align="left">gdp</td>
 <td align="right">1</td>
 <td align="right">0.0000000</td>
 <td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
-</tr>
-<tr class="even">
-<td align="left">inflation_rate</td>
-<td align="right">1</td>
-<td align="right">-1.4142587</td>
-<td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
+<td align="right">0.5165853</td>
 </tr>
 <tr class="odd">
-<td align="left">unemployment_rate</td>
+<td align="left">inflation_rate</td>
 <td align="right">1</td>
-<td align="right">-0.0770963</td>
+<td align="right">-1.5694059</td>
 <td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
+<td align="right">0.5165853</td>
 </tr>
 <tr class="even">
 <td align="left">crime_rate</td>
 <td align="right">1</td>
-<td align="right">0.1065574</td>
+<td align="right">0.1088544</td>
 <td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
+<td align="right">0.5165853</td>
 </tr>
 <tr class="odd">
 <td align="left">personnel_rate</td>
 <td align="right">1</td>
-<td align="right">-0.0424605</td>
+<td align="right">-0.0473156</td>
 <td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
+<td align="right">0.5165853</td>
 </tr>
 <tr class="even">
 <td align="left">trafficked_victims</td>
 <td align="right">1</td>
-<td align="right">0.0078471</td>
+<td align="right">0.0078378</td>
 <td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
+<td align="right">0.5165853</td>
 </tr>
 <tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
 <td align="right">1</td>
-<td align="right">-1.3823676</td>
+<td align="right">-1.3407173</td>
 <td align="right">0.7943282</td>
-<td align="right">0.5249133</td>
+<td align="right">0.5165853</td>
 </tr>
 </tbody>
 </table>
@@ -1114,96 +1257,104 @@ estimates, the coefficient for <code>gdp</code> was shrunk to 0.</p>
 <tr class="odd">
 <td align="left">(Intercept)</td>
 <td align="right">1</td>
-<td align="right">74.6709895</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">75.5833480</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="even">
 <td align="left">gdp</td>
 <td align="right">1</td>
 <td align="right">0.0000000</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="odd">
 <td align="left">inflation_rate</td>
 <td align="right">1</td>
-<td align="right">-0.6671610</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">-0.6907875</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="even">
 <td align="left">unemployment_rate</td>
 <td align="right">1</td>
-<td align="right">-0.3409829</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">-0.3553263</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="odd">
 <td align="left">hdi</td>
 <td align="right">1</td>
-<td align="right">-77.2906554</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">-78.2143914</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="even">
 <td align="left">crime_rate</td>
 <td align="right">1</td>
-<td align="right">0.0040888</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">0.0043479</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="odd">
 <td align="left">personnel_rate</td>
 <td align="right">1</td>
-<td align="right">0.0082468</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">0.0085533</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="even">
 <td align="left">trafficked_victims</td>
 <td align="right">1</td>
-<td align="right">-0.0001397</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">-0.0002459</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 <tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
 <td align="right">1</td>
-<td align="right">-0.1995430</td>
-<td align="right">0.1</td>
-<td align="right">0.3517353</td>
+<td align="right">-0.2056343</td>
+<td align="right">0.0630957</td>
+<td align="right">0.3524531</td>
 </tr>
 </tbody>
 </table>
 <p>The optimal lambda for homicide rate is 0.050. Similar to the results
 from violence, the coefficient for <code>gdp</code> was shrunk to 0.</p>
-<p><u># Criterion-based procedure</p>
 </div>
+</div>
+<div id="criterion-based-procedure" class="section level1">
+<h1>Criterion-based procedure</h1>
 <div id="best-subset-regression-for-violence-rate"
 class="section level2">
 <h2>Best Subset Regression for Violence Rate</h2>
 <div id="predict-violence-rate-using-r-squared-as-criterion"
 class="section level3">
 <h3>Predict violence rate using r-squared as criterion</h3>
-<pre><code>## [1] 0.5171375
-##                     ...1                      gdp           inflation_rate 
-##                     TRUE                     TRUE                     TRUE 
-##        unemployment_rate                      hdi               crime_rate 
-##                    FALSE                    FALSE                     TRUE 
-##           personnel_rate       trafficked_victims alcohol_consumption_rate 
-##                     TRUE                     TRUE                     TRUE</code></pre>
+<pre><code>## $Criterion
+## [1] 0.5103599
+## 
+## $Variable_Selection
+##                      gdp           inflation_rate        unemployment_rate 
+##                     TRUE                     TRUE                    FALSE 
+##                      hdi               crime_rate           personnel_rate 
+##                    FALSE                     TRUE                     TRUE 
+##       trafficked_victims alcohol_consumption_rate 
+##                     TRUE                     TRUE</code></pre>
 </div>
 <div id="predict-violence_rate-using-cp-as-criterion"
 class="section level3">
 <h3>Predict violence_rate using Cp as criterion</h3>
-<pre><code>## [1] 7.123014
-##                     ...1                      gdp           inflation_rate 
-##                     TRUE                     TRUE                     TRUE 
-##        unemployment_rate                      hdi               crime_rate 
-##                    FALSE                    FALSE                     TRUE 
-##           personnel_rate       trafficked_victims alcohol_consumption_rate 
-##                     TRUE                     TRUE                     TRUE</code></pre>
+<pre><code>## $Criterion
+## [1] 5.363491
+## 
+## $Variable_Selection
+##                      gdp           inflation_rate        unemployment_rate 
+##                     TRUE                     TRUE                    FALSE 
+##                      hdi               crime_rate           personnel_rate 
+##                    FALSE                     TRUE                     TRUE 
+##       trafficked_victims alcohol_consumption_rate 
+##                     TRUE                     TRUE</code></pre>
 </div>
 <div id="check-for-co-linearity-in-best-subset-violence-model"
 class="section level3">
@@ -1250,24 +1401,30 @@ class="section level2">
 <div id="predict-homicide-rate-using-r-squared-as-criterion"
 class="section level3">
 <h3>Predict homicide rate using R-squared as criterion</h3>
-<pre><code>## [1] 0.3367418
-##                     ...1                      gdp           inflation_rate 
-##                    FALSE                     TRUE                     TRUE 
-##        unemployment_rate                      hdi               crime_rate 
+<pre><code>## $Criterion
+## [1] 0.3367418
+## 
+## $Variable_Selection
+##                      gdp           inflation_rate        unemployment_rate 
 ##                     TRUE                     TRUE                     TRUE 
-##           personnel_rate       trafficked_victims alcohol_consumption_rate 
-##                     TRUE                    FALSE                     TRUE</code></pre>
+##                      hdi               crime_rate           personnel_rate 
+##                     TRUE                     TRUE                     TRUE 
+##       trafficked_victims alcohol_consumption_rate 
+##                    FALSE                     TRUE</code></pre>
 </div>
 <div id="predict-homicide-rates-using-cp-as-criterion"
 class="section level3">
 <h3>Predict Homicide Rates using Cp as criterion</h3>
-<pre><code>## [1] 5.492935
-##                     ...1                      gdp           inflation_rate 
-##                    FALSE                    FALSE                     TRUE 
-##        unemployment_rate                      hdi               crime_rate 
-##                     TRUE                     TRUE                     TRUE 
-##           personnel_rate       trafficked_victims alcohol_consumption_rate 
-##                    FALSE                    FALSE                    FALSE</code></pre>
+<pre><code>## $Criterion
+## [1] 6.511243
+## 
+## $Variable_Selection
+##                      gdp           inflation_rate        unemployment_rate 
+##                    FALSE                     TRUE                     TRUE 
+##                      hdi               crime_rate           personnel_rate 
+##                     TRUE                     TRUE                    FALSE 
+##       trafficked_victims alcohol_consumption_rate 
+##                    FALSE                    FALSE</code></pre>
 </div>
 <div id="check-for-co-linearity-in-best-subset-homicide-model"
 class="section level3">

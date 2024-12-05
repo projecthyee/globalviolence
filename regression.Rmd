@@ -5,7 +5,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(MASS)
 library(glmnet)
 library(leaps)
 library(mgcv)
@@ -168,7 +167,7 @@ boxcox_transform = function(value) {
     return(value) 
   }
 
-  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
   lambda = boxcox_result$x[which.max(boxcox_result$y)]  
 
 
