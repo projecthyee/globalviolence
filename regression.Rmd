@@ -536,8 +536,20 @@ cv_df_homicide %>%
   ) %>% 
   ggplot(aes(x = Model, y = RMSE)) +
   geom_violin() +
-  ggtitle("RMSE by Model for Predicting Homicide Rate")
+  ggtitle("RMSE by Model for Predicting Homicide Rate") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
+
+Examining the three models we used to predict homicide rate, we see that 
+the distribution of RMSE across 100-fold cross-validation are nearly identical. 
+This is likely in regard to the few predictor variables included in our dataset.
+In particular, with such few predictor variables, lasso is likely not most 
+well-suited for this task, as there is not a serious need to reduce model 
+complexity. Consequently, the number of variabls included in each of the 3 
+models is quite similar, and the difference of 1 or 2 included predictors 
+between each of the models does not produce a substnatial change in model 
+effectiveness.
+
 
 # Model Diagnostics
 
