@@ -148,8 +148,8 @@ check_model = function(resid_list, observed, predicted, model_name) {
     diagnostics <- append(diagnostics, list(qqplot, resid_fit))
   }
   
+  patchwork::wrap_plots(diagnostics)
 }
-  
   
 ```
 This is a plotting function to combine several different plot types that assess 
