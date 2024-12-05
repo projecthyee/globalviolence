@@ -4,7 +4,7 @@ navbar:
   title: "Home"
   left:
     - text: "Data"
-      href: cleaning.html
+      href: data_cleaning.html
     - text: "EDA"
       href: eda.html
     - text: "Regression"
