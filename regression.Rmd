@@ -5,16 +5,18 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(MASS)
 library(glmnet)
 library(leaps)
 library(mgcv)
 library(ggcorrplot)
 library(modelr)
+library(GGally)
 set.seed(1)
 
 merged_violence_df <- read_csv(
-  file = "data/merged_violence.csv" )
+  file = "data/merged_violence.csv",
+  col_select = c(2:15))
+
 ```
 
 # Introduction
@@ -37,16 +39,18 @@ best_subset = function(predictor, outcome, criterion) {
       method = criterion, names = names(predictor))
   
   if (criterion == "Cp") {
-    optimal_rsq <- optimal_subset[[criterion]] %>% min()
+    optimal_criterion <- optimal_subset[[criterion]] %>% min()
     optimal_subset_idx <- optimal_subset[[criterion]] %>% which.min()
+    
   } else {
-    optimal_rsq <- optimal_subset[[criterion]] %>% max()
+    optimal_criterion <- optimal_subset[[criterion]] %>% max()
     optimal_subset_idx <- optimal_subset[[criterion]] %>% which.max()
   }
   
-  print(optimal_rsq) 
-  print(optimal_subset$which[optimal_subset_idx,])
-
+  
+  list(Criterion = optimal_criterion , 
+       Variable_Selection = optimal_subset$which[optimal_subset_idx,])
+  
 }
 ```
 This function serves as a wrapper around the leaps function. It performs 
@@ -105,17 +109,25 @@ calculates and returns the rmse.
 # Exploratory data analysis 
 
 ## Visualizations of distributions
-```{r distribution}
+```{r distributions, fig.width = 10, fig.height = 10}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
     ggplot(merged_violence_df, aes(x = column)) +
-    geom_density() +
-    labs(title = paste("Distribution of", name))
+      geom_density() +
+      labs(title = paste("Distribution of", name))
   }
 }
 
-list = colnames(merged_violence_df)
+list = merged_violence_df |> 
+  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
+  colnames()
+
 map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
+
+merged_violence_df |>
+  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
+
 ```
 
 All variables are skewed right, except for human development index which is bimodal and slightly left-skewed. We will apply ln transformations and Box-Cox transformations to these variables. Even though it is not necessary to normalize the distribution of predictors, this step will stabilize variance and reduce heteroscedasticity. We believe it will be helpful for further steps with model.
@@ -154,7 +166,7 @@ boxcox_transform = function(value) {
     return(value) 
   }
 
-  boxcox_result = boxcox(value ~ 1, plotit = FALSE)
+  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
   lambda = boxcox_result$x[which.max(boxcox_result$y)]  
 
 
@@ -193,11 +205,15 @@ ggcorrplot(cor_matrix,
            title = "Correlation Heatmap"
 )
 ```
+
 There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
 corr = 0.5, and moderately high correlation between `trafficked_victims` and 
 `gdp`, corr = 0.7. 
 
 # Data Pre-processing
+
+In this step, we manipulate the merged_violence_df in preparation for later 
+statistical modelling. 
 
 ## Define Lambda Range
 ```{r}
@@ -320,7 +336,8 @@ lasso_violence_fit |>
   knitr::kable()
 ```
 
-The optimal lambda for violence rate is 0.794. Based on lasso estimates, the coefficient for `gdp` was shrunk to 0. 
+The optimal lambda for violence rate is 0.794. Based on lasso estimates, 
+the coefficient for `gdp` was shrunk to 0. 
 
 
 ## Predictors for homicide rate.
