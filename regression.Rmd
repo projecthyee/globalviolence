@@ -109,7 +109,7 @@ calculates and returns the rmse.
 # Exploratory data analysis 
 
 ## Visualizations of distributions
-```{r distribution}
+```{r distributions}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
     ggplot(merged_violence_df, aes(x = column)) +
@@ -328,7 +328,8 @@ lasso_violence_fit |>
   knitr::kable()
 ```
 
-The optimal lambda for violence rate is 0.794. Based on lasso estimates, the coefficient for `gdp` was shrunk to 0. 
+The optimal lambda for violence rate is 0.794. Based on lasso estimates, 
+the coefficient for `gdp` was shrunk to 0. 
 
 
 ## Predictors for homicide rate.
