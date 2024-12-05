@@ -390,6 +390,17 @@ lasso_violence_fit =
 lasso_violence_fit |> 
   broom::tidy() |> 
   knitr::kable()
+
+lasso_predict_violence <- 
+  predict.glmnet(lasso_violence_fit, lambda_violence_opt, 
+                 newx = violence_matrix, type = "response")
+  
+lasso_predict_violence <- as.vector(lasso_predict_violence)
+
+lasso_violence_resid <- tibble(
+  residuals = violence_outcome - lasso_predict_violence
+)
+
 ```
 
 The optimal lambda for violence rate is `r lambda_violence_opt`` Based on 
@@ -414,6 +425,17 @@ lasso_homicide_fit =
 lasso_homicide_fit |> 
   broom::tidy() |> 
   knitr::kable()
+
+lasso_predict_homicide <- 
+  predict.glmnet(lasso_homicide_fit, lambda_homicide_opt, 
+                 newx = homicide_matrix, type = "response")
+  
+lasso_predict_homicide <- as.vector(lasso_predict_homicide)
+
+lasso_homicide_resid <- tibble(
+  residuals = homicide_outcome - lasso_predict_homicide
+)
+
 ```
 
 The optimal lambda for homicide rate is `r lambda_homicide_opt`. Similar 
@@ -647,33 +669,75 @@ ease of interpretability of beta coefficients.
 
 ### Violence Rates
 
-```{r}
+```{r echo=FALSE}
+resid_df <- tibble(residuals = resid(baseline_MLR_viol)) 
+
+resid_df %>% 
+  ggplot(aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line(col = "red")
 
 ```
 
 
 ### Homicide Rates
-```{r}
-test_df <- tibble(
-  residuals = resid(baseline_MLR_hom)
-)
-ggplot(
-  data = test_df, aes(sample = residuals)) +
-    stat_qq() + 
-    stat_qq_line(col = "red")
+```{r echo=FALSE}
+resid_df <- tibble(residuals = resid(baseline_MLR_hom)) 
+
+resid_df %>% 
+  ggplot(aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line(col = "red")
+
 ```
 
 ## QQ Plot of Best Subset Linear Model 
 
-```{r}
+### Violence Rate
+```{r echo=FALSE}
+resid_df <- tibble(residuals = resid(subset_violence_lm)) 
+
+resid_df %>% 
+  ggplot(aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line(col = "red")
+
+```
+
+### Homicide Rate
+```{r echp=FALSE}
+resid_df <- tibble(residuals = resid(subset_homicide_lm)) 
+
+resid_df %>% 
+  ggplot(aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line(col = "red")
 
 ```
 
 ## QQ Plot of Lasso Model
 
-```{r}
+
+### Violence Rate
+```{r echo=FALSE}
+lasso_violence_resid %>% 
+  ggplot(aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line(col = "red")
+
+```
+
+### Homicide Rate
+```{r echo=FALSE}
+lasso_homicide_resid %>% 
+  ggplot(aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line(col = "red")
 
 ```
 
 
-# Conclusion of Modeling
+# Conclusion 
+
+
+
