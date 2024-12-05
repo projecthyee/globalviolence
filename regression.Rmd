@@ -243,56 +243,6 @@ violence_outcome <- violence_df %>%
 
 ```
 
-
-# Statistical Learning Approaches
-
-## Data Pre-processing
-
-### Define Lambda Range
-```{r}
-lambda = 10^(seq(-2, 2.75, 0.1))
-```
-
-### Pre-processing for homicide.
-```{r}
-homicide_df =
-  merged_violence_df |> 
-  dplyr::ungroup() |> 
-  dplyr::select(
-    homicide_rate, everything(), -violence_rate, -year, -country, -region, 
-    -iso3_code) |> 
-  drop_na()
-
-homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
-
-homicide_predictors <- homicide_df %>% 
-  dplyr::select(-homicide_rate)
-
-homicide_outcome <- homicide_df %>% 
-  pull(homicide_rate)
-```
-
-### Pre-processing for violence.
-```{r}
-violence_df =
-  merged_violence_df |> 
-  dplyr::ungroup() |> 
-  dplyr::select(
-    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
-    -iso3_code) |>
-  drop_na()
-
-violence_matrix <- model.matrix(violence_rate ~., data = violence_df)[,-1]
-  
-violence_predictors <- violence_df %>% 
-  dplyr::select(-violence_rate)
-
-violence_outcome <- violence_df %>% 
-  pull(violence_rate)
-
-```
-
-
 # Baseline MLR with additive effects
 First, we will fit a baseline MLR with additive effects from all possible predictor variables to use as a point of reference for our modeling process. This step provides basic understanding of the extent to which different covariates contribute to the outcomes of interest. 
 
