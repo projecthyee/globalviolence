@@ -439,8 +439,18 @@ vif_subset_violence_model %>%
   select(variable, VIF) %>% 
   knitr::kable()
 ```
+All variables have VIF value below 5, suggesting that there is no 
+multi-colinearity concerns.
+
+### Interpretation
+The results from criterion-based procedures suggest that 
+significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. 
+This yields the most appropriate Cp value (5.363), which is approximately 
+close to the number of predictors, and highest adjusted R-squared (0.510).
 
 ## Best subset regression for Homicide Rate
+
+## Best subset regression for homicide rate
 
 ### Predict homicide rate using R-squared as criterion
 ```{r echo=FALSE}
@@ -453,7 +463,6 @@ best_subset(predictor = homicide_predictors, outcome = homicide_outcome,
 best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
             criterion = "Cp")
 ```
-
 
 ### Check for co-linearity in best subset homicide model
 ```{r echo=FALSE}
@@ -469,10 +478,19 @@ vif_subset_homicide_model %>%
   select(variable, VIF) %>% 
   knitr::kable()
 ```
+All variables have VIF value below 5, suggesting that there is no 
+multi-colinearity concerns.
 
-The results from criterion-based procedures suggest that significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. This yields the most appropriate Cp value (5.363), which is approximately close to the number of predictors, and highest adjusted R-squared (0.510). 
 
-For homicide_rate, the results are not as straightforward. The best model based on Cp and R-squared seems to be the model with 4 predictors because it has the lowest Cp (6.36), and a decently high adjusted R-squared (0.331), indicating a good balance between fit and complexity. As more predictors are added, R-squared adjusts slightly but Cp levels off at around 6 predictors. The model with 4 predictors, which includes inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a better trade-off.
+### Interpretation
+For homicide_rate, the results are not as straightforward. 
+The best model based on Cp and R-squared seems to be the model with 
+4 predictors because it has the lowest Cp (6.36), and a relatively high 
+adjusted R-squared (0.331), indicating a good balance between fit and 
+complexity. As more predictors are added, R-squared adjusts slightly but Cp 
+levels off at around 6 predictors. The model with 4 predictors, which includes 
+inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a 
+better trade-off.
 
 
 # Model Comparison 
