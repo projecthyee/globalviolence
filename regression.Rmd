@@ -730,7 +730,17 @@ baseline_viol_resid_df =
 check_model(baseline_hom_resid_df, "MLR All Predictors Homicide Rate")
 check_model(baseline_viol_resid_df, "MLR All Predictors Violence Rate")
 ```
-
+Examining the QQ-plots for the MLRs with all predictor variables included, we 
+notice that our assumption of normality of residuals may be in violation, as 
+there appear to many lower-bound and upper-bound outliers that do not fall along 
+the reference line. Regarding the plots of fitted values versus residuals, we 
+see differing results based on whether homicide rate or violence rate is 
+the outcome variable. With homicide as the outcome variable, we can see 
+residuals oscillate above and below the reference line, indicating approximate 
+linearity of the relationship between the predictors and the outcome variables. 
+However, the greater variability in the residuals as fitted values increase, 
+suggests that we are seeing heteroscedasticity. Regarding violence rate as the 
+outcome variable, we see both issues with heteroscedasticity and linearity. 
 
 ## Best Subset MLR 
 
@@ -748,6 +758,16 @@ subset_violence_resid_df =
 check_model(subset_homicide_resid_df, "MLR Best Subset Homicide Rate")
 check_model(subset_violence_resid_df, "MLR Best Subset Violence Rate")
 ```
+
+Examining the QQ-plots for the MLRs using the best subset of predictor variables, 
+we once again notice that our assumption of normality of residuals may be in 
+violation, as there appear to many lower-bound and upper-bound outliers that do 
+not fall along the reference line. For the fitted versus residuals plot for 
+homicide rate, we see violations of both linearity and homosecdascity. The 
+equivalent plot for violence rate presents similar concerns regarding 
+homoscedascity, but shows a greater spread of residuals along the horizontal 
+reference line, and therefore better implies linearity of relationship between
+predictor variables and outcome. 
 
 
 ## Lasso
@@ -768,9 +788,16 @@ lasso_violence_resid_df =
 check_model(lasso_homicide_resid_df, "Lasso Homicide Rate")
 check_model(lasso_violence_resid_df, "Lasso Violence Rate")
 ```
-
+Consistent with results from the QQ-plots of the previous two MLR models, lasso 
+models for both homicide rate and violence rate show potential violations of the 
+assumption of normality, as many lower-bound and upper-bound outlier residuals
+do not fall along the reference line. For the fitted versus residuals plot 
+of homicide rate, we see possible heteroscedascity, while the equivalent plot 
+for homicide rate shows both possible heteroscedascity and non-linearity. 
 
 # Conclusion 
 
-
+Based on our comparisons of RMSE, we conclude that our best subset regression 
+models are most accurate at predicting the outcome: (1) Violence Rate and (2) 
+Homicide Rate. 
 
