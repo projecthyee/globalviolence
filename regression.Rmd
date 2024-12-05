@@ -351,6 +351,7 @@ The optimal lambda for homicide rate is 0.050. Similar to the results from viole
 
 # Criterion-based procedure
 
+
 ## Best Subset Regression for Violence Rate
 
 ### Predict violence rate using r-squared as criterion
