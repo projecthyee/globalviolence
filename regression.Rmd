@@ -278,8 +278,9 @@ Results from VIF show that there is no multicollinearity issue (VIF < 5).
 baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
-summary(baseline_MLR_viol)
-
+baseline_MLR_viol %>% 
+  broom::tidy() %>% 
+  knitr::kable()
 ```
 Results from MLR show that gdp, inflation rate, crime rate, personnel rate, number of trafficked victims per 100,000 and alcohol consumption rates are significant predictors of violence rate at significance level alpha = 0.01. 
 
