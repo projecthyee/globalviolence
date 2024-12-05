@@ -633,9 +633,15 @@ ease of interpretability of beta coefficients.
 # Model Diagnostics
 
 ## QQ Plot of All Variable Linear Model
-
 ```{r}
 
+test_df <- tibble(
+  residuals = resid(baseline_MLR_hom)
+)
+ggplot(
+  data = test_df, aes(sample = residuals)) +
+    stat_qq() + 
+    stat_qq_line(col = "red")
 ```
 
 ## QQ Plot of Best Subset Linear Model 
