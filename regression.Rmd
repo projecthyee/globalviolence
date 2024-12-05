@@ -355,6 +355,9 @@ covariates contribute to the outcomes of interest.
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
+
+baseline_MLR_hom_fitted <- baseline_MLR_hom[["fitted.values"]]
+
 baseline_MLR_hom %>% 
   broom::tidy() %>% 
   knitr::kable()
@@ -383,6 +386,9 @@ Results from VIF show that there is no multicollinearity issue (VIF < 5).
 baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
+
+baseline_MLR_viol_fitted <- baseline_MLR_viol[["fitted.values"]]
+
 baseline_MLR_viol %>% 
   broom::tidy() %>% 
   knitr::kable()
@@ -497,6 +503,10 @@ best_subset(predictor = violence_predictors, outcome = violence_outcome,
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
+
+subset_violence_fitted <- subset_violence_lm[["fitted.values"]]
+
+
 vif_subset_violence_model <- car::vif(subset_violence_lm) 
 
 vif_subset_violence_model %>% 
@@ -536,6 +546,9 @@ best_subset(predictor = homicide_predictors, outcome = homicide_outcome,
 ```{r echo=FALSE}
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + crime_rate, data = homicide_df)
+
+subset_homicide_fitted <- subset_homicide_lm[["fitted.values"]]
+
 
 vif_subset_homicide_model <- car::vif(subset_homicide_lm)
 vif_subset_homicide_model %>% 
