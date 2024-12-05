@@ -11,15 +11,6 @@ output:
 library(tidyverse)
 library(plotly)
 
-theme_set(theme_minimal() + 
-  theme(legend.position = "bottom", 
-      plot.title = element_text(hjust = 0.5)))
-
-knitr::opts_chunk$set(
-	fig.width = 8, 
-  fig.height = 6
-)
-
 merged_violence_df = read_csv("./data/merged_violence.csv")
 homicide_visual_df = read_csv("./data/homicide_visual.csv")
 violence_visual_df = read_csv("./data/violence_visual.csv")
@@ -97,7 +88,7 @@ other years possibly due to socioeconomic factors, such as economic instability.
 # Violence: Offences & Victims
 
 ## Global Trends of Violent Offences
-```{r message = FALSE}
+```{r message = FALSE, fig.height = 10}
 violence_visual_df |> 
   filter(indicator == "Violent offences") |> 
   group_by(category, year, region) |> 
@@ -105,17 +96,19 @@ violence_visual_df |>
   ggplot(aes(x = year, y = grp_mean_rate, color = category)) +
   geom_line() +
   facet_wrap(~region, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom") + 
   labs(title = "Violent Offences Across Region",
        x = "Year", 
-       y = "Average Rate of Violent Offences")
+       y = "Average Rate of Violent Offences") +
+  guides(color = guide_legend(nrow = 3))
 ```
 
 Africa's most common violent offence category was serious assault, with the Americas trading off
 between serious assault and acts intended to induce fear or emotional distress. From 2015-2021 Oceania clearly has the highest rates of serious assault, but it drops severely in 2022. 
 
 ## Exploring Violent Offences
-```{r message = FALSE, fig.height = 10}
+```{r message = FALSE, fig.height = 10, fig.width = 8}
 violence_visual_df |>
   filter(indicator == "Violent offences") |>
   group_by(category, year, region) |> 
@@ -123,11 +116,12 @@ violence_visual_df |>
   mutate(category = fct_reorder(category, avg_violence_rate)) |>
   ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~year, ncol=2) +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1),
+        legend.position = "bottom") +
   labs(x = "Category", 
        y = "Average Rate of Violent Offences",
-       title = "Violent Offences Across Category and Time") + 
-  facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 80, hjust = 1)) 
+       title = "Violent Offences Across Category and Time") 
 ```
 
 The plot above shows similar trends to the line graph above, but allows us to compare more closely

@@ -401,7 +401,7 @@ div.tocify {
   labs(x = &quot;Year&quot;,
        y = &quot;Average Rate of Homicide Victims&quot;,
        title = &quot;Homicide Victims Across Region&quot;)</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-1-1.png" width="768" /></p>
+<p><img src="eda_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>The Americas and Asia have significantly higher average homicide rate
 across years for male victims compared to the other regions. The average
 homicide rate between genders are not significant for Africa, Asia and
@@ -421,7 +421,7 @@ Oceania.</p>
        y = &quot;Average Rate of Homicide Victims&quot;,
        title = &quot;Homicide in America &amp; Asia&quot;, 
        fill = &quot;Category&quot;)</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-2-1.png" width="768" /></p>
+<p><img src="eda_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Further exploring homicide in Americas and Asia, the Americas have
 higher homicide rates for most categories compared to Asia. Homicides of
 perpetrator to victim relationship unknown has the largest homicide
@@ -445,7 +445,7 @@ percent.</p>
        x = &quot;Year&quot;,
        y = &quot;Total Rate of Homicide Victims&quot;,
        fill = &quot;Category&quot;)</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
+<p><img src="eda_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>Homicides of unknown types and perpetrator to victim relationship
 unknown are two highest proportions in the total homicide rate,
 indicating most homicides are committed by strangers or have no
@@ -468,11 +468,13 @@ instability.</p>
   ggplot(aes(x = year, y = grp_mean_rate, color = category)) +
   geom_line() +
   facet_wrap(~region, ncol=2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = &quot;bottom&quot;) + 
   labs(title = &quot;Violent Offences Across Region&quot;,
        x = &quot;Year&quot;, 
-       y = &quot;Average Rate of Violent Offences&quot;)</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
+       y = &quot;Average Rate of Violent Offences&quot;) +
+  guides(color = guide_legend(nrow = 3))</code></pre>
+<p><img src="eda_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Africa’s most common violent offence category was serious assault,
 with the Americas trading off between serious assault and acts intended
 to induce fear or emotional distress. From 2015-2021 Oceania clearly has
@@ -487,11 +489,12 @@ the highest rates of serious assault, but it drops severely in 2022.</p>
   mutate(category = fct_reorder(category, avg_violence_rate)) |&gt;
   ggplot(aes(x = category, y = avg_violence_rate, fill = region)) +
   geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  facet_wrap(~year, ncol=2) +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1),
+        legend.position = &quot;bottom&quot;) +
   labs(x = &quot;Category&quot;, 
        y = &quot;Average Rate of Violent Offences&quot;,
-       title = &quot;Violent Offences Across Category and Time&quot;) + 
-  facet_wrap(~year, ncol=2) +
-  theme(axis.text.x = element_text(angle = 80, hjust = 1)) </code></pre>
+       title = &quot;Violent Offences Across Category and Time&quot;) </code></pre>
 <p><img src="eda_files/figure-html/unnamed-chunk-5-1.png" width="768" /></p>
 <p>The plot above shows similar trends to the line graph above, but
 allows us to compare more closely the rates for categories that are less
@@ -520,7 +523,7 @@ with sufficient data.</p>
   labs(x = &quot;Year&quot;,
        y = &quot;Average Rate of Sexual Violence Victims&quot;,
        title = &quot;Sexual Violence Across Region&quot;)</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+<p><img src="eda_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>When exploring victim rate of sexual violence, we can see that in
 overall, there is a higher average victim rate for females; the largest
 disparity in victim rate between the genders can be observed in Oceania,
@@ -546,7 +549,7 @@ region.</p>
        y = &quot;Average Rate of Sexual Violence Victims&quot;,
        fill = &quot;Category&quot;,
        title = &quot;Sexual Violence By Category&quot;)</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p><img src="eda_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>Further exploring victims of sexual violence, except for perpetrator
 unknown to the victim, Oceania has a higher average victim rate of
 sexual violence for the all other categories compared to the other
@@ -571,7 +574,7 @@ the victim as the category with the highest rate.</p>
        y = &quot;Total Rate of Sexual Violence Victims&quot;,
        title = &quot;Distribution of Sexual Violence by Category&quot;,
        fill = &quot;Category&quot;)</code></pre>
-<p><img src="eda_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
+<p><img src="eda_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>Relationship to perpetrator is not known is the category with a
 significant proportion to total victim rate of sexual violence compared
 to the other categories across the years. The proportion of victim rates
