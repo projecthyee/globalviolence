@@ -112,21 +112,20 @@ calculates and returns the rmse.
 ```{r distributions, fig.width = 10, fig.height = 10, warning = FALSE, message = FALSE, echo = FALSE}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
-    plot = ggplot(merged_violence_df, aes(x = column)) +
-            geom_density() +
-            labs(title = paste("Distribution of", name))
+    ggplot(merged_violence_df, aes(x = column)) +
+      geom_density() +
+      labs(title = paste("Distribution of", name))
   }
 }
 
 list = merged_violence_df |> 
-  select(homicide_rate:alcohol_consumption_rate) |>
+  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
   colnames()
 
 hide = map(list, \(x) plot_distributions(pull(merged_violence_df, x), x))
 
-## GGPairs (Also shows correlation)
 merged_violence_df |>
-  select(homicide_rate:alcohol_consumption_rate) |>
+  dplyr::select(homicide_rate:alcohol_consumption_rate) |>
   ggpairs()
 ```
 
@@ -171,8 +170,11 @@ boxcox_transform = function(value) {
   boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
   lambda = boxcox_result$x[which.max(boxcox_result$y)]  
 
-
-  transformed_value = (value^lambda - 1) / lambda
+  if(lambda != 0) {
+    transformed_value = (value^lambda - 1) / lambda
+  } else {
+    transformed_value = log(value)
+  }
   return(transformed_value)
 }
 
