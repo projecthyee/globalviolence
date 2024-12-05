@@ -12,9 +12,9 @@ navbar:
     - text: "Shiny & Dashboard"
       menu:
       - text: "Prevalence of Violence"
-        href: https://yousmni3269.shinyapps.io/shiny/
+        href: https://yousmni3269.shinyapps.io/shiny_prevalence/
       - text: "Trends of Violence"
-        href: https://yousmni3269.shinyapps.io/shinyapp/
+        href: https://yousmni3269.shinyapps.io/shiny_trend/
       - text: "Homicide vs. Violence"
         href: plotly_vs.html
     - text: "Project Report"

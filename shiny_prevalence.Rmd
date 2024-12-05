@@ -79,7 +79,7 @@ sliderInput(
 ```
 
 
-Column {data-width=400}
+Column 
 -----------------------------------------------------------------------
 
 ### Global Visualization 
@@ -108,7 +108,7 @@ renderPlotly(
 
 
 
-Column {data-width=600}
+Column 
 -----------------------------------------------------------------------
 
 ### Average Outcome Rate per Region over the Selected Year

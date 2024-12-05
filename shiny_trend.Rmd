@@ -61,7 +61,7 @@ radioButtons(
 Column 
 -----------------------------------------------------------------------
 
-### Outcome Rates across Years per Region 
+### Outcome Rates Across Years per Region 
 
 ```{r}
 renderPlotly(
@@ -71,14 +71,21 @@ renderPlotly(
       else region == input[["region_choice"]],
       outcome == input[["outcome_choice"]]
       ) |>
-    mutate(rate = round(rate, digits = 3)) |>
+    mutate(rate = round(rate, digits = 3), 
+           text_label = str_c("Country: ", country, 
+                              "\nYear: ", year,
+                              "\nRate: ", rate)
+           ) |>
     group_by(country) |>
     plot_ly(x = ~as.factor(year), 
             y = ~rate, 
             color = ~country,
             type = 'scatter', 
             mode = 'lines', 
-            line = list(width = 1)) |> 
+            line = list(width = 1), 
+            text = ~text_label, 
+            hovertemplate = paste("%{text}<extra></extra>")
+            ) |> 
     layout(xaxis = list(title = "Year"),
           yaxis = list(title = "Rate (per 100,000 population)"))
 )
