@@ -33,6 +33,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
@@ -221,6 +222,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -368,6 +372,14 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore"><strong>Regression</strong></h1>
@@ -477,32 +489,19 @@ dataset and then calculates and returns the rmse.</p>
 <h2>check_model</h2>
 <pre class="r"><code>check_model = function(data, name) {
   
-  diagnostics = list()
-  
-  resid_fit =
+  resid_fit = 
     data |&gt;
     ggplot(aes(y = resid, x = pred)) +
     geom_point() +
     geom_smooth(method = &quot;lm&quot;) + 
-    labs(title = name,
+    labs(title = paste(&quot;Residual vs. Fitted:&quot;, name),
          y = &quot;Residual&quot;, 
          x = &quot;Fitted Value&quot;)
-
-  qqplot = 
-    data |&gt;
-      filter(is.finite(resid)) |&gt;
-      ggplot(aes(sample = resid)) +
-      stat_qq() +
-      stat_qq_line(col = &quot;red&quot;) +
-      xlab(&quot;Theoretical Quantiles&quot;) +
-      ylab(&quot;Residuals&quot;) +
-      ggtitle(name)
   
-  qqnorm(pull(data, resid), main = &quot;QQ Plot of Residuals&quot;)
+  print(resid_fit)
+  qqnorm(pull(data, resid), main = paste(&quot;QQ Plot: &quot;, name))
   qqline(pull(data, resid), col = &quot;red&quot;)
-      
-  diagnostics = append(diagnostics, list(qqplot, resid_fit))
-  patchwork::wrap_plots(diagnostics)
+  
 }</code></pre>
 <p>This is a plotting function to combine several different plot types
 that assess the assumptions of linear models</p>
@@ -1691,6 +1690,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

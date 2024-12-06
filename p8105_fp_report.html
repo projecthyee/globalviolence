@@ -1130,32 +1130,19 @@ dataset and then calculates and returns the rmse.</p>
 <h3>check_model</h3>
 <pre class="r"><code>check_model = function(data, name) {
   
-  diagnostics = list()
-  
-  resid_fit =
+  resid_fit = 
     data |&gt;
     ggplot(aes(y = resid, x = pred)) +
     geom_point() +
     geom_smooth(method = &quot;lm&quot;) + 
-    labs(title = name,
+    labs(title = paste(&quot;Residual vs. Fitted:&quot;, name),
          y = &quot;Residual&quot;, 
          x = &quot;Fitted Value&quot;)
-
-  qqplot = 
-    data |&gt;
-      filter(is.finite(resid)) |&gt;
-      ggplot(aes(sample = resid)) +
-      stat_qq() +
-      stat_qq_line(col = &quot;red&quot;) +
-      xlab(&quot;Theoretical Quantiles&quot;) +
-      ylab(&quot;Residuals&quot;) +
-      ggtitle(name)
   
-  qqnorm(pull(data, resid), main = &quot;QQ Plot of Residuals&quot;)
+  print(resid_fit)
+  qqnorm(pull(data, resid), main = paste(&quot;QQ Plot:&quot;, name))
   qqline(pull(data, resid), col = &quot;red&quot;)
-      
-  diagnostics = append(diagnostics, list(qqplot, resid_fit))
-  patchwork::wrap_plots(diagnostics)
+  
 }</code></pre>
 <p>This is a plotting function to combine several different plot types
 that assess the assumptions of linear models</p>

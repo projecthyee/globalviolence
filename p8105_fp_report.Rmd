@@ -12,6 +12,9 @@ output:
 library(readxl)
 library(countrycode)
 library(tidyverse)
+
+theme_set(theme_minimal() + 
+  theme(plot.title = element_text(hjust = 0.5)))
 ```
 
 # *Motivation*
@@ -735,32 +738,19 @@ calculates and returns the rmse.
 ```{r}
 check_model = function(data, name) {
   
-  diagnostics = list()
-  
-  resid_fit =
+  resid_fit = 
     data |>
     ggplot(aes(y = resid, x = pred)) +
     geom_point() +
     geom_smooth(method = "lm") + 
-    labs(title = name,
+    labs(title = paste("Residual vs. Fitted:", name),
          y = "Residual", 
          x = "Fitted Value")
-
-  qqplot = 
-    data |>
-      filter(is.finite(resid)) |>
-      ggplot(aes(sample = resid)) +
-      stat_qq() +
-      stat_qq_line(col = "red") +
-      xlab("Theoretical Quantiles") +
-      ylab("Residuals") +
-      ggtitle(name)
   
-  qqnorm(pull(data, resid), main = "QQ Plot of Residuals")
+  print(resid_fit)
+  qqnorm(pull(data, resid), main = paste("QQ Plot:", name))
   qqline(pull(data, resid), col = "red")
-      
-  diagnostics = append(diagnostics, list(qqplot, resid_fit))
-  patchwork::wrap_plots(diagnostics)
+  
 }
 ```
 This is a plotting function to combine several different plot types that assess 
