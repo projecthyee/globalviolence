@@ -570,9 +570,10 @@ boxcox_df |&gt;
   select(homicide_rate:alcohol_consumption_rate) |&gt;
   ggpairs()</code></pre>
 <p><img src="regression_files/figure-html/boxcox-1.png" width="1920" /></p>
-<p>Since boxcox transformation substantially approved the shapes of the
-distributions, we decided to use the boxcox transformed data for
-regression.</p>
+<p>Both natural log and boxcox transformations substantially normalized
+the distributions. Since boxcox resulted in more improved results as
+shown in the plots above, we decided to use the boxcox transformed data
+for regression.</p>
 </div>
 </div>
 <div id="multicolliniearity-diagnostics" class="section level2">
@@ -1651,12 +1652,12 @@ regression model for predicting homicide rate returned an r-squared of
 0.57. The variables included in this model were unemployment rate, HDI,
 economic crime rate and personnel rate.</p>
 <p>Below are some important interpretations of our findings, based on
-the best-subset regression model for predicting homicide rate: HDI
-(Coefficient = -18.50047), p-value &lt; 2e-16: A 1-unit increase in the
-Human Development Index (HDI) results in a decrease of 18.50047 units in
-the transformed homicide rate, holding all other variables constant.
-Since the p-value is very small (&lt; 2e-16), HDI has a strong negative
-effect on the transformed homicide rate.</p>
+the best-subset regression model for predicting homicide rate:</p>
+<p>HDI (Coefficient = -18.50047), p-value &lt; 2e-16: A 1-unit increase
+in the Human Development Index (HDI) results in a decrease of 18.50047
+units in the transformed homicide rate, holding all other variables
+constant. Since the p-value is very small (&lt; 2e-16), HDI has a strong
+negative effect on the transformed homicide rate.</p>
 <p>Economic Crime Rate (Coefficient = 0.12511, p-value = 9.21e-08): A
 1-unit increase in transformed economic crime rate results in an
 increase of 0.12511 units in transformed homicide rate, holding all

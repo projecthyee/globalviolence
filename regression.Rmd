@@ -218,8 +218,9 @@ boxcox_df |>
 
 ```
 
-
-Since boxcox transformation substantially approved the shapes of the distributions, we decided to use the boxcox transformed data for regression.
+Both natural log and boxcox transformations substantially normalized the distributions. 
+Since boxcox resulted in more improved results as shown in the plots above, 
+we decided to use the boxcox transformed data for regression. 
 
 ## Multicolliniearity Diagnostics
 
@@ -766,6 +767,7 @@ variables included in this model were unemployment rate, HDI, economic crime
 rate and personnel rate. 
 
 Below are some important interpretations of our findings, based on the best-subset regression model for predicting homicide rate:
+
 HDI (Coefficient = -18.50047), p-value < 2e-16:
 A 1-unit increase in the Human Development Index (HDI) results in a decrease of 18.50047 units in the transformed homicide rate, holding all other variables constant. Since the p-value is very small (< 2e-16), HDI has a strong negative effect on the transformed homicide rate.
 
