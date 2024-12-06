@@ -44,10 +44,10 @@ Column {data-width=650}
 
 ```{r message = FALSE, warning=FALSE}
 merged_violence_df |> 
-  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~crime_rate,
+  plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~economic_crime_rate,
           text = ~paste('Country', country, 
                         '<br>Year:', year, 
-                        '<br>Economic Crime Rate:', crime_rate,
+                        '<br>Economic Crime Rate:', economic_crime_rate,
                         '<br>Personnel Rate:', personnel_rate, 
                         '<br>Alcohol Consumption Rate:', alcohol_consumption_rate,
                         '<br>Trafficed Victims:', trafficked_victims), 
