@@ -770,14 +770,6 @@ the assumptions of linear models
 
 ### Visualizations of Distributions
 ```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
-plot_distributions = function(column, name) {
-  if(is.numeric(column) & name != "year") {
-    ggplot(merged_violence_df, aes(x = column)) +
-      geom_density() +
-      labs(title = paste("Distribution of", name))
-  }
-}
-
 merged_violence_df |>
   select(homicide_rate:alcohol_consumption_rate) |>
   ggpairs()
@@ -791,9 +783,9 @@ regarding the constancy of variance in linear models. Transformations are
 intended to approximately normalize the data.
 
 
-### Transformations
+### Data Transformations
 
-### Natural Log Transform
+#### Natural Log Transform
 ```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
 ln_transform = function(value) {
   return(log(abs(value)))
@@ -810,7 +802,7 @@ ln_df |>
 
 ```
 
-## Box-Cox Transform
+#### Box-Cox Transform
 ```{r boxcox, fig.width = 20, fig.height = 20, warning = FALSE}
 boxcox_transform = function(value) {
   if (all(is.na(value))) {
@@ -967,7 +959,7 @@ Results from baseline MLR show that that inflation rate, unemployment rate and
 hdi are significant predictors of homicide rate at 
 alpha = 0.05. 
 
-### Check Baseline Homicide Model for Collinearity
+### Collinearity in Homicide Model
 ```{r }
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %>% 
@@ -998,7 +990,7 @@ Results from MLR show that gdp, inflation rate, crime rate, personnel rate,
 number of trafficked victims per 100,000 and alcohol consumption rates are 
 significant predictors of violence rate at significance level alpha = 0.01. 
 
-### Calculate VIF for Baseline Violence MLR
+#### Collinearity in Violence Model
 ```{r }
 vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %>% 

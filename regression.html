@@ -518,15 +518,14 @@ which is bimodal and slightly left-skewed. Hence, we decided to apply ln
 transformations and Box-Cox transformations to ensure noramlity of the
 data.</p>
 </div>
-<div id="transformations" class="section level2">
-<h2>Transformations</h2>
+<div id="data-transformations" class="section level2">
+<h2>Data Transformations</h2>
 <p>Transformation step involves writing a function for natural log
 transformation and a function for Box-Cox transformation. The functions
 are mapped into the nested list col which includes all continuous
 variables in the <code>merged_violence_df</code> dataset.</p>
-</div>
-<div id="natural-log-transformation" class="section level2">
-<h2>Natural Log Transformation</h2>
+<div id="natural-log-transformation" class="section level3">
+<h3>Natural Log Transformation</h3>
 <pre class="r"><code>ln_transform = function(value) {
   return(log(abs(value)))
 }
@@ -541,8 +540,8 @@ ln_df |&gt;
   ggpairs()</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-1.png" width="1920" /></p>
 </div>
-<div id="box-cox-transformation" class="section level2">
-<h2>Box-Cox Transformation</h2>
+<div id="box-cox-transformation" class="section level3">
+<h3>Box-Cox Transformation</h3>
 <pre class="r"><code>boxcox_transform = function(value) {
   if (all(is.na(value))) {
     return(value) 
@@ -598,6 +597,7 @@ sufficiently large amount of data points, we can assume that the
 sampling distribution is approximately normal. Using the convention that
 n &gt; 30 allows for the assumption of approximate normality, our 310
 observation dataset suffices to be supported by CLT.</p>
+</div>
 </div>
 <div id="multicolliniearity-diagnostics" class="section level2">
 <h2>Multicolliniearity Diagnostics</h2>
@@ -783,9 +783,8 @@ baseline_MLR_hom %&gt;%
 rate and hdi are significant predictors of homicide rate at alpha =
 0.05.</p>
 </div>
-<div id="check-baseline-homicide-model-for-collinearity"
-class="section level2">
-<h2>Check Baseline Homicide Model for Collinearity</h2>
+<div id="collinearity-in-homicide-model" class="section level2">
+<h2>Collinearity in Homicide Model</h2>
 <pre class="r"><code>vif_baseline_hom_MLR &lt;- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %&gt;% 
   tibble(
@@ -938,9 +937,8 @@ rate, number of trafficked victims per 100,000 and alcohol consumption
 rates are significant predictors of violence rate at significance level
 alpha = 0.01.</p>
 </div>
-<div id="calculate-vif-for-baseline-violence-mlr"
-class="section level2">
-<h2>Calculate VIF for Baseline Violence MLR</h2>
+<div id="collinearity-in-violence-model" class="section level2">
+<h2>Collinearity in Violence Model</h2>
 <pre class="r"><code>vif_baseline_viol_MLR &lt;- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %&gt;% 
   tibble(

@@ -1174,11 +1174,10 @@ variables in order to account for concerns regarding the constancy of
 variance in linear models. Transformations are intended to approximately
 normalize the data.</p>
 </div>
-<div id="transformations" class="section level3">
-<h3>Transformations</h3>
-</div>
-<div id="natural-log-transform" class="section level3">
-<h3>Natural Log Transform</h3>
+<div id="data-transformations" class="section level3">
+<h3>Data Transformations</h3>
+<div id="natural-log-transform" class="section level4">
+<h4>Natural Log Transform</h4>
 <pre class="r"><code>ln_transform = function(value) {
   return(log(abs(value)))
 }
@@ -1193,9 +1192,8 @@ ln_df |&gt;
   ggpairs()</code></pre>
 <p><img src="p8105_fp_report_files/figure-html/ln-transform-1.png" width="1920" /></p>
 </div>
-</div>
-<div id="box-cox-transform" class="section level2">
-<h2>Box-Cox Transform</h2>
+<div id="box-cox-transform" class="section level4">
+<h4>Box-Cox Transform</h4>
 <pre class="r"><code>boxcox_transform = function(value) {
   if (all(is.na(value))) {
     return(value) 
@@ -1245,6 +1243,8 @@ we can assume that the sampling distribution is approximately normal.
 Using the convention that n &gt; 30 allows for the assumption of
 approximate normality, our 310 observation dataset suffices to be
 supported by Central Limit Theorem (CLT).</p>
+</div>
+</div>
 <div id="multicolliniearity-diagnostics" class="section level3">
 <h3>Multicolliniearity Diagnostics</h3>
 <p>We used <code>cor()</code> to find the correlation between the eight
@@ -1425,9 +1425,8 @@ baseline_MLR_hom %&gt;%
 rate and hdi are significant predictors of homicide rate at alpha =
 0.05.</p>
 </div>
-<div id="check-baseline-homicide-model-for-collinearity"
-class="section level3">
-<h3>Check Baseline Homicide Model for Collinearity</h3>
+<div id="collinearity-in-homicide-model" class="section level3">
+<h3>Collinearity in Homicide Model</h3>
 <pre class="r"><code>vif_baseline_hom_MLR &lt;- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %&gt;% 
   tibble(
@@ -1579,10 +1578,8 @@ baseline_MLR_viol %&gt;%
 rate, number of trafficked victims per 100,000 and alcohol consumption
 rates are significant predictors of violence rate at significance level
 alpha = 0.01.</p>
-</div>
-<div id="calculate-vif-for-baseline-violence-mlr"
-class="section level3">
-<h3>Calculate VIF for Baseline Violence MLR</h3>
+<div id="collinearity-in-violence-model" class="section level4">
+<h4>Collinearity in Violence Model</h4>
 <pre class="r"><code>vif_baseline_viol_MLR &lt;- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %&gt;% 
   tibble(
@@ -1635,6 +1632,7 @@ vif_baseline_viol_MLR %&gt;%
 </table>
 <p>Results from VIF show that there is no multicollinearity issue (VIF
 &lt; 5).</p>
+</div>
 </div>
 </div>
 <div id="lasso" class="section level2">
