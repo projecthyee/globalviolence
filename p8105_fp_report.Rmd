@@ -635,16 +635,15 @@ merged_violence_df <- read_csv(
 ```
 
 ## Background
-
 Our motivation for doing regression is to determine the significant predictors 
-of the two measures of violence: (1) homicide victim rate and (2) violent offences rate.
+of the two measures of violence: (1) homicide victim rate and (2) violent offences rate. 
 
 Global violence is a complex issue, depending on many factors, from political,
 cultural, to economic. We aimed to choose predictors that reflect inequality which are
 often related to social unrest and violence. Much numerical data exists for the economic indicators of a country
 such as GDP, inflation and unemployment rate, and we also wanted to include HDI since that in itself
 is a well-recognized global measurement. Intuitively, criminal activity is also related to violence,
-so indicators for economic crime rate and criminal justice personnell were considered. Lastly, alcohol rate was included
+so indicators for economic crime rate and criminal justice personnel were considered. Lastly, alcohol rate was included
 because substance usage is often perceived to be correlated with violence. Subsequently, 
 we aim to develop models that show which factors are the best predictors of homicide and violence rates. 
 
@@ -652,6 +651,9 @@ Given the plausible theoretical linkage between each of our included
 predictor variables and the outcome variables of interest, we seek to develop 
 models that can determine which factors are most predictive of homicide and 
 violence rate. 
+
+We performed this analysis to uncover the extent to which 
+different factors influence homicide rate and violence rate as outcomes.
 
 ## Functions for Fitting Data
 
@@ -729,6 +731,7 @@ Given a fitted glmnet model, a test dataset, and an outcome variable of
 interest, this function predicts the avlues in the test dataset and then 
 calculates and returns the rmse. 
 
+
 ### check_model
 ```{r}
 check_model = function(data, name) {
@@ -743,13 +746,14 @@ check_model = function(data, name) {
          x = "Fitted Value")
   
   print(resid_fit)
-  qqnorm(pull(data, resid), main = paste("QQ Plot:", name))
+  qqnorm(pull(data, resid), main = paste("QQ Plot: ", name))
   qqline(pull(data, resid), col = "red")
   
 }
 ```
 This is a plotting function to combine several different plot types that assess 
-the assumptions of linear models
+the assumptions of linear models.
+
 
 ## Descriptive Statistics
 
@@ -760,12 +764,10 @@ merged_violence_df |>
   ggpairs()
 ```
 
-Distribution of all variables were checked and it was found that they are all 
-right-skewed, except for human development index. HDI variable showed bimodal 
-and slightly left-skewed distribution. Hence, we decided to apply ln transformations 
-and Box-Cox transformations to these variables in order to account for concerns 
-regarding the constancy of variance in linear models. Transformations are 
-intended to approximately normalize the data.
+All variables are skewed right, except for HDI which is 
+bimodal and slightly left-skewed. Hence, we decided to apply ln transformations 
+and Box-Cox transformations to ensure normality of the data. 
+
 
 
 ### Data Transformations
@@ -824,18 +826,9 @@ boxcox_df |>
 
 ```
 
-Though the transformations were expected to improve the normality, the results 
-suggest that the transformations are not necessarily effective. In fact, we found 
-that the original data already provides a reasonable representation of the 
-underlying distribution. 
-
-While the natural logarithm helped with normality, the Box-Cox transformation 
-did not substantially improve the data's distribution. Box-Cox transformation
-requires shifting data to be strictly positive, which could introduce 
-unnecessary complexity.
-
-Since boxcox transformation substantially approved the shapes of the distributions, 
-we ultimately decided to use the boxcox data for regression.
+Both natural log and boxcox transformations substantially normalized the distributions. 
+Since boxcox resulted in more improved results as shown in the plots above, 
+we decided to use the boxcox transformed data for regression. 
 
 ### Multicolliniearity Diagnostics
 
@@ -858,9 +851,7 @@ ggcorrplot(cor_matrix,
 )
 ```
 
-There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
-corr = 0.56, and moderately high correlation between `trafficked_victims` and 
-`gdp`, corr = 0.77. 
+There is moderate correlation between `hdi` and `alcohol_consumption_rate` (corr = 0.56), `hdi` and `economic_crime_rate` (corr = 0.57), and `gdp` and `trafficked_victims` (corr - 0.51). 
 
 ## Data Pre-Processing
 
@@ -871,7 +862,7 @@ lambda = 10^(seq(-2, 2.75, 0.1))
 
 ### Approach to Pre-Processing Data
 
-Prior to performing any model fitting, we split our intial dataset into 
+Prior to performing any model fitting, we split our initial dataset into 
 separate homicide and violence datasets, each of which includes the outcome 
 variable and all numeric predictor variables. Specific predictor and outcome 
 dataframes, and an outcome matrix, are created for later use in linear models, 
@@ -916,7 +907,7 @@ violence_outcome <- violence_df %>%
 
 First, we decided to fit a baseline MLR with additive effects from all possible 
 predictor variables to use as a point of reference for our modeling process. 
-This step provides basic understanding of the extent to which different 
+This step provides insight into which  
 covariates contribute to the outcomes of interest. 
 
 ### Predict Homicide Rates
@@ -931,9 +922,7 @@ baseline_MLR_hom %>%
   broom::tidy() %>% 
   knitr::kable()
 ```
-Results from baseline MLR show that that inflation rate, unemployment rate and 
-hdi are significant predictors of homicide rate at 
-alpha = 0.05. 
+Results from baseline MLR show that that HDI, economic crime rate and personnel rate are significant predictors of homicide.
 
 ### Collinearity of Baseline Homicide Model 
 ```{r }
@@ -948,7 +937,7 @@ vif_baseline_hom_MLR %>%
 
 ```
 
-Results from VIF show that there is no multicollinearity issue (VIF < 5).
+Results from VIF show that there is no serious multicollinearity issue (VIF < 5).
 
 ### Predict Violence Rates
 ```{r }
@@ -962,9 +951,7 @@ baseline_MLR_viol %>%
   broom::tidy() %>% 
   knitr::kable()
 ```
-Results from MLR show that gdp, inflation rate, economic crime rate, personnel rate, 
-number of trafficked victims per 100,000 and alcohol consumption rates are 
-significant predictors of violence rate at significance level alpha = 0.01. 
+Results from MLR show that `gdp`, `inflation_rate`, `unemployment_rate`, `hdi`, `economic_crime_rate`, and `alcohol_consumption_rate` are significant predictors of violence rate $\alpha$ = 0.01. 
 
 ### Collinearity of Baseline Violence Model
 ```{r }
@@ -977,7 +964,7 @@ vif_baseline_viol_MLR %>%
   select(variable, VIF) %>% 
   knitr::kable()
 ```
-Results from VIF show that there is no multicollinearity issue (VIF < 5).
+Results from VIF show that there is no serious multicollinearity issue (VIF < 5).
 
 ## Lasso
 We used lasso to as a feature selection tool to find the most important 
@@ -1071,10 +1058,8 @@ violence_best_subset_Cp
 
 #### Collinearity of Best-Subset Violence Model
 ```{r }
-subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                           economic_crime_rate + personnel_rate +
-                           alcohol_consumption_rate, data = violence_df)
-
+subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate + hdi + economic_crime_rate + personnel_rate + alcohol_consumption_rate, data = violence_df)
+summary(subset_violence_lm)
 subset_violence_fitted <- subset_violence_lm[["fitted.values"]]
 
 
@@ -1092,7 +1077,8 @@ All variables have VIF value below 5, suggesting that there is no
 multi-colinearity concerns.
 
 #### Interpretation
-The results from criterion-based procedures suggest that 
+
+The results from both criterion-based procedures suggest that 
 significant predictors for `violence_rate` are `gdp`, `inflation_rate`, 
 `unemployment_rate`, `economic_crime_rate`, `personnel_rate`, `hdi` 
 and `alcohol_consumption rate`, with a total of 7 predictors. 
@@ -1124,7 +1110,7 @@ homicide_best_subset_Cp
 subset_homicide_lm <- lm(homicide_rate ~ unemployment_rate + hdi + 
                            economic_crime_rate + personnel_rate, 
                          data = homicide_df)
-
+summary(subset_homicide_lm)
 subset_homicide_fitted <- subset_homicide_lm[["fitted.values"]]
 
 
@@ -1138,18 +1124,14 @@ vif_subset_homicide_model %>%
   knitr::kable()
 ```
 All variables have VIF value below 5, suggesting that there is no 
-multi-colinearity concerns.
+multi-colinearity issue.
 
 
-#### Interpretation
+### Interpretation
 For `homicide_rate`, the results are not as straightforward. 
-The best model based on R-squared (0.57) is the model with `unemployment_rate`, `hdi`, 
-`economic_crime_rate` and `personnel_rate` as predictors. Howeover, based on the 
-Cp criterion (2.51), it's the model with `hdi`, `economic_crime_rate` and `personnel_rate`.
+The best model based on R-squared (0.57) is the model with `unemployment_rate`, `hdi`, `economic_crime_rate` and `personnel_rate` as predictors. Howeover, based on the Cp criterion (2.51), it's the model with `hdi`, `economic_crime_rate` and `personnel_rate`.
 
-Subsequently, we will choose four predictors since it has a relatively high adjusted 
-R-Squared (0.57) and we are interested in a model that can explain more variances 
-of violence rates. 
+Subsequently, we will choose four predictors since it has a relatively high adjusted R-Squared (0.57) and we were interested in a model that explains more variation in violence rates. 
 
 ## Model Comparison
 
@@ -1255,7 +1237,7 @@ number of predictor variables that exist in our studied dataset. In general,
 each of the 3 models will not differ by many predictor variables, and therefore
 perform similarly. Comparing the 3 models, the best subset regression model
 may be considered optimal as it reduces model complexity, without the 
-difficulty of interpreting beta coefficients, which happens
+caveat of difficulty interpreting beta coefficients, which occurs 
 with lasso models.
 
 
@@ -1281,13 +1263,13 @@ Examining the 3 models we used to predict homicide rate, we see that
 the distribution of RMSE across 100-fold cross-validation are nearly identical. 
 This is likely in regard to the few predictor variables included in our dataset.
 In particular, with such few predictor variables, lasso is likely not the most 
-well-suited for this task, as there is not a serious need to reduce model 
+well-suited for this task, since there is not a serious need to reduce model 
 complexity. Consequently, the number of variables included in each of the 3 
-models is quite similar, and the difference of 1 or 2 included predictors 
+models is  similar, and the difference of 1 or 2 included predictors 
 between each of the models does not produce a substantial change in model 
 effectiveness. Comparing the 3 models, the best subset regression model 
 may be considered the best as it reduces model complexity but maintains 
-ease of interpretability of beta coefficients, having a slighlty greater 
+ease of interpretationof beta coefficients, having a slightly  greater 
 spread in lower RMSE values compared to the other two models, which is not 
 as noticeable. 
 
@@ -1386,12 +1368,35 @@ Homicide Rate.
 The best-subset regression model for predicting violence 
 rate yielded an adjusted r-squared of 
 `r round(violence_best_subset_rsq[["Criterion"]], 2)` and included 
-the following variables a predictors: GDP, inflation rate, economic crime rate, 
-unemployment rate, personnel rate, and alcohol consumption rate. The 
+the following variables as predictors: GDP, inflation rate, economic crime rate, hdi, unemployment rate, personnel rate, and alcohol consumption rate. The 
 best-subset regression model for predicting homicide rate returned an 
 r-squared of `r round(homicide_best_subset_rsq[["Criterion"]], 2)`. The 
 variables included in this model were unemployment rate, HDI, economic crime 
 rate and personnel rate. 
+
+**Below are some important interpretations of our findings, based on the best-subset regression model for predicting homicide rate:**
+
+HDI (Coefficient = -18.50047), p-value < 2e-16:
+A 1-unit increase in the HDI results in a decrease of 18.50047 units in the transformed homicide rate, holding all other variables constant. Since the p-value is very small, HDI has a strong negative effect on the transformed homicide rate.
+
+Economic Crime Rate (Coefficient = 0.12511, p-value = 9.21e-08):
+A 1-unit increase in transformed economic crime rate results in an increase of 0.12511 units in transformed homicide rate, holding all other variables constant. The p-value is very small, indicating statistical significance.
+
+Personnel Rate (Coefficient = 0.09847, p-value = 0.000268):
+A 1-unit increase in transformed personnel rate results in an increase of 0.09847 units in the transformed homicide rate, holding other predictors constant. The small p-value (0.000268) also makes this effect statistically significant. This is rather surprising, because we believed an increase in personnel rate should decrease homicide rate. However, because personnel rate is a variable that also includes judges, this result might make sense. 
+
+**Here are some of our important findings based on the best-subset regression model for predicting violence rate:**
+
+Economic Crime Rate (coefficient: 0.43184, p-value: < 2e-16)
+A 1-unit increase in the transformed economic crime rate results in an increase of 0.43184 units in the transformed violence rate, holding all other variables constant. The p-value is extremely small, indicating a  significant relationship. This is consistent with the model predicting homicide rate.
+
+GDP (coefficient: 0.33523, p-value: 3.22e-07)
+A 1-unit increase in transformed GDP results in an increase of 0.33523 units in the transformed violence rate, holding all other variables constant. The p-value is very small, suggesting statistical significance. The association between economic growth and violence is surprising because we might previously associate higher crime with countries with lower GDP. However, these results may suggest that GDP growth can exacerbate inequality and drive violence. 
+
+Alcohol Consumption Rate (coefficient: -0.19195, p-value: 0.000146)
+A 1-unit increase in transformed alcohol consumption rate results in a decrease of 0.19195 units in the transformed violence rate, holding all other variables constant. The p-value is small (0.000146), indicating statistical significance. This result was also unexpected because we previously believed higher alcohol consumption would lead to an [increase in violence](https://pmc.ncbi.nlm.nih.gov/articles/PMC8729263/) (being associated with aggression, mood and personality disorders). This might be due to 
+limitations in our data quality. 
+
 
 # *Discussion*
 
