@@ -782,8 +782,7 @@ merged_violence_df |>
 
 Distribution of all variables were checked and it was found that they are all 
 right-skewed, except for human development index. HDI variable showed bimodal 
-and slightly left-skewed distribution. Hence, we decided to apply log All variables are skewed right, except for human development index which is 
-bimodal and slightly left-skewed. Hence, we decided to apply ln transformations 
+and slightly left-skewed distribution. Hence, we decided to apply ln transformations 
 and Box-Cox transformations to these variables in order to account for concerns 
 regarding the constancy of variance in linear models. Transformations are 
 intended to approximately normalize the data.
@@ -861,7 +860,7 @@ normality of the distributions are alleviated by the Central Limit Theorem.
 With a sufficiently large amount of data points, we can assume that the sampling 
 distribution is approximately normal. Using the convention that n > 30 allows for 
 the assumption of approximate normality, our 310 observation dataset suffices
-to be supported by CLT.
+to be supported by Central Limit Theorem (CLT).
 
 ### Multicolliniearity Diagnostics
 
