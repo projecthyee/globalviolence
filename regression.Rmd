@@ -449,10 +449,8 @@ violence_best_subset_Cp
 
 ### Collinearity of Best-Subset Violence Model
 ```{r }
-subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                           economic_crime_rate + personnel_rate +
-                           alcohol_consumption_rate, data = violence_df)
-
+subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate + hdi + economic_crime_rate + personnel_rate + alcohol_consumption_rate, data = violence_df)
+summary(subset_violence_lm)
 subset_violence_fitted <- subset_violence_lm[["fitted.values"]]
 
 
@@ -471,7 +469,7 @@ multi-colinearity concerns.
 
 ### Interpretation
 The results from criterion-based procedures suggest that, based on the highest adjusted R-squared, the significant predictors for `violence_rate` are `gdp`, `inflation_rate`, `unemployment_rate`, `economic_crime_rate`, `hdi`, `personnel_rate`and `alcohol_consumption rate`, with a total of 7 predictors. 
-The results from Cp, however, suggested a model that does not include personnel_rate. We ultimately decided to proceed with the model that includes personnel rate, because in the real-world context, personnel rate should explain some variation in violence rate. 
+The results from Cp, however, suggested a model that does not include personnel_rate. We ultimately decided to proceed with the model that does not include personnel rate, because in the real-world context, personnel rate should explain some variation in violence rate. 
 
 ## Best Subset Regression for Homicide 
 
@@ -498,7 +496,7 @@ homicide_best_subset_Cp
 subset_homicide_lm <- lm(homicide_rate ~ unemployment_rate + hdi + 
                            economic_crime_rate + personnel_rate, 
                          data = homicide_df)
-
+summary(subset_homicide_lm)
 subset_homicide_fitted <- subset_homicide_lm[["fitted.values"]]
 
 
@@ -762,3 +760,23 @@ r-squared of `r round(homicide_best_subset_rsq[["Criterion"]], 2)`. The
 variables included in this model were unemployment rate, HDI, economic crime 
 rate and personnel rate. 
 
+Below are some important interpretations of our findings, based on the best-subset regression model for predicting homicide rate:
+HDI (Coefficient = -18.50047), p-value < 2e-16:
+A 1-unit increase in the Human Development Index (HDI) results in a decrease of 18.50047 units in the transformed homicide rate, holding all other variables constant. Since the p-value is very small (< 2e-16), HDI has a strong negative effect on the transformed homicide rate.
+
+Economic Crime Rate (Coefficient = 0.12511, p-value = 9.21e-08):
+A 1-unit increase in transformed economic crime rate results in an increase of 0.12511 units in transformed homicide rate, holding all other variables constant. The p-value is very small (9.21e-08), indicating statistical significance.
+
+Personnel Rate (Coefficient = 0.09847, p-value = 0.000268):
+A 1-unit increase in transformed personnel rate results in an increase of 0.09847 units in the transformed homicide rate, holding other predictors constant. The small p-value (0.000268) also makes this effect statistically significant. This is rather surprising, because an increase in personnel rate should decrease homicide rate in theory. However, this finding could suggest that higher personnel rate may lead to more focused policing in some areas, which increase homicide reporting, or this could also reflect lack of personnel training, corruption or misallocation of resources.
+
+Here are some of our important findings based on the best-subset regression model for predicting violence rate:
+
+Economic Crime Rate (coefficient: 0.43184, p-value: < 2e-16)
+A 1-unit increase in the transformed economic crime rate results in an increase of 0.43184 units in the transformed violence rate, holding all other variables constant. The p-value is extremely small (< 2e-16), indicating a highly significant relationship. This is consistent with the model predicting homicide rate.
+
+GDP (coefficient: 0.33523, p-value: 3.22e-07)
+A 1-unit increase in transformed GDP results in an increase of 0.33523 units in the transformed violence rate, holding all other variables constant. The p-value (3.22e-07) is very small, suggesting statistical significance. The association between economic growth and violence suggests that GDP growth may exacerbate inequality or create economic disparity, which might be a driver of violence. 
+
+Alcohol Consumption Rate (coefficient: -0.19195, p-value: 0.000146)
+A 1-unit increase in transformed alcohol consumption rate results in a decrease of 0.19195 units in the transformed violence rate, holding all other variables constant. The p-value is small (0.000146), indicating statistical significance. This result is rather counterintuitive, but in some settings, alcohol-related interventions and policies can help reduce violence (e.g., controlling alcohol abuse or fostering a safer drinking culture).
