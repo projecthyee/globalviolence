@@ -504,7 +504,7 @@ dataset and then calculates and returns the rmse.</p>
   
 }</code></pre>
 <p>This is a plotting function to combine several different plot types
-that assess the assumptions of linear models</p>
+that assess the assumptions of linear models.</p>
 </div>
 </div>
 <div id="descriptive-statistics" class="section level1">
@@ -570,16 +570,8 @@ boxcox_df |&gt;
   select(homicide_rate:alcohol_consumption_rate) |&gt;
   ggpairs()</code></pre>
 <p><img src="regression_files/figure-html/boxcox-1.png" width="1920" /></p>
-<p>Though the transformations were expected to improve the normality,
-the results suggest that the transformations are not necessarily
-effective. In fact, we found that the original data already provides a
-reasonable representation of the underlying distribution.</p>
-<p>While the natural logarithm helped with normality, the Box-Cox
-transformation did not substantially improve the data’s distribution.
-Box-Cox transformation requires shifting data to be strictly positive,
-which could introduce unnecessary complexity.</p>
 <p>Since boxcox transformation substantially approved the shapes of the
-distributions, we ultimately decided to use the boxcox data for
+distributions, we decided to use the boxcox transformed data for
 regression.</p>
 </div>
 </div>
@@ -602,9 +594,9 @@ ggcorrplot(cor_matrix,
 )</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>There is moderate correlation between <code>hdi</code> and
-<code>alcohol_consumption_rate</code>, corr = 0.56, and moderately high
-correlation between <code>trafficked_victims</code> and
-<code>gdp</code>, corr = 0.77.</p>
+<code>alcohol_consumption_rate</code> (corr = 0.56), <code>hdi</code>
+and <code>economic_crime_rate</code> (corr = 0.57), and <code>gdp</code>
+and <code>trafficked_victims</code> (corr - 0.51).</p>
 </div>
 </div>
 <div id="data-pre-processing" class="section level1">
@@ -755,9 +747,8 @@ baseline_MLR_hom %&gt;%
 </tr>
 </tbody>
 </table>
-<p>Results from baseline MLR show that that inflation rate, unemployment
-rate and hdi are significant predictors of homicide rate at alpha =
-0.05.</p>
+<p>Results from baseline MLR show that that HDI, economic crime rate and
+personnel rate are significant predictors of homicide.</p>
 </div>
 <div id="collinearity-of-baseline-homicide-model"
 class="section level2">
@@ -812,8 +803,8 @@ vif_baseline_hom_MLR %&gt;%
 </tr>
 </tbody>
 </table>
-<p>Results from VIF show that there is no multicollinearity issue (VIF
-&lt; 5).</p>
+<p>Results from VIF show that there is no serious multicollinearity
+issue (VIF &lt; 5).</p>
 </div>
 <div id="predict-violence-rates" class="section level2">
 <h2>Predict Violence Rates</h2>
@@ -909,10 +900,9 @@ baseline_MLR_viol %&gt;%
 </tr>
 </tbody>
 </table>
-<p>Results from MLR show that gdp, inflation rate, economic crime rate,
-personnel rate, number of trafficked victims per 100,000 and alcohol
-consumption rates are significant predictors of violence rate at
-significance level alpha = 0.01.</p>
+<p>Results from MLR show that gdp, inflation rate, unemployment rate,
+hdi, economic crime rate, and alcohol consumption rates are significant
+predictors of violence rate at significance level alpha = 0.01.</p>
 </div>
 <div id="collinearity-of-baseline-violence-model"
 class="section level2">
@@ -967,8 +957,8 @@ vif_baseline_viol_MLR %&gt;%
 </tr>
 </tbody>
 </table>
-<p>Results from VIF show that there is no multicollinearity issue (VIF
-&lt; 5).</p>
+<p>Results from VIF show that there is no serious multicollinearity
+issue (VIF &lt; 5).</p>
 </div>
 </div>
 <div id="lasso" class="section level1">
@@ -1212,11 +1202,35 @@ violence_best_subset_Cp</code></pre>
 <div id="collinearity-of-best-subset-violence-model"
 class="section level3">
 <h3>Collinearity of Best-Subset Violence Model</h3>
-<pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                           economic_crime_rate + personnel_rate +
-                           alcohol_consumption_rate, data = violence_df)
-
-subset_violence_fitted &lt;- subset_violence_lm[[&quot;fitted.values&quot;]]
+<pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate + hdi + economic_crime_rate + personnel_rate + alcohol_consumption_rate, data = violence_df)
+summary(subset_violence_lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = violence_rate ~ gdp + inflation_rate + unemployment_rate + 
+##     hdi + economic_crime_rate + personnel_rate + alcohol_consumption_rate, 
+##     data = violence_df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -5.8827 -0.9624 -0.1570  0.8284  6.2878 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)              -6.31311    1.99260  -3.168 0.001690 ** 
+## gdp                       0.33523    0.06413   5.227 3.22e-07 ***
+## inflation_rate           -0.33153    0.14322  -2.315 0.021293 *  
+## unemployment_rate        -0.33631    0.15790  -2.130 0.033985 *  
+## hdi                      -4.54750    2.25322  -2.018 0.044452 *  
+## economic_crime_rate       0.43184    0.03913  11.035  &lt; 2e-16 ***
+## personnel_rate            0.05607    0.04621   1.213 0.226015    
+## alcohol_consumption_rate -0.19195    0.04991  -3.846 0.000146 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.627 on 302 degrees of freedom
+## Multiple R-squared:  0.477,  Adjusted R-squared:  0.4649 
+## F-statistic: 39.36 on 7 and 302 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>subset_violence_fitted &lt;- subset_violence_lm[[&quot;fitted.values&quot;]]
 
 
 vif_subset_violence_model &lt;- car::vif(subset_violence_lm) 
@@ -1238,27 +1252,31 @@ vif_subset_violence_model %&gt;%
 <tbody>
 <tr class="odd">
 <td align="left">gdp</td>
-<td align="right">1.273905</td>
+<td align="right">1.506510</td>
 </tr>
 <tr class="even">
 <td align="left">inflation_rate</td>
-<td align="right">1.113407</td>
+<td align="right">1.162907</td>
 </tr>
 <tr class="odd">
 <td align="left">unemployment_rate</td>
-<td align="right">1.149280</td>
+<td align="right">1.176492</td>
 </tr>
 <tr class="even">
-<td align="left">economic_crime_rate</td>
-<td align="right">1.677787</td>
+<td align="left">hdi</td>
+<td align="right">3.257676</td>
 </tr>
 <tr class="odd">
-<td align="left">personnel_rate</td>
-<td align="right">1.238342</td>
+<td align="left">economic_crime_rate</td>
+<td align="right">2.149680</td>
 </tr>
 <tr class="even">
+<td align="left">personnel_rate</td>
+<td align="right">1.248621</td>
+</tr>
+<tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
-<td align="right">1.396373</td>
+<td align="right">1.912238</td>
 </tr>
 </tbody>
 </table>
@@ -1267,14 +1285,15 @@ multi-colinearity concerns.</p>
 </div>
 <div id="interpretation" class="section level3">
 <h3>Interpretation</h3>
-<p>The results from criterion-based procedures suggest that significant
-predictors for <code>violence_rate</code> are <code>gdp</code>,
-<code>inflation_rate</code>, <code>unemployment_rate</code>,
-<code>economic_crime_rate</code>, <code>personnel_rate</code>,
-<code>hdi</code> and <code>alcohol_consumption rate</code>, with a total
-of 7 predictors. This yields the most appropriate Cp value (6.94), which
-is approximately close to the number of predictors, and highest adjusted
-R-squared (0.46).</p>
+<p>The results from both criterion-based procedures suggest that
+significant predictors for <code>violence_rate</code> are
+<code>gdp</code>, <code>inflation_rate</code>,
+<code>unemployment_rate</code>, <code>economic_crime_rate</code>,
+<code>personnel_rate</code>, <code>hdi</code> and
+<code>alcohol_consumption rate</code>, with a total of 7 predictors.
+This yields the most appropriate Cp value (6.94), which is approximately
+close to the number of predictors, and highest adjusted R-squared
+(0.46).</p>
 </div>
 </div>
 <div id="best-subset-regression-for-homicide" class="section level2">
@@ -1321,8 +1340,30 @@ class="section level3">
 <pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ unemployment_rate + hdi + 
                            economic_crime_rate + personnel_rate, 
                          data = homicide_df)
-
-subset_homicide_fitted &lt;- subset_homicide_lm[[&quot;fitted.values&quot;]]
+summary(subset_homicide_lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = homicide_rate ~ unemployment_rate + hdi + economic_crime_rate + 
+##     personnel_rate, data = homicide_df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.3265 -0.6331 -0.1335  0.5938  3.0783 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          -3.02937    0.34997  -8.656 2.87e-16 ***
+## unemployment_rate    -0.12063    0.08725  -1.383 0.167818    
+## hdi                 -18.50047    1.02730 -18.009  &lt; 2e-16 ***
+## economic_crime_rate   0.12511    0.02286   5.474 9.21e-08 ***
+## personnel_rate        0.09847    0.02671   3.687 0.000268 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.9551 on 305 degrees of freedom
+## Multiple R-squared:  0.5716, Adjusted R-squared:  0.566 
+## F-statistic: 101.8 on 4 and 305 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>subset_homicide_fitted &lt;- subset_homicide_lm[[&quot;fitted.values&quot;]]
 
 
 vif_subset_homicide_model &lt;- car::vif(subset_homicide_lm)
@@ -1360,7 +1401,7 @@ vif_subset_homicide_model %&gt;%
 </tbody>
 </table>
 <p>All variables have VIF value below 5, suggesting that there is no
-multi-colinearity concerns.</p>
+multi-colinearity issue</p>
 </div>
 </div>
 <div id="interpretation-1" class="section level2">
@@ -1374,7 +1415,7 @@ with <code>hdi</code>, <code>economic_crime_rate</code> and
 <code>personnel_rate</code>.</p>
 <p>Subsequently, we will choose four predictors since it has a
 relatively high adjusted R-Squared (0.57) and we are interested in a
-model that can explain more variances of violence rates.</p>
+model that can explain more variation in violence rates.</p>
 </div>
 </div>
 <div id="model-comparison" class="section level1">
@@ -1512,7 +1553,7 @@ not as noticeable.</p>
 </div>
 </div>
 <div id="model-diagnostics" class="section level1">
-<h1>Model Diagnostics</h1>
+<h1><em>Model Diagnostics</em></h1>
 <div id="all-variables-included-mlr" class="section level2">
 <h2>All Variables included MLR</h2>
 <pre class="r"><code>baseline_hom_resid_df = 
@@ -1598,17 +1639,62 @@ this deviation is very insignificant.</p>
 </div>
 </div>
 <div id="conclusion" class="section level1">
-<h1>Conclusion</h1>
+<h1><em>Conclusion</em></h1>
 <p>Based on our comparisons of RMSE, we can conclude that our
 best-subset regression models are most accurate at predicting the
 outcomes: (1) Violence Rate and (2) Homicide Rate.</p>
 <p>The best-subset regression model for predicting violence rate yielded
 an adjusted r-squared of 0.46 and included the following variables a
-predictors: GDP, inflation rate, economic crime rate, unemployment rate,
-personnel rate, and alcohol consumption rate. The best-subset regression
-model for predicting homicide rate returned an r-squared of 0.57. The
-variables included in this model were unemployment rate, HDI, economic
-crime rate and personnel rate.</p>
+predictors: GDP, inflation rate, economic crime rate, hdi, unemployment
+rate, personnel rate, and alcohol consumption rate. The best-subset
+regression model for predicting homicide rate returned an r-squared of
+0.57. The variables included in this model were unemployment rate, HDI,
+economic crime rate and personnel rate.</p>
+<p>Below are some important interpretations of our findings, based on
+the best-subset regression model for predicting homicide rate: HDI
+(Coefficient = -18.50047), p-value &lt; 2e-16: A 1-unit increase in the
+Human Development Index (HDI) results in a decrease of 18.50047 units in
+the transformed homicide rate, holding all other variables constant.
+Since the p-value is very small (&lt; 2e-16), HDI has a strong negative
+effect on the transformed homicide rate.</p>
+<p>Economic Crime Rate (Coefficient = 0.12511, p-value = 9.21e-08): A
+1-unit increase in transformed economic crime rate results in an
+increase of 0.12511 units in transformed homicide rate, holding all
+other variables constant. The p-value is very small (9.21e-08),
+indicating statistical significance.</p>
+<p>Personnel Rate (Coefficient = 0.09847, p-value = 0.000268): A 1-unit
+increase in transformed personnel rate results in an increase of 0.09847
+units in the transformed homicide rate, holding other predictors
+constant. The small p-value (0.000268) also makes this effect
+statistically significant. This is rather surprising, because an
+increase in personnel rate should decrease homicide rate in theory.
+However, this finding could suggest that higher personnel rate may lead
+to more focused policing in some areas, which increase homicide
+reporting, or this could also reflect lack of personnel training,
+corruption or misallocation of resources.</p>
+<p>Here are some of our important findings based on the best-subset
+regression model for predicting violence rate:</p>
+<p>Economic Crime Rate (coefficient: 0.43184, p-value: &lt; 2e-16) A
+1-unit increase in the transformed economic crime rate results in an
+increase of 0.43184 units in the transformed violence rate, holding all
+other variables constant. The p-value is extremely small (&lt; 2e-16),
+indicating a highly significant relationship. This is consistent with
+the model predicting homicide rate.</p>
+<p>GDP (coefficient: 0.33523, p-value: 3.22e-07) A 1-unit increase in
+transformed GDP results in an increase of 0.33523 units in the
+transformed violence rate, holding all other variables constant. The
+p-value (3.22e-07) is very small, suggesting statistical significance.
+The association between economic growth and violence suggests that GDP
+growth may exacerbate inequality or create economic disparity, which
+might be a driver of violence.</p>
+<p>Alcohol Consumption Rate (coefficient: -0.19195, p-value: 0.000146) A
+1-unit increase in transformed alcohol consumption rate results in a
+decrease of 0.19195 units in the transformed violence rate, holding all
+other variables constant. The p-value is small (0.000146), indicating
+statistical significance. This result is rather counterintuitive, but in
+some settings, alcohol-related interventions and policies can help
+reduce violence (e.g., controlling alcohol abuse or fostering a safer
+drinking culture).</p>
 </div>
 
 

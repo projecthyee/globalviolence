@@ -468,8 +468,13 @@ All variables have VIF value below 5, suggesting that there is no
 multi-colinearity concerns.
 
 ### Interpretation
-The results from criterion-based procedures suggest that, based on the highest adjusted R-squared, the significant predictors for `violence_rate` are `gdp`, `inflation_rate`, `unemployment_rate`, `economic_crime_rate`, `hdi`, `personnel_rate`and `alcohol_consumption rate`, with a total of 7 predictors. 
-The results from Cp, however, suggested a model that does not include personnel_rate. We ultimately decided to proceed with the model that does not include personnel rate, because in the real-world context, personnel rate should explain some variation in violence rate. 
+
+The results from both criterion-based procedures suggest that 
+significant predictors for `violence_rate` are `gdp`, `inflation_rate`, 
+`unemployment_rate`, `economic_crime_rate`, `personnel_rate`, `hdi` 
+and `alcohol_consumption rate`, with a total of 7 predictors. 
+This yields the most appropriate Cp value (6.94), which is approximately 
+close to the number of predictors, and highest adjusted R-squared (0.46).
 
 ## Best Subset Regression for Homicide 
 
@@ -660,7 +665,7 @@ spread in lower RMSE values compared to the other two models, which is not
 as noticeable. 
 
 
-# Model Diagnostics
+# *Model Diagnostics*
 
 ## All Variables included MLR
 
@@ -745,7 +750,7 @@ of homicide and violence rates, we see a very low possibility of heteroscedascit
 and non-linearity, since the horizontal line crosses the value of zero, but this 
 acceptable since this deviation is very insignificant.
 
-# Conclusion
+# *Conclusion*
 
 Based on our comparisons of RMSE, we can conclude that our best-subset regression 
 models are most accurate at predicting the outcomes: (1) Violence Rate and (2) 
