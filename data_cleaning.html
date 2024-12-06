@@ -390,10 +390,9 @@ div.tocify {
 <div id="source" class="section level1">
 <h1><em>Source</em></h1>
 <p>Though there are many determinants and indicators of violence, we
-chose<br />
-indicators and outcomes that were most interesting and came from one
-fairly consistent data source to try to limit discrepancies across data
-collection methods. They came from the following sources:</p>
+chose indicators and outcomes that were most interesting and came from
+one fairly consistent data source to try to limit discrepancies across
+data collection methods. They came from the following sources:</p>
 <ul>
 <li>United Nations Development Program (UNDP):
 <ul>
@@ -564,18 +563,19 @@ each dataset to automatically tidy the datasets. The
 each dataset since some of the country names are represented
 inconsistently across dataset files. For example, South Korea was
 represented as “Korea (Republic of)” and “Korea, Rep.”</p>
-<p>Moreover, for the countrycode() function, NA is returned if no
-matches are found and warnings are also suppressed by
+<p>Moreover, for the <code>countrycode()</code> function, NA is returned
+if no matches are found and warnings are also suppressed by
 <code>nomatch = NA</code> and <code>warn = FALSE</code> respectively
-since some datasets include iso3 codes for entities that are not
-countries. For example, EUU represents the European Union; however, the
-<code>countrycode()</code> function only recognizes iso3 codes for
-countries and returns a warning, but we are interested in countries and
-regions. A boolean parameter called <code>pivot</code> was included to
-indicate if a dataset needs to be pivoted and subsequently perform
-<code>pivot_longer()</code>, since some datasets had years organized as
-different columns, where each column represented values for that
-year.</p>
+since some datasets include iso3 codes for entities that are
+neither<br />
+countries nor recognized by the ISO 3166 standard. For example, EUU
+represents the European Union; however, the <code>countrycode()</code>
+function only recognizes iso3 codes for countries and returns a warning,
+but we are interested in countries and regions. A boolean parameter
+called <code>pivot</code> was included to indicate if a dataset needs to
+be pivoted and subsequently perform <code>pivot_longer()</code>, since
+some datasets had years organized as different columns, where each
+column represented values for that year.</p>
 <p>Also, some of the datasets include rates for different categories.
 For example, the data for economic crime includes crime rates for fraud,
 burglary and more. Therefore, another boolean parameter called

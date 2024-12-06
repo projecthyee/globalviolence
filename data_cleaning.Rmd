@@ -15,7 +15,7 @@ library(countrycode)
 
 # *Source*
 
-Though there are many determinants and indicators of violence, we chose  
+Though there are many determinants and indicators of violence, we chose 
 indicators and outcomes that were most interesting and came from one 
 fairly consistent data source to try to limit discrepancies across
 data collection methods. They came from the following sources:
@@ -175,15 +175,16 @@ country names of each dataset since some of the country names are represented
 inconsistently across dataset files. For example, South Korea was represented 
 as "Korea (Republic of)" and "Korea, Rep." 
 
-Moreover, for the countrycode() function, NA is returned if no matches are 
+Moreover, for the `countrycode()` function, NA is returned if no matches are 
 found and warnings are also suppressed by `nomatch = NA` and `warn = FALSE` 
-respectively since some datasets include iso3 codes for entities that are not 
-countries. For example, EUU represents the European Union; however, the 
-`countrycode()` function only recognizes iso3 codes for countries and returns a 
-warning, but we are interested in countries and regions. A boolean parameter 
-called `pivot` was included to indicate if a dataset needs to be pivoted and 
-subsequently perform `pivot_longer()`, since some datasets had years organized 
-as different columns, where each column represented values for that year. 
+respectively since some datasets include iso3 codes for entities that are neither  
+countries nor recognized by the ISO 3166 standard. For example, EUU represents 
+the European Union; however, the `countrycode()` function only recognizes iso3 
+codes for countries and returns a warning, but we are interested in countries and 
+regions. A boolean parameter called `pivot` was included to indicate if a dataset 
+needs to be pivoted and subsequently perform `pivot_longer()`, since some datasets 
+had years organized as different columns, where each column represented values 
+for that year. 
 
 Also, some of the datasets include rates for different categories. For example, 
 the data for economic crime includes crime rates for fraud, burglary and more. 
