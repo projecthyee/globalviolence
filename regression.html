@@ -375,8 +375,8 @@ div.tocify {
 </div>
 
 
-<div id="introduction" class="section level1">
-<h1><em>Introduction</em></h1>
+<div id="background" class="section level1">
+<h1><em>Background</em></h1>
 <p>Our motivation for doing regression is to determine the significant
 predictors of the two measures of violence: (1) homicide rate and (2)
 violence rate.</p>
@@ -604,7 +604,10 @@ observation dataset suffices to be supported by CLT.</p>
 <p>We used <code>cor()</code> to find the correlation between the eight
 predictors of homicide rate and violence.</p>
 <pre class="r"><code>cor_matrix = 
-  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,&quot;crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, &quot;alcohol_consumption_rate&quot;)], use = &quot;pairwise.complete.obs&quot;)
+  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,
+                             &quot;economic_crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, 
+                             &quot;alcohol_consumption_rate&quot;)], 
+      use = &quot;pairwise.complete.obs&quot;)
 
 
 ggcorrplot(cor_matrix, 
@@ -685,7 +688,7 @@ interest.</p>
 <div id="predict-homicide-rates" class="section level2">
 <h2>Predict Homicide Rates</h2>
 <pre class="r"><code>baseline_MLR_hom &lt;- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_hom_fitted &lt;- baseline_MLR_hom[[&quot;fitted.values&quot;]]
@@ -747,7 +750,7 @@ baseline_MLR_hom %&gt;%
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">0.0047858</td>
 <td align="right">0.0037406</td>
 <td align="right">1.2793927</td>
@@ -816,7 +819,7 @@ vif_baseline_hom_MLR %&gt;%
 <td align="right">2.455203</td>
 </tr>
 <tr class="odd">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.700020</td>
 </tr>
 <tr class="even">
@@ -839,7 +842,7 @@ vif_baseline_hom_MLR %&gt;%
 <div id="predict-violence-rates" class="section level2">
 <h2>Predict Violence Rates</h2>
 <pre class="r"><code>baseline_MLR_viol &lt;- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_viol_fitted &lt;- baseline_MLR_viol[[&quot;fitted.values&quot;]]
@@ -901,7 +904,7 @@ baseline_MLR_viol %&gt;%
 <td align="right">0.6321801</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">0.1193201</td>
 <td align="right">0.0108316</td>
 <td align="right">11.0158771</td>
@@ -971,7 +974,7 @@ vif_baseline_viol_MLR %&gt;%
 <td align="right">2.455203</td>
 </tr>
 <tr class="odd">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.700020</td>
 </tr>
 <tr class="even">
@@ -1060,7 +1063,7 @@ lasso_violence_fit |&gt;
 <td align="right">0.5192427</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1</td>
 <td align="right">0.1133362</td>
 <td align="right">0.3981072</td>
@@ -1165,7 +1168,7 @@ lasso_homicide_fit |&gt;
 <td align="right">0.3524531</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1</td>
 <td align="right">0.0043479</td>
 <td align="right">0.0630957</td>
@@ -1225,7 +1228,7 @@ violence_best_subset_rsq</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                     TRUE                     TRUE                    FALSE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                    FALSE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
@@ -1242,7 +1245,7 @@ violence_best_subset_Cp</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                     TRUE                     TRUE                    FALSE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                    FALSE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
@@ -1251,7 +1254,7 @@ violence_best_subset_Cp</code></pre>
 class="section level3">
 <h3>Collinearity check in Best-Subset Violence Model</h3>
 <pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
 
 subset_violence_fitted &lt;- subset_violence_lm[[&quot;fitted.values&quot;]]
@@ -1283,7 +1286,7 @@ vif_subset_violence_model %&gt;%
 <td align="right">1.070415</td>
 </tr>
 <tr class="odd">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.373276</td>
 </tr>
 <tr class="even">
@@ -1306,11 +1309,11 @@ multi-colinearity concerns.</p>
 <div id="interpretation" class="section level3">
 <h3>Interpretation</h3>
 <p>The results from criterion-based procedures suggest that significant
-predictors for violence_rate are gdp, inflation_rate, crime_rate,
-personnel_rate, trafficked_victims and alcohol_consumption rate, with a
-total of 6 predictors. This yields the most appropriate Cp value
-(5.363), which is approximately close to the number of predictors, and
-highest adjusted R-squared (0.510).</p>
+predictors for violence_rate are gdp, inflation_rate,
+economic_crime_rate, personnel_rate, trafficked_victims and
+alcohol_consumption rate, with a total of 6 predictors. This yields the
+most appropriate Cp value (5.363), which is approximately close to the
+number of predictors, and highest adjusted R-squared (0.510).</p>
 </div>
 </div>
 <div id="best-subset-regression-for-homicide" class="section level2">
@@ -1328,7 +1331,7 @@ homicide_best_subset_rsq</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                     TRUE                     TRUE                     TRUE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                     TRUE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                     TRUE</code></pre>
@@ -1346,7 +1349,7 @@ homicide_best_subset_Cp</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                    FALSE                     TRUE                     TRUE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                     TRUE                     TRUE                    FALSE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                    FALSE</code></pre>
@@ -1355,7 +1358,7 @@ homicide_best_subset_Cp</code></pre>
 class="section level3">
 <h3>Collinearity Check in Best-Subset Homicide Model</h3>
 <pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ inflation_rate + unemployment_rate +
-                           hdi + crime_rate, data = homicide_df)
+                           hdi + economic_crime_rate, data = homicide_df)
 
 subset_homicide_fitted &lt;- subset_homicide_lm[[&quot;fitted.values&quot;]]
 
@@ -1389,7 +1392,7 @@ vif_subset_homicide_model %&gt;%
 <td align="right">1.468355</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.316883</td>
 </tr>
 </tbody>
@@ -1441,7 +1444,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
   mutate(
     MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;violence_rate&quot;, 
                                         alpha = 1,lambda = lambda))
@@ -1463,7 +1466,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
   mutate(
     MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
-                          + unemployment_rate + hdi + crime_rate, data = df)),
+                          + unemployment_rate + hdi + economic_crime_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;homicide_rate&quot;, 
                                         alpha = 1,lambda = lambda))
   ) %&gt;% 

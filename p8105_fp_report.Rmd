@@ -272,7 +272,7 @@ econ_crime_df =
   read_excel(path = "data/unodc/corruption_economic_crime.xlsx", skip = 2) |>
   janitor::clean_names() |>
   filter(unit_of_measurement == "Rate per 100,000 population") |>
-  tidy_df("crime_rate",  average = TRUE)
+  tidy_df("economic_crime_rate",  average = TRUE)
 
 personnel_df =
   read_excel(path = "data/unodc/criminal_justice_personnel.xlsx", skip = 2) |>
@@ -627,126 +627,30 @@ merged_violence_df <- read_csv(
   col_select = c(2:15))
 ```
 
-## Visualizations of Distributions
-```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
-plot_distributions = function(column, name) {
-  if(is.numeric(column) & name != "year") {
-    ggplot(merged_violence_df, aes(x = column)) +
-      geom_density() +
-      labs(title = paste("Distribution of", name))
-  }
-}
+## Background
 
-merged_violence_df |>
-  select(homicide_rate:alcohol_consumption_rate) |>
-  ggpairs()
-```
+Our motivation for doing regression is to determine the significant predictors 
+of the two measures of violence: (1) homicide rate and (2) violence rate. 
 
-Distribution of all variables were checked and it was found that they are all 
-right-skewed, except for human development index. HDI variable showed bimodal 
-and slightly left-skewed distribution. Hence, we decided to apply log All variables are skewed right, except for human development index which is 
-bimodal and slightly left-skewed. Hence, we decided to apply ln transformations 
-and Box-Cox transformations to these variables in order to account for concerns 
-regarding the constancy of variance in linear models. Transformations are 
-intended to approximately normalize the data.
+Violence is a complex and multifaceted issue, especially when considered in a global context. 
+To better understand its various dimensions, we aimed to include a diverse set 
+of predictors that reflect different underlying factors driving violence. 
+Specifically, economic indicators like GDP, inflation rate, and 
+the Human Development Index (HDI) capture aspects of economic inequality, 
+which can influence social unrest and violence. Economic crime rate, 
+personnel rate, and number of trafficked victims serve as indicators of 
+the level of criminal activity in a country, as well as potential efficacy of 
+law enforcement. Such indicators could be predictive of violence in the country. 
+Lastly, alcohol rate is included to address the possibility that substance 
+usage could influence the occurrence of violence.
 
+Given the plausible theoretical linkage between each of our included 
+predictor variables and the outcome variables of interest, we seek to develop 
+models that can determine which factors are most predictive of homicide and 
+violence rate. 
 
-## Transformations
-
-## Natural Log Transform
-```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
-ln_transform = function(value) {
-  return(log(abs(value)))
-}
-
-ln_df = 
-  merged_violence_df |>
-  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
-                ln_transform))
-
-ln_df |>
-  select(homicide_rate:alcohol_consumption_rate) |>
-  ggpairs()
-
-```
-
-## Box-Cox Transform
-```{r boxcox, fig.width = 20, fig.height = 20, warning = FALSE}
-boxcox_transform = function(value) {
-  if (all(is.na(value))) {
-    return(value) 
-  }
-
-  min_value = min(value, na.rm = TRUE) 
-  if (min_value <= 0) {
-    value = value + abs(min_value) + 0.00001  
-  }
-
-  if (length(unique(value)) == 1) {
-    return(value) 
-  }
-
-  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
-  lambda = boxcox_result$x[which.max(boxcox_result$y)]  
-
-  if(lambda != 0) {
-    transformed_value = (value^lambda - 1) / lambda
-  } else {
-    transformed_value = log(value)
-  }
-  return(transformed_value)
-}
-
-boxcox_df = merged_violence_df |> 
-  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
-                ~ boxcox_transform(.)))
-
-boxcox_df |>
-  select(homicide_rate:alcohol_consumption_rate) |>
-  ggpairs()
-
-```
-
-Though the transformations were expected to improve the normality, the results 
-suggest that the transformations are not necessarily effective. In fact, we found 
-that the original data already provides a reasonable representation of the 
-underlying distribution. 
-
-While the natural logarithm helped with normality, the Box-Cox transformation 
-did not substantially improve the data's distribution. Box-Cox transformation
-requires shifting data to be strictly positive, which could introduce 
-unnecessary complexity.
-
-Since neither transformation substantially approved the shapes of the distributions, 
-we ultimately decided to use the original data. Concerns regarding the 
-normality of the distributions are alleviated by the Central Limit Theorem. 
-With a sufficiently large amount of data points, we can assume that the sampling 
-distribution is approximately normal. Using the convention that n > 30 allows for 
-the assumption of approximate normality, our 310 observation dataset suffices
-to be supported by CLT.
-
-## Multicolliniearity Diagnostics
-
-We used `cor()` to find the correlation between the eight predictors of 
-homicide rate and violence. 
-
-```{r }
-cor_matrix = 
-  cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
-
-ggcorrplot(cor_matrix, 
-           method = "circle",  
-           type = "lower",  
-           lab = TRUE,        
-           lab_size = 3,      
-           colors = c("blue", "white", "red"), # Color scale (blue = negative, red = positive)
-           title = "Correlation Heatmap"
-)
-```
-
-There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
-corr = 0.56, and moderately high correlation between `trafficked_victims` and 
-`gdp`, corr = 0.77. 
+We performed this analysis to uncover the extent to which 
+different factors influence homicide rate and violence rate as outcomes.
 
 ## Functions for Fitting Data
 
@@ -859,12 +763,137 @@ check_model = function(data, name) {
 This is a plotting function to combine several different plot types that assess 
 the assumptions of linear models
 
+## Descriptive Statistics
+
+### Visualizations of Distributions
+```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
+plot_distributions = function(column, name) {
+  if(is.numeric(column) & name != "year") {
+    ggplot(merged_violence_df, aes(x = column)) +
+      geom_density() +
+      labs(title = paste("Distribution of", name))
+  }
+}
+
+merged_violence_df |>
+  select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
+```
+
+Distribution of all variables were checked and it was found that they are all 
+right-skewed, except for human development index. HDI variable showed bimodal 
+and slightly left-skewed distribution. Hence, we decided to apply log All variables are skewed right, except for human development index which is 
+bimodal and slightly left-skewed. Hence, we decided to apply ln transformations 
+and Box-Cox transformations to these variables in order to account for concerns 
+regarding the constancy of variance in linear models. Transformations are 
+intended to approximately normalize the data.
+
+
+### Transformations
+
+### Natural Log Transform
+```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
+ln_transform = function(value) {
+  return(log(abs(value)))
+}
+
+ln_df = 
+  merged_violence_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ln_transform))
+
+ln_df |>
+  select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
+
+```
+
+## Box-Cox Transform
+```{r boxcox, fig.width = 20, fig.height = 20, warning = FALSE}
+boxcox_transform = function(value) {
+  if (all(is.na(value))) {
+    return(value) 
+  }
+
+  min_value = min(value, na.rm = TRUE) 
+  if (min_value <= 0) {
+    value = value + abs(min_value) + 0.00001  
+  }
+
+  if (length(unique(value)) == 1) {
+    return(value) 
+  }
+
+  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]  
+
+  if(lambda != 0) {
+    transformed_value = (value^lambda - 1) / lambda
+  } else {
+    transformed_value = log(value)
+  }
+  return(transformed_value)
+}
+
+boxcox_df = merged_violence_df |> 
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ~ boxcox_transform(.)))
+
+boxcox_df |>
+  select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
+
+```
+
+Though the transformations were expected to improve the normality, the results 
+suggest that the transformations are not necessarily effective. In fact, we found 
+that the original data already provides a reasonable representation of the 
+underlying distribution. 
+
+While the natural logarithm helped with normality, the Box-Cox transformation 
+did not substantially improve the data's distribution. Box-Cox transformation
+requires shifting data to be strictly positive, which could introduce 
+unnecessary complexity.
+
+Since neither transformation substantially approved the shapes of the distributions, 
+we ultimately decided to use the original data. Concerns regarding the 
+normality of the distributions are alleviated by the Central Limit Theorem. 
+With a sufficiently large amount of data points, we can assume that the sampling 
+distribution is approximately normal. Using the convention that n > 30 allows for 
+the assumption of approximate normality, our 310 observation dataset suffices
+to be supported by CLT.
+
+### Multicolliniearity Diagnostics
+
+We used `cor()` to find the correlation between the eight predictors of 
+homicide rate and violence. 
+
+```{r }
+cor_matrix = 
+  cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi",
+                             "economic_crime_rate", "personnel_rate", "trafficked_victims", 
+                             "alcohol_consumption_rate")], use = "pairwise.complete.obs")
+
+ggcorrplot(cor_matrix, 
+           method = "circle",  
+           type = "lower",  
+           lab = TRUE,        
+           lab_size = 3,      
+           colors = c("blue", "white", "red"), # Color scale (blue = negative, red = positive)
+           title = "Correlation Heatmap"
+)
+```
+
+There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
+corr = 0.56, and moderately high correlation between `trafficked_victims` and 
+`gdp`, corr = 0.77. 
+
+## Data Pre-Processing
+
 ### Define Lambda Range
 ```{r}
 lambda = 10^(seq(-2, 2.75, 0.1))
 ```
-
-## Data Pre-Processing
 
 ### Approach to Pre-Processing Data
 
@@ -923,7 +952,7 @@ covariates contribute to the outcomes of interest.
 ### Predict Homicide Rates
 ```{r }
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_hom_fitted <- baseline_MLR_hom[["fitted.values"]]
@@ -954,7 +983,7 @@ Results from VIF show that there is no multicollinearity issue (VIF < 5).
 ### Predict Violence Rates
 ```{r }
 baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_viol_fitted <- baseline_MLR_viol[["fitted.values"]]
@@ -1075,7 +1104,7 @@ violence_best_subset_Cp
 #### Collinearity Check in Best-Subset Violence Model 
 ```{r }
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
 
 subset_violence_fitted <- subset_violence_lm[["fitted.values"]]
@@ -1096,7 +1125,7 @@ multi-colinearity concerns.
 
 #### Interpretation
 The results from criterion-based procedures suggest that 
-significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. 
+significant predictors for violence_rate are gdp, inflation_rate, economic_crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. 
 This yields the most appropriate Cp value (5.363), which is approximately 
 close to the number of predictors, and highest adjusted R-squared (0.510).
 
@@ -1123,7 +1152,7 @@ homicide_best_subset_Cp
 #### Collinearity Check in Best-Subset Homicide Model
 ```{r }
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
-                           hdi + crime_rate, data = homicide_df)
+                           hdi + economic_crime_rate, data = homicide_df)
 
 subset_homicide_fitted <- subset_homicide_lm[["fitted.values"]]
 
@@ -1185,7 +1214,7 @@ cv_df_violence <-
   mutate(
     MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
                                         alpha = 1,lambda = lambda))
@@ -1209,7 +1238,7 @@ cv_df_homicide <-
   mutate(
     MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
-                          + unemployment_rate + hdi + crime_rate, data = df)),
+                          + unemployment_rate + hdi + economic_crime_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = "homicide_rate", 
                                         alpha = 1,lambda = lambda))
   ) %>% 

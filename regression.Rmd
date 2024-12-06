@@ -22,7 +22,7 @@ merged_violence_df <- read_csv(
 
 ```
 
-# *Introduction*
+# *Background*
 Our motivation for doing regression is to determine the significant predictors 
 of the two measures of violence: (1) homicide rate and (2) violence rate. 
 
@@ -276,7 +276,10 @@ homicide rate and violence.
 
 ```{r }
 cor_matrix = 
-  cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
+  cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi",
+                             "economic_crime_rate", "personnel_rate", "trafficked_victims", 
+                             "alcohol_consumption_rate")], 
+      use = "pairwise.complete.obs")
 
 
 ggcorrplot(cor_matrix, 
@@ -360,7 +363,7 @@ covariates contribute to the outcomes of interest.
 ## Predict Homicide Rates
 ```{r }
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_hom_fitted <- baseline_MLR_hom[["fitted.values"]]
@@ -391,7 +394,7 @@ Results from VIF show that there is no multicollinearity issue (VIF < 5).
 ## Predict Violence Rates
 ```{r }
 baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_viol_fitted <- baseline_MLR_viol[["fitted.values"]]
@@ -512,7 +515,7 @@ violence_best_subset_Cp
 ### Collinearity check in Best-Subset Violence Model 
 ```{r }
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
 
 subset_violence_fitted <- subset_violence_lm[["fitted.values"]]
@@ -533,7 +536,7 @@ multi-colinearity concerns.
 
 ### Interpretation
 The results from criterion-based procedures suggest that 
-significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. 
+significant predictors for violence_rate are gdp, inflation_rate, economic_crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. 
 This yields the most appropriate Cp value (5.363), which is approximately 
 close to the number of predictors, and highest adjusted R-squared (0.510).
 
@@ -560,7 +563,7 @@ homicide_best_subset_Cp
 ### Collinearity Check in Best-Subset Homicide Model
 ```{r }
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
-                           hdi + crime_rate, data = homicide_df)
+                           hdi + economic_crime_rate, data = homicide_df)
 
 subset_homicide_fitted <- subset_homicide_lm[["fitted.values"]]
 
@@ -622,7 +625,7 @@ cv_df_violence <-
   mutate(
     MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
                                         alpha = 1,lambda = lambda))
@@ -646,7 +649,7 @@ cv_df_homicide <-
   mutate(
     MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
-                          + unemployment_rate + hdi + crime_rate, data = df)),
+                          + unemployment_rate + hdi + economic_crime_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = "homicide_rate", 
                                         alpha = 1,lambda = lambda))
   ) %>% 

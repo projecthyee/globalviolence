@@ -671,7 +671,7 @@ accordingly.</p>
   read_excel(path = &quot;data/unodc/corruption_economic_crime.xlsx&quot;, skip = 2) |&gt;
   janitor::clean_names() |&gt;
   filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
-  tidy_df(&quot;crime_rate&quot;,  average = TRUE)
+  tidy_df(&quot;economic_crime_rate&quot;,  average = TRUE)
 
 personnel_df =
   read_excel(path = &quot;data/unodc/criminal_justice_personnel.xlsx&quot;, skip = 2) |&gt;
@@ -773,7 +773,7 @@ head(merged_violence_df)</code></pre>
 ## 5 ALB       Albania Europe  2019          2.26          5.09 15401826127.
 ## 6 ALB       Albania Europe  2020          2.13          4.71 15162734205.
 ## # ℹ 7 more variables: inflation_rate &lt;dbl&gt;, unemployment_rate &lt;dbl&gt;, hdi &lt;dbl&gt;,
-## #   crime_rate &lt;dbl&gt;, personnel_rate &lt;dbl&gt;, trafficked_victims &lt;dbl&gt;,
+## #   economic_crime_rate &lt;dbl&gt;, personnel_rate &lt;dbl&gt;, trafficked_victims &lt;dbl&gt;,
 ## #   alcohol_consumption_rate &lt;dbl&gt;</code></pre>
 <pre class="r"><code>write.csv(merged_violence_df, file = &quot;./data/merged_violence.csv&quot;)</code></pre>
 <p>The final merged dataset includes 771 rows and 14 columns, including
@@ -1024,110 +1024,29 @@ consistency and coherence with other data sources.</p>
 </div>
 <div id="regression" class="section level1">
 <h1><em>Regression</em></h1>
-<div id="visualizations-of-distributions" class="section level2">
-<h2>Visualizations of Distributions</h2>
-<p><img src="p8105_fp_report_files/figure-html/distributions-1.png" width="1920" /></p>
-<p>Distribution of all variables were checked and it was found that they
-are all right-skewed, except for human development index. HDI variable
-showed bimodal and slightly left-skewed distribution. Hence, we decided
-to apply log All variables are skewed right, except for human
-development index which is bimodal and slightly left-skewed. Hence, we
-decided to apply ln transformations and Box-Cox transformations to these
-variables in order to account for concerns regarding the constancy of
-variance in linear models. Transformations are intended to approximately
-normalize the data.</p>
-</div>
-<div id="transformations" class="section level2">
-<h2>Transformations</h2>
-</div>
-<div id="natural-log-transform" class="section level2">
-<h2>Natural Log Transform</h2>
-<pre class="r"><code>ln_transform = function(value) {
-  return(log(abs(value)))
-}
-
-ln_df = 
-  merged_violence_df |&gt;
-  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
-                ln_transform))
-
-ln_df |&gt;
-  select(homicide_rate:alcohol_consumption_rate) |&gt;
-  ggpairs()</code></pre>
-<p><img src="p8105_fp_report_files/figure-html/ln-transform-1.png" width="1920" /></p>
-</div>
-<div id="box-cox-transform" class="section level2">
-<h2>Box-Cox Transform</h2>
-<pre class="r"><code>boxcox_transform = function(value) {
-  if (all(is.na(value))) {
-    return(value) 
-  }
-
-  min_value = min(value, na.rm = TRUE) 
-  if (min_value &lt;= 0) {
-    value = value + abs(min_value) + 0.00001  
-  }
-
-  if (length(unique(value)) == 1) {
-    return(value) 
-  }
-
-  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
-  lambda = boxcox_result$x[which.max(boxcox_result$y)]  
-
-  if(lambda != 0) {
-    transformed_value = (value^lambda - 1) / lambda
-  } else {
-    transformed_value = log(value)
-  }
-  return(transformed_value)
-}
-
-boxcox_df = merged_violence_df |&gt; 
-  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
-                ~ boxcox_transform(.)))
-
-boxcox_df |&gt;
-  select(homicide_rate:alcohol_consumption_rate) |&gt;
-  ggpairs()</code></pre>
-<p><img src="p8105_fp_report_files/figure-html/boxcox-1.png" width="1920" /></p>
-<p>Though the transformations were expected to improve the normality,
-the results suggest that the transformations are not necessarily
-effective. In fact, we found that the original data already provides a
-reasonable representation of the underlying distribution.</p>
-<p>While the natural logarithm helped with normality, the Box-Cox
-transformation did not substantially improve the data’s distribution.
-Box-Cox transformation requires shifting data to be strictly positive,
-which could introduce unnecessary complexity.</p>
-<p>Since neither transformation substantially approved the shapes of the
-distributions, we ultimately decided to use the original data. Concerns
-regarding the normality of the distributions are alleviated by the
-Central Limit Theorem. With a sufficiently large amount of data points,
-we can assume that the sampling distribution is approximately normal.
-Using the convention that n &gt; 30 allows for the assumption of
-approximate normality, our 310 observation dataset suffices to be
-supported by CLT.</p>
-</div>
-<div id="multicolliniearity-diagnostics" class="section level2">
-<h2>Multicolliniearity Diagnostics</h2>
-<p>We used <code>cor()</code> to find the correlation between the eight
-predictors of homicide rate and violence.</p>
-<pre class="r"><code>cor_matrix = 
-  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,&quot;crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, &quot;alcohol_consumption_rate&quot;)], use = &quot;pairwise.complete.obs&quot;)
-
-ggcorrplot(cor_matrix, 
-           method = &quot;circle&quot;,  
-           type = &quot;lower&quot;,  
-           lab = TRUE,        
-           lab_size = 3,      
-           colors = c(&quot;blue&quot;, &quot;white&quot;, &quot;red&quot;), # Color scale (blue = negative, red = positive)
-           title = &quot;Correlation Heatmap&quot;
-)</code></pre>
-<p><img src="p8105_fp_report_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-<p>There is moderate correlation between <code>hdi</code> and
-<code>alcohol_consumption_rate</code>, corr = 0.56, and moderately high
-correlation between <code>trafficked_victims</code> and
-<code>gdp</code>, corr = 0.77.</p>
+<div id="background" class="section level2">
+<h2>Background</h2>
+<p>Our motivation for doing regression is to determine the significant
+predictors of the two measures of violence: (1) homicide rate and (2)
+violence rate.</p>
+<p>Violence is a complex and multifaceted issue, especially when
+considered in a global context. To better understand its various
+dimensions, we aimed to include a diverse set of predictors that reflect
+different underlying factors driving violence. Specifically, economic
+indicators like GDP, inflation rate, and the Human Development Index
+(HDI) capture aspects of economic inequality, which can influence social
+unrest and violence. Economic crime rate, personnel rate, and number of
+trafficked victims serve as indicators of the level of criminal activity
+in a country, as well as potential efficacy of law enforcement. Such
+indicators could be predictive of violence in the country. Lastly,
+alcohol rate is included to address the possibility that substance usage
+could influence the occurrence of violence.</p>
+<p>Given the plausible theoretical linkage between each of our included
+predictor variables and the outcome variables of interest, we seek to
+develop models that can determine which factors are most predictive of
+homicide and violence rate.</p>
+<p>We performed this analysis to uncover the extent to which different
+factors influence homicide rate and violence rate as outcomes.</p>
 </div>
 <div id="functions-for-fitting-data" class="section level2">
 <h2>Functions for Fitting Data</h2>
@@ -1237,13 +1156,123 @@ dataset and then calculates and returns the rmse.</p>
 <p>This is a plotting function to combine several different plot types
 that assess the assumptions of linear models</p>
 </div>
-<div id="define-lambda-range" class="section level3">
-<h3>Define Lambda Range</h3>
-<pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))</code></pre>
+</div>
+<div id="descriptive-statistics" class="section level2">
+<h2>Descriptive Statistics</h2>
+<div id="visualizations-of-distributions" class="section level3">
+<h3>Visualizations of Distributions</h3>
+<p><img src="p8105_fp_report_files/figure-html/distributions-1.png" width="1920" /></p>
+<p>Distribution of all variables were checked and it was found that they
+are all right-skewed, except for human development index. HDI variable
+showed bimodal and slightly left-skewed distribution. Hence, we decided
+to apply log All variables are skewed right, except for human
+development index which is bimodal and slightly left-skewed. Hence, we
+decided to apply ln transformations and Box-Cox transformations to these
+variables in order to account for concerns regarding the constancy of
+variance in linear models. Transformations are intended to approximately
+normalize the data.</p>
+</div>
+<div id="transformations" class="section level3">
+<h3>Transformations</h3>
+</div>
+<div id="natural-log-transform" class="section level3">
+<h3>Natural Log Transform</h3>
+<pre class="r"><code>ln_transform = function(value) {
+  return(log(abs(value)))
+}
+
+ln_df = 
+  merged_violence_df |&gt;
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ln_transform))
+
+ln_df |&gt;
+  select(homicide_rate:alcohol_consumption_rate) |&gt;
+  ggpairs()</code></pre>
+<p><img src="p8105_fp_report_files/figure-html/ln-transform-1.png" width="1920" /></p>
+</div>
+</div>
+<div id="box-cox-transform" class="section level2">
+<h2>Box-Cox Transform</h2>
+<pre class="r"><code>boxcox_transform = function(value) {
+  if (all(is.na(value))) {
+    return(value) 
+  }
+
+  min_value = min(value, na.rm = TRUE) 
+  if (min_value &lt;= 0) {
+    value = value + abs(min_value) + 0.00001  
+  }
+
+  if (length(unique(value)) == 1) {
+    return(value) 
+  }
+
+  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]  
+
+  if(lambda != 0) {
+    transformed_value = (value^lambda - 1) / lambda
+  } else {
+    transformed_value = log(value)
+  }
+  return(transformed_value)
+}
+
+boxcox_df = merged_violence_df |&gt; 
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ~ boxcox_transform(.)))
+
+boxcox_df |&gt;
+  select(homicide_rate:alcohol_consumption_rate) |&gt;
+  ggpairs()</code></pre>
+<p><img src="p8105_fp_report_files/figure-html/boxcox-1.png" width="1920" /></p>
+<p>Though the transformations were expected to improve the normality,
+the results suggest that the transformations are not necessarily
+effective. In fact, we found that the original data already provides a
+reasonable representation of the underlying distribution.</p>
+<p>While the natural logarithm helped with normality, the Box-Cox
+transformation did not substantially improve the data’s distribution.
+Box-Cox transformation requires shifting data to be strictly positive,
+which could introduce unnecessary complexity.</p>
+<p>Since neither transformation substantially approved the shapes of the
+distributions, we ultimately decided to use the original data. Concerns
+regarding the normality of the distributions are alleviated by the
+Central Limit Theorem. With a sufficiently large amount of data points,
+we can assume that the sampling distribution is approximately normal.
+Using the convention that n &gt; 30 allows for the assumption of
+approximate normality, our 310 observation dataset suffices to be
+supported by CLT.</p>
+<div id="multicolliniearity-diagnostics" class="section level3">
+<h3>Multicolliniearity Diagnostics</h3>
+<p>We used <code>cor()</code> to find the correlation between the eight
+predictors of homicide rate and violence.</p>
+<pre class="r"><code>cor_matrix = 
+  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,
+                             &quot;economic_crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, 
+                             &quot;alcohol_consumption_rate&quot;)], use = &quot;pairwise.complete.obs&quot;)
+
+ggcorrplot(cor_matrix, 
+           method = &quot;circle&quot;,  
+           type = &quot;lower&quot;,  
+           lab = TRUE,        
+           lab_size = 3,      
+           colors = c(&quot;blue&quot;, &quot;white&quot;, &quot;red&quot;), # Color scale (blue = negative, red = positive)
+           title = &quot;Correlation Heatmap&quot;
+)</code></pre>
+<p><img src="p8105_fp_report_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>There is moderate correlation between <code>hdi</code> and
+<code>alcohol_consumption_rate</code>, corr = 0.56, and moderately high
+correlation between <code>trafficked_victims</code> and
+<code>gdp</code>, corr = 0.77.</p>
 </div>
 </div>
 <div id="data-pre-processing" class="section level2">
 <h2>Data Pre-Processing</h2>
+<div id="define-lambda-range" class="section level3">
+<h3>Define Lambda Range</h3>
+<pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))</code></pre>
+</div>
 <div id="approach-to-pre-processing-data" class="section level3">
 <h3>Approach to Pre-Processing Data</h3>
 <p>Prior to performing any model fitting, we split our intial dataset
@@ -1299,7 +1328,7 @@ interest.</p>
 <div id="predict-homicide-rates" class="section level3">
 <h3>Predict Homicide Rates</h3>
 <pre class="r"><code>baseline_MLR_hom &lt;- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_hom_fitted &lt;- baseline_MLR_hom[[&quot;fitted.values&quot;]]
@@ -1361,7 +1390,7 @@ baseline_MLR_hom %&gt;%
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">0.0047858</td>
 <td align="right">0.0037406</td>
 <td align="right">1.2793927</td>
@@ -1430,7 +1459,7 @@ vif_baseline_hom_MLR %&gt;%
 <td align="right">2.455203</td>
 </tr>
 <tr class="odd">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.700020</td>
 </tr>
 <tr class="even">
@@ -1453,7 +1482,7 @@ vif_baseline_hom_MLR %&gt;%
 <div id="predict-violence-rates" class="section level3">
 <h3>Predict Violence Rates</h3>
 <pre class="r"><code>baseline_MLR_viol &lt;- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
-                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                   hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
                     alcohol_consumption_rate , data = merged_violence_df)
 
 baseline_MLR_viol_fitted &lt;- baseline_MLR_viol[[&quot;fitted.values&quot;]]
@@ -1515,7 +1544,7 @@ baseline_MLR_viol %&gt;%
 <td align="right">0.6321801</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">0.1193201</td>
 <td align="right">0.0108316</td>
 <td align="right">11.0158771</td>
@@ -1585,7 +1614,7 @@ vif_baseline_viol_MLR %&gt;%
 <td align="right">2.455203</td>
 </tr>
 <tr class="odd">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.700020</td>
 </tr>
 <tr class="even">
@@ -1674,7 +1703,7 @@ lasso_violence_fit |&gt;
 <td align="right">0.5192427</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1</td>
 <td align="right">0.1133362</td>
 <td align="right">0.3981072</td>
@@ -1779,7 +1808,7 @@ lasso_homicide_fit |&gt;
 <td align="right">0.3524531</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1</td>
 <td align="right">0.0043479</td>
 <td align="right">0.0630957</td>
@@ -1839,7 +1868,7 @@ violence_best_subset_rsq</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                     TRUE                     TRUE                    FALSE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                    FALSE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
@@ -1856,7 +1885,7 @@ violence_best_subset_Cp</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                     TRUE                     TRUE                    FALSE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                    FALSE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
@@ -1865,7 +1894,7 @@ violence_best_subset_Cp</code></pre>
 class="section level4">
 <h4>Collinearity Check in Best-Subset Violence Model</h4>
 <pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
 
 subset_violence_fitted &lt;- subset_violence_lm[[&quot;fitted.values&quot;]]
@@ -1897,7 +1926,7 @@ vif_subset_violence_model %&gt;%
 <td align="right">1.070415</td>
 </tr>
 <tr class="odd">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.373276</td>
 </tr>
 <tr class="even">
@@ -1920,11 +1949,11 @@ multi-colinearity concerns.</p>
 <div id="interpretation" class="section level4">
 <h4>Interpretation</h4>
 <p>The results from criterion-based procedures suggest that significant
-predictors for violence_rate are gdp, inflation_rate, crime_rate,
-personnel_rate, trafficked_victims and alcohol_consumption rate, with a
-total of 6 predictors. This yields the most appropriate Cp value
-(5.363), which is approximately close to the number of predictors, and
-highest adjusted R-squared (0.510).</p>
+predictors for violence_rate are gdp, inflation_rate,
+economic_crime_rate, personnel_rate, trafficked_victims and
+alcohol_consumption rate, with a total of 6 predictors. This yields the
+most appropriate Cp value (5.363), which is approximately close to the
+number of predictors, and highest adjusted R-squared (0.510).</p>
 </div>
 </div>
 <div id="best-subset-regression-for-homicide" class="section level3">
@@ -1942,7 +1971,7 @@ homicide_best_subset_rsq</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                     TRUE                     TRUE                     TRUE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                     TRUE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                     TRUE</code></pre>
@@ -1960,7 +1989,7 @@ homicide_best_subset_Cp</code></pre>
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
 ##                    FALSE                     TRUE                     TRUE 
-##                      hdi               crime_rate           personnel_rate 
+##                      hdi      economic_crime_rate           personnel_rate 
 ##                     TRUE                     TRUE                    FALSE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                    FALSE</code></pre>
@@ -1969,7 +1998,7 @@ homicide_best_subset_Cp</code></pre>
 class="section level4">
 <h4>Collinearity Check in Best-Subset Homicide Model</h4>
 <pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ inflation_rate + unemployment_rate +
-                           hdi + crime_rate, data = homicide_df)
+                           hdi + economic_crime_rate, data = homicide_df)
 
 subset_homicide_fitted &lt;- subset_homicide_lm[[&quot;fitted.values&quot;]]
 
@@ -2003,7 +2032,7 @@ vif_subset_homicide_model %&gt;%
 <td align="right">1.468355</td>
 </tr>
 <tr class="even">
-<td align="left">crime_rate</td>
+<td align="left">economic_crime_rate</td>
 <td align="right">1.316883</td>
 </tr>
 </tbody>
@@ -2055,7 +2084,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
   mutate(
     MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
+                           economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;violence_rate&quot;, 
                                         alpha = 1,lambda = lambda))
@@ -2077,7 +2106,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
   mutate(
     MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
-                          + unemployment_rate + hdi + crime_rate, data = df)),
+                          + unemployment_rate + hdi + economic_crime_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;homicide_rate&quot;, 
                                         alpha = 1,lambda = lambda))
   ) %&gt;% 
