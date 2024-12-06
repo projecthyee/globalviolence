@@ -40,4 +40,4 @@ in vulnerable areas.
 1. How can we best predict violence and homicide rates (i.e. what are its indicators)? 
 2. How do rates of indicators compare across global regions and countries? 
 3. How do rates of violence and homicide compare across global and regions and countries?
-4. What categories of violent are most prevalent? 
+4. What categories of violence are most prevalent? 
