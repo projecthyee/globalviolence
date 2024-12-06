@@ -402,12 +402,12 @@ turn affects determinants such as housing, education, transportation,
 and economic conditions. This project seeks to explore the factors
 driving serious assault, sexual violence, and intentional homicide
 worldwide from 2015 to 2023.</p>
-<p>Selected this time frame because it includes significant global
+<p>We selected this time frame because it includes significant global
 events, including the COVID-19 pandemic and various conflicts, which
-have greatly influenced patterns of violence. Also, even though there
-are a lot of missing data for year 2023, we decided to include the year
-because this time period provides insight into the contemporary factors
-shaping violence worldwide.</p>
+have greatly influenced patterns of violence. Furthermore, even though
+there was a lot of missing data for 2023, we ultimately decided to
+include it in our analysis because of the conflicts that defined this
+year.</p>
 </div>
 <div id="related-work" class="section level1">
 <h1><em>Related Work</em></h1>
@@ -415,10 +415,10 @@ shaping violence worldwide.</p>
 global peace. New York Times (NYT) Journalist, Marc Lacey, titled NYT’s
 annual photojournalism review <a
 href="https://www.nytimes.com/interactive/2023/world/year-in-pictures.html">“A
-Weary World”</a>. Though 2024 comes to a close , the conflicts in
-Russia, Gaza, Ethiopia, and Sudan rage on, and more understanding of
-violence trends is needed. Tensions within and across countries have
-major implications for not just conflict prevention but also social and
+Weary World”</a>. Though 2024 comes to a close, the conflicts in Russia,
+Gaza, Ethiopia, and Sudan rage on, and more understanding of violence
+trends is needed. Tensions within and across countries have major
+implications for not just conflict prevention but also social and
 economic preservation which are often more fragile in vulnerable
 areas.</p>
 </div>
@@ -438,9 +438,11 @@ regions and countries?</li>
 <h1><em>Data</em></h1>
 <div id="source" class="section level2">
 <h2>Source</h2>
-<p>Since there are many determinants and indicators of violence, we
-chose the indicators and outcomes that seem most relevant and
-interesting in exploring violence from the following sources:</p>
+<p>Though there are many determinants and indicators of violence, we
+chose<br />
+indicators and outcomes that were most interesting and came from one
+fairly consistent data source to try to limit discrepancies across data
+collection methods. They came from the following sources:</p>
 <ul>
 <li>United Nations Development Program (UNDP):
 <ul>
@@ -555,8 +557,9 @@ write.csv(violence_visual_df, file = &quot;./data/violence_visual.csv&quot;)</co
 <p>The tidied violence dataset includes country, region, indicator,
 category of violence, sex, year and violence rate. The indicator
 includes different rates for violence (violent offences and victims)
-which are explored further in EDA. Rates per 100,000 people were chosen
-also for this dataset for comparability.</p>
+which are explored further in EDA. Rates per 100,000 people was chosen
+as the measurement since it takes into account the differing populations
+across countries.</p>
 </div>
 </div>
 <div id="tidy-regression-data" class="section level2">
@@ -1033,24 +1036,23 @@ consistency and coherence with other data sources.</p>
 <p>Our motivation for doing regression is to determine the significant
 predictors of the two measures of violence: (1) homicide rate and (2)
 violence rate.</p>
-<p>Violence is a complex and multifaceted issue, especially when
-considered in a global context. To better understand its various
-dimensions, we aimed to include a diverse set of predictors that reflect
-different underlying factors driving violence. Specifically, economic
-indicators like GDP, inflation rate, and the Human Development Index
-(HDI) capture aspects of economic inequality, which can influence social
-unrest and violence. Economic crime rate, personnel rate, and number of
-trafficked victims serve as indicators of the level of criminal activity
-in a country, as well as potential efficacy of law enforcement. Such
-indicators could be predictive of violence in the country. Lastly,
-alcohol rate is included to address the possibility that substance usage
-could influence the occurrence of violence.</p>
+<p>Global violence is a complex issue, depending on many factors, from
+political, cultural, to economic. We aimed to choose predictors that
+reflect inequality which are often related to social unrest and
+violence. Much numerical data exists for the economic indicators of a
+country like GDP and inflation rate, and we also wanted to include HDI
+since that in itself is a well-recognized global measurement.
+Intuitively, criminal activity is also related to violence, so
+indicators for police personnel were considered. Lastly, alcohol rate
+was included because substance usage is often perceived to be correlated
+with violence.</p>
+<p>Given our own personal hypotheses, we aim to develop models that show
+which factors are the best predictors of homicide and violence
+rates.</p>
 <p>Given the plausible theoretical linkage between each of our included
 predictor variables and the outcome variables of interest, we seek to
 develop models that can determine which factors are most predictive of
 homicide and violence rate.</p>
-<p>We performed this analysis to uncover the extent to which different
-factors influence homicide rate and violence rate as outcomes.</p>
 </div>
 <div id="functions-for-fitting-data" class="section level2">
 <h2>Functions for Fitting Data</h2>
@@ -1938,11 +1940,13 @@ multi-colinearity concerns.</p>
 <div id="interpretation" class="section level4">
 <h4>Interpretation</h4>
 <p>The results from criterion-based procedures suggest that significant
-predictors for violence_rate are gdp, inflation_rate,
-economic_crime_rate, personnel_rate, trafficked_victims and
-alcohol_consumption rate, with a total of 6 predictors. This yields the
-most appropriate Cp value (5.363), which is approximately close to the
-number of predictors, and highest adjusted R-squared (0.510).</p>
+predictors for <code>violence_rate</code> are <code>gdp</code>,
+<code>inflation_rate</code>, <code>economic_crime_rate</code>,
+<code>personnel_rate</code>, <code>trafficked_victims</code> and
+<code>alcohol_consumption rate</code>, with a total of 6 predictors.
+This yields the most appropriate Cp value (5.363), which is
+approximately close to the number of predictors, and highest adjusted
+R-squared (0.510).</p>
 </div>
 </div>
 <div id="best-subset-regression-for-homicide" class="section level3">
@@ -2031,14 +2035,14 @@ multi-colinearity concerns.</p>
 </div>
 <div id="interpretation-1" class="section level4">
 <h4>Interpretation</h4>
-<p>For homicide_rate, the results are not as straightforward. The best
-model based on Cp and R-squared seems to be the model with 4 predictors
-because it has the lowest Cp (6.36), and a relatively high adjusted
-R-squared (0.331), indicating a good balance between fit and complexity.
-As more predictors are added, R-squared adjusts slightly but Cp levels
-off at around 6 predictors. The model with 4 predictors, which includes
-inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a
-better trade-off.</p>
+<p>For <code>homicide_rate</code>, the results are not as
+straightforward. The best model based on Cp and R-squared seems to be
+the model with 4 predictors because it has the lowest Cp (6.36), and a
+relatively high adjusted R-squared (0.331), indicating a good balance
+between fit and complexity. As more predictors are added, R-squared
+adjusts slightly but Cp levels off at around 6 predictors. The model
+with 4 predictors, which includes inflation_rate, unemployment_rate,
+hdi, personnel_rate, seems to be a better trade-off.</p>
 </div>
 </div>
 </div>
@@ -2194,17 +2198,16 @@ check_model(baseline_hom_resid_df, &quot;MLR All Predictors Homicide Rate&quot;)
 <p><img src="p8105_fp_report_files/figure-html/unnamed-chunk-36-3.png" width="672" /><img src="p8105_fp_report_files/figure-html/unnamed-chunk-36-4.png" width="672" />
 Examining the QQ-plots for the MLRs with all predictor variables
 included, we notice that our assumption of normality of residuals may be
-in violation, as there appear to many lower-bound and upper-bound
-outliers that do not fall along the reference line. Regarding the plots
-of fitted values versus residuals, we see differing results based on
-whether homicide rate or violence rate is the outcome variable. With
-homicide as the outcome variable, we can see residuals oscillate above
-and below the reference line, indicating approximate linearity of the
-relationship between the predictors and the outcome variables. However,
-the greater variability in the residuals as fitted values increase,
-suggests that we are seeing heteroscedasticity. Regarding violence rate
-as the outcome variable, we see both issues with heteroscedasticity and
-linearity.</p>
+violated, as there are many lower-bound and upper-bound outliers that do
+not fall along the reference line. For the plots of fitted values versus
+residuals, we see differing results based on whether homicide rate or
+violence rate is the outcome variable. With homicide as the outcome
+variable, we can see residuals oscillate above and below the reference
+line, indicating approximate linearity of the relationship between the
+predictors and the outcome variables. However, the greater variability
+in the residuals as fitted values increase, suggests that we are seeing
+heteroscedasticity. Regarding violence rate as the outcome variable, we
+see both issues with heteroscedasticity and linearity.</p>
 </div>
 <div id="best-subset-mlr" class="section level3">
 <h3>Best Subset MLR</h3>
@@ -2266,12 +2269,12 @@ possible heteroscedascity and non-linearity.</p>
 best-subset regression models are most accurate at predicting the
 outcomes: (1) Violence Rate and (2) Homicide Rate.</p>
 <p>The best-subset regression model for predicting violence rate yielded
-an adjusted r-squared of and included the following variables a
+an adjusted r-squared of 0.51 and included the following variables a
 predictors: GDP, inflation rate, crime rate, personnel rate, trafficked
 victims, and alcohol consumption rate. The best-subset regression model
-for predicting homicide rate returned an r-squared of . The variables
-included in this model were inflation rate, unemployment rate, HDI, and
-crime rate.</p>
+for predicting homicide rate returned an r-squared of 0.33. The
+variables included in this model were inflation rate, unemployment rate,
+HDI, and crime rate.</p>
 <p>Despite moderately high R-squared values for each of these models, we
 must acknowledge that the models’ performance and accuracy may suffer
 from certain drawbacks. In particular, model diagnostics revealed

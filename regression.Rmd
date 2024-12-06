@@ -805,12 +805,12 @@ Homicide Rate.
 
 The best-subset regression model for predicting violence 
 rate yielded an adjusted r-squared of 
-`r cat(violence_best_subset_rsq[["Criterion"]])` and included 
+`r round(violence_best_subset_rsq[["Criterion"]], 2)` and included 
 the following variables a predictors: GDP, inflation rate, crime rate, 
 personnel rate, trafficked victims, and alcohol consumption rate. The 
 best-subset regression model for predicting homicide rate returned an 
 r-squared of 
-`r cat(subset_homicide_lm %>% broom::glance() %>% pull(adj.r.squared))`. The 
+`r round(subset_homicide_lm %>% broom::glance() %>% pull(adj.r.squared), 2)`. The 
 variables included in this model were inflation rate, unemployment rate, HDI,
 and crime rate. 
 
