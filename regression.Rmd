@@ -178,9 +178,9 @@ merged_violence_df |>
 
 All variables are skewed right, except for human development index which is 
 bimodal and slightly left-skewed. Hence, we decided to apply ln transformations 
-and Box-Cox transformations to these variables in order to account for concerns 
-regarding the constancy of variance in linear models. Transformations are 
-intended to approximately normalize the data.
+and Box-Cox transformations to ensure noramlity of the data. 
+
+
 
 ## Transformations
 Transformation step involves writing a function for natural log transformation 
@@ -373,7 +373,7 @@ Results from baseline MLR show that that inflation rate, unemployment rate and
 hdi are significant predictors of homicide rate at 
 alpha = 0.05. 
 
-## Check Baseline Homicide Prediction Model for Colinearity
+## Check Baseline Homicide Model for Colinearity
 ```{r }
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %>% 
@@ -490,9 +490,9 @@ to the results from violence, the coefficient for `gdp` was shrunk to 0.
 
 # *Criterion-based procedure*
 
-## Best-Subset Regression for Violence Rate
+## Best-Subset Regression for Violence 
 
-### Predict violence rate using r-squared as criterion
+### Predict violence rate using R-squared
 ```{r }
 violence_best_subset_rsq <- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
@@ -501,7 +501,7 @@ violence_best_subset_rsq <-
 violence_best_subset_rsq
 ```
 
-### Predict violence_rate using Cp as criterion
+### Predict violence rate using Cp 
 ```{r }
 violence_best_subset_Cp <- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
@@ -509,7 +509,7 @@ violence_best_subset_Cp <-
 violence_best_subset_Cp
 ```
 
-### Check for co-linearity in best-subset violence model 
+### Co-linearity check in best-subset violence model 
 ```{r }
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
@@ -537,9 +537,9 @@ significant predictors for violence_rate are gdp, inflation_rate, crime_rate, pe
 This yields the most appropriate Cp value (5.363), which is approximately 
 close to the number of predictors, and highest adjusted R-squared (0.510).
 
-## Best subset regression for Homicide Rate
+## Best subset regression for Homicide 
 
-### Predict homicide rate using R-squared as criterion
+### Predict homicide rate using R-squared 
 ```{r }
 homicide_best_subset_rsq <- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
@@ -548,7 +548,7 @@ homicide_best_subset_rsq <-
 homicide_best_subset_rsq
 ```
 
-### Predict Homicide Rates using Cp as criterion
+### Predict Homicide rate using Cp
 ```{r }
 homicide_best_subset_Cp <- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
@@ -557,7 +557,7 @@ homicide_best_subset_Cp <-
 homicide_best_subset_Cp
 ```
 
-### Check for co-linearity in best subset homicide model
+### Co-linearity check in best-subset homicide model
 ```{r }
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + crime_rate, data = homicide_df)
@@ -714,7 +714,7 @@ cv_df_homicide %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Examining the three models we used to predict homicide rate, we see that 
+Examining the 3 models we used to predict homicide rate, we see that 
 the distribution of RMSE across 100-fold cross-validation are nearly identical. 
 This is likely in regard to the few predictor variables included in our dataset.
 In particular, with such few predictor variables, lasso is likely not the most 
@@ -785,7 +785,7 @@ reference line, and therefore better implies linearity of relationship between
 predictor variables and outcome. 
 
 
-## *Lasso*
+## Lasso
 
 ```{r, message = FALSE, warning - FALSE}
 lasso_homicide_resid_df =

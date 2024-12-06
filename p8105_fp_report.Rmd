@@ -12,6 +12,7 @@ output:
 library(readxl)
 library(countrycode)
 library(tidyverse)
+library(GGally)
 ```
 
 # *Motivation*
@@ -613,9 +614,327 @@ is that UNODC does check for consistency and coherence with other data sources.
 
 # *Regression*
 
+## Visualizations of distributions
+```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
+plot_distributions = function(column, name) {
+  if(is.numeric(column) & name != "year") {
+    ggplot(merged_violence_df, aes(x = column)) +
+      geom_density() +
+      labs(title = paste("Distribution of", name))
+  }
+}
 
-(NEED TO ADD REGRESSION)
+merged_violence_df |>
+  select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
+```
 
+Distribution of all variables were checked and it was found that they are all 
+right-skewed, except for human development index. HDI variable showed bimodal 
+and slightly left-skewed distribution. Hence, we decided to apply log All variables are skewed right, except for human development index which is 
+bimodal and slightly left-skewed. Hence, we decided to apply ln transformations 
+and Box-Cox transformations to these variables in order to account for concerns 
+regarding the constancy of variance in linear models. Transformations are 
+intended to approximately normalize the data.
+
+
+## Transformations
+
+## Natural Log Transform
+```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
+ln_transform = function(value) {
+  return(log(abs(value)))
+}
+
+ln_df = 
+  merged_violence_df |>
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ln_transform))
+
+ln_df |>
+  select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
+
+```
+
+## Box-Cox Transform
+```{r boxcox, fig.width = 20, fig.height = 20, warning = FALSE}
+boxcox_transform = function(value) {
+  if (all(is.na(value))) {
+    return(value) 
+  }
+
+  min_value = min(value, na.rm = TRUE) 
+  if (min_value <= 0) {
+    value = value + abs(min_value) + 0.00001  
+  }
+
+  if (length(unique(value)) == 1) {
+    return(value) 
+  }
+
+  boxcox_result = MASS::boxcox(value ~ 1, plotit = FALSE)
+  lambda = boxcox_result$x[which.max(boxcox_result$y)]  
+
+  if(lambda != 0) {
+    transformed_value = (value^lambda - 1) / lambda
+  } else {
+    transformed_value = log(value)
+  }
+  return(transformed_value)
+}
+
+boxcox_df = merged_violence_df |> 
+  mutate(across(c(homicide_rate:alcohol_consumption_rate), 
+                ~ boxcox_transform(.)))
+
+boxcox_df |>
+  select(homicide_rate:alcohol_consumption_rate) |>
+  ggpairs()
+
+```
+
+Though the transformations were expected to improve the normality, the results 
+suggest that the transformations are not necessarily effective. In fact, we found 
+that the original data already provides a reasonable representation of the 
+underlying distribution. 
+
+While the natural logarithm helped with normality, the Box-Cox transformation 
+did not substantially improve the data's distribution. Box-Cox transformation
+requires shifting data to be strictly positive, which could introduce 
+unnecessary complexity.
+
+Since neither transformation substantially approved the shapes of the distributions, 
+we ultimately decided to use the original data. Concerns regarding the 
+normality of the distributions are alleviated by the Central Limit Theorem. 
+With a sufficiently large amount of data points, we can assume that the sampling 
+distribution is approximately normal. Using the convention that n > 30 allows for 
+the assumption of approximate normality, our 310 observation dataset suffices
+to be supported by CLT.
+
+## Multicolliniearity diagnostics
+
+We used `cor()` to find the correlation between the eight predictors of 
+homicide rate and violence. 
+
+```{r }
+cor_matrix = 
+  cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi","crime_rate", "personnel_rate", "trafficked_victims", "alcohol_consumption_rate")], use = "pairwise.complete.obs")
+
+ggcorrplot(cor_matrix, 
+           method = "circle",  
+           type = "lower",  
+           lab = TRUE,        
+           lab_size = 3,      
+           colors = c("blue", "white", "red"), # Color scale (blue = negative, red = positive)
+           title = "Correlation Heatmap"
+)
+```
+
+There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
+corr = 0.56, and moderately high correlation between `trafficked_victims` and 
+`gdp`, corr = 0.77. 
+
+## Model Building 
+Three types of models were made for the dataset: MLR, best subset, and lasso. 
+
+(NOT SURE IF WE SHOULD PUT EVERYTHING. IF WE DO PUT EVERYTHING FROM REGRESSION 
+FILE THIS IS GOING TO GET REALLY LONG)
+
+## Model Comparison 
+
+### Training and Testing Datasets
+```{r}
+cv_df_violence <- 
+  modelr::crossv_mc(violence_df, 100)
+
+cv_df_violence <- cv_df_violence %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+
+cv_df_homicide <-
+  modelr::crossv_mc(homicide_df, 100)
+
+cv_df_homicide <- cv_df_homicide %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+
+```
+
+### Violence Model
+```{r}
+cv_df_violence <-
+  cv_df_violence %>% 
+  mutate(
+    MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
+    MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
+                           crime_rate + personnel_rate + trafficked_victims +
+                           alcohol_consumption_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
+                                        alpha = 1,lambda = lambda))
+  ) %>% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, "violence_rate"))
+  ) %>% 
+  select(starts_with("rmse_"))
+
+```
+
+### Homicide Model
+```{r}
+cv_df_homicide <-
+  cv_df_homicide %>% 
+  mutate(
+    MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
+    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
+                          + unemployment_rate + hdi + crime_rate, data = df)),
+    lasso = map(train, \(df) fit_glmnet(df, outcome = "homicide_rate", 
+                                        alpha = 1,lambda = lambda))
+  ) %>% 
+  mutate(
+    rmse_all_var = map2_dbl(
+      MLR_all_var, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_best_subset = map2_dbl(
+      MLR_best_subset, test, \(mod, test) rmse(model = mod, data = test)),
+    rmse_lasso = map2_dbl(
+      lasso, test, \(mod, test) rmse_glmnet(mod, test, "homicide_rate"))
+  ) %>% 
+  select(starts_with("rmse_"))
+```
+
+
+### Comparing the RMSE for Violence 
+
+```{r }
+cv_df_violence %>%
+  pivot_longer(
+    everything(),
+    names_to = "Model", 
+    values_to = "RMSE",
+    names_prefix = "rmse_"
+  ) %>% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %>% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin() +
+  ggtitle("RMSE by Model for Predicting Violence Rate") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Examining the distribution of RMSEs for each of the 3 models for 
+predicting violence rate, we can see that they are relatively similar but MLR
+including all predictor variables has a greater spread than the others with a 
+higher upper bound in the violin plot. 
+
+In general, each of the 3 models will not differ by many predictor variables due
+to the few number of predictor variables in out dataset and thus perform similarly. 
+Comparing the 3 models, the best subset regression model
+may be considered optimal as it reduces model complexity, without the 
+further caveat of difficulty interpreting beta coefficients, as is the case 
+with lasso models.
+
+
+### Comparing the RMSE for Homicide
+
+```{r }
+cv_df_homicide %>%
+  pivot_longer(
+    everything(),
+    names_to = "Model", 
+    values_to = "RMSE",
+    names_prefix = "rmse_"
+  )%>% 
+  mutate(
+    Model = fct_inorder(Model)
+  ) %>% 
+  ggplot(aes(x = Model, y = RMSE)) +
+  geom_violin() +
+  ggtitle("RMSE by Model for Predicting Homicide Rate") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Examining the 3 models we used to predict homicide rate, we can see that 
+the distribution of RMSE across 100-fold cross-validation are nearly identical. 
+This is likely in regard to the few predictor variables included in our dataset.
+In particular, with such few predictor variables, lasso is likely not the most 
+well-suited for this task, as there is not a serious need to reduce model 
+complexity. Consequently, the number of variables included in each of the 3 
+models is quite similar, and the difference of 1 or 2 included predictors 
+between each of the models does not produce a substantial change in model 
+effectiveness. Comparing the 3 models, the best subset regression model 
+may be considered the best as it reduces model complexity but maintains 
+ease of interpretability of beta coefficients.
+
+### Model Diagnostics for Best Subset 
+
+```{r, message = FALSE, warning = FALSE}
+subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
+                           hdi + crime_rate, data = homicide_df)
+subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
+                           crime_rate + personnel_rate + trafficked_victims +
+                           alcohol_consumption_rate, data = violence_df)
+
+subset_homicide_resid_df = 
+  merged_violence_df |>
+  add_residuals(subset_homicide_lm) |>
+  add_predictions(subset_homicide_lm) 
+
+subset_violence_resid_df = 
+  merged_violence_df |>
+  add_residuals(subset_violence_lm) |>
+  add_predictions(subset_violence_lm) 
+
+check_model(subset_homicide_resid_df, "MLR Best-Subset Homicide Rate")
+check_model(subset_violence_resid_df, "MLR Best-Subset Violence Rate")
+```
+
+Examining the QQ-plots for the MLRs using the best-subset of predictor variables, 
+we once again notice that our assumption of normality of residuals may be in 
+violation, as there appear to many lower-bound and upper-bound outliers that do 
+not fall along the reference line. For the fitted versus residuals plot for 
+homicide rate, we see violations of both linearity and homosecdascity. The 
+equivalent plot for violence rate presents similar concerns regarding 
+homoscedascity, but shows a greater spread of residuals along the horizontal 
+reference line, and therefore better implies linearity of relationship between
+predictor variables and outcome. 
+
+
+## Conclusion 
+Based on our comparisons of RMSE, we can conclude that our best-subset regression 
+models are most accurate at predicting the outcomes: (1) Violence Rate and (2) 
+Homicide Rate. 
+
+The best-subset regression model for predicting violence 
+rate yielded an adjusted r-squared of 
+`r cat(violence_best_subset_rsq[["Criterion"]])` and included 
+the following variables a predictors: GDP, inflation rate, crime rate, 
+personnel rate, trafficked victims, and alcohol consumption rate. The 
+best-subset regression model for predicting homicide rate returned an 
+r-squared of 
+`r cat(subset_homicide_lm %>% broom::glance() %>% pull(adj.r.squared))`. The 
+variables included in this model were inflation rate, unemployment rate, HDI,
+and crime rate. 
+
+Despite moderately high R-squared values for each of these models, we must 
+acknowledge that the models' performance and accuracy may suffer from certain 
+drawbacks. In particular, model diagnostics revealed concerns regarding the 
+normality, linearity, and homoscedascity of the dataset used to produce these 
+models. Additionally, transformations applied to cope with the concerns regarding 
+normality failed to produce more normalized distributions for any of the 
+predictor variables. As a result, the R-squared values for our models may 
+be inaccurate and different forms of modelling, such as a non-linear approach,
+may be better suited for exploring what variables predict violence and homicide 
+rates.
 
 # *Citation*
 
