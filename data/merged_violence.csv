@@ -1,4 +1,4 @@
-"","iso3_code","country","region","year","homicide_rate","violence_rate","gdp","inflation_rate","unemployment_rate","hdi","economic_crime_rate","personnel_rate","trafficked_victims","alcohol_consumption_rate"
+"","iso3_code","country","region","year","homicide_rate","violence_rate","gdp","inflation_rate","unemployment_rate","hdi","crime_rate","personnel_rate","trafficked_victims","alcohol_consumption_rate"
 "1","ALB","Albania","Europe",2015,2.22030951808529,5.5111254109617,11386853113.0189,1.89617402592365,17.193,0.797,25.8573545960349,164.534186579778,109,5.04
 "2","ALB","Albania","Europe",2016,2.74204347492575,4.86923452509419,11861199830.8396,1.2754316836741,15.418,0.795,22.5148379839894,129.210121403107,95,5.13
 "3","ALB","Albania","Europe",2017,2.01434001712189,4.63893575371667,13019726211.7369,1.98666133171199,13.616,0.796,22.4124268571723,117.194456551708,95,5.13

@@ -325,7 +325,7 @@ div.tocify {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="data_cleaning.html">Data</a>
+  <a href="data_cleaning.html">Data Cleaning</a>
 </li>
 <li>
   <a href="eda.html">EDA</a>
@@ -455,13 +455,13 @@ sources above. The names of the files were also changed accordingly for
 clarity and to avoid confusion. For example, the alcohol consumption
 data file was renamed from “data.csv” to “alcohol_consumption.csv”.</p>
 </div>
-<div id="eda-data" class="section level1">
-<h1><em>EDA Data</em></h1>
+<div id="tidy-eda-data" class="section level1">
+<h1><em>Tidy EDA Data</em></h1>
 <p>For EDA, since we are interested in exploring the trends of global
 violence, we imported and tidied the datasets for our two outcome
 variables: homicide and violence.</p>
-<div id="homicide" class="section level2">
-<h2>Homicide</h2>
+<div id="homicide-dataset" class="section level2">
+<h2>Homicide Dataset</h2>
 <pre class="r"><code>homicide_visual_df = 
     read_excel(path = &quot;data/unodc/intentional_homicide.xlsx&quot;,
                skip = 2) |&gt;
@@ -478,7 +478,9 @@ variables: homicide and violence.</p>
                                     &quot;Intimate partner or family member&quot;),
          category = str_replace_all(category, 
                                     &quot;^Socio-political homicide.*&quot;, 
-                                    &quot;Socio-political homicide&quot;))</code></pre>
+                                    &quot;Socio-political homicide&quot;))
+
+write.csv(homicide_visual_df, file = &quot;./data/homicide_visual.csv&quot;)</code></pre>
 <p>The tidied homicide dataset includes country, region, category of
 homicide victims, sex, year and victim rate of homicide. The dataset
 included data for both counts and rates per 100,000 people. Therefore,
@@ -486,8 +488,8 @@ we filtered to choose rates per 100,000 people since it allows
 standardization for comparability by adjusting for differences in
 population size.</p>
 </div>
-<div id="violence" class="section level2">
-<h2>Violence</h2>
+<div id="violence-dataset" class="section level2">
+<h2>Violence Dataset</h2>
 <pre class="r"><code>violence_visual_df = 
     read_excel(path = &quot;data/unodc/violent_sexual_crime.xlsx&quot;,
                skip = 2) |&gt;
@@ -498,7 +500,9 @@ population size.</p>
          violence_rate = value) |&gt;
   mutate(category = str_replace_all(category, 
                                     &quot;^Sexual violence.*&quot;, 
-                                    &quot;Sexual violence&quot;))</code></pre>
+                                    &quot;Sexual violence&quot;))
+
+write.csv(violence_visual_df, file = &quot;./data/violence_visual.csv&quot;)</code></pre>
 <p>The tidied violence dataset includes country, region, indicator,
 category of violence, sex, year and violence rate. The indicator
 includes different rates for violence (violent offences and victims)
@@ -506,8 +510,8 @@ which will be explored further in EDA. Rates per 100,000 people were
 chosen also for this dataset for comparability.</p>
 </div>
 </div>
-<div id="regression-data" class="section level1">
-<h1><em>Regression Data</em></h1>
+<div id="tidy-regression-data" class="section level1">
+<h1><em>Tidy Regression Data</em></h1>
 <p>For regression, the datasets for all the chosen predictors and
 outcomes will be tidied and merged for modeling process and
 analysis.</p>

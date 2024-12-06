@@ -101,13 +101,13 @@ The names of the files were also changed accordingly for clarity and to avoid
 confusion. For example, the alcohol consumption data file was renamed from 
 "data.csv" to "alcohol_consumption.csv".
 
-## EDA Data
+## Tidy EDA Data
 
 For EDA, since we are interested in exploring the trends of global violence, 
 we imported and tidied the datasets for our two outcome variables: homicide 
 and violence. 
 
-### Homicide
+### Homicide Dataset
 ```{r}
 homicide_visual_df = 
     read_excel(path = "data/unodc/intentional_homicide.xlsx",
@@ -127,6 +127,7 @@ homicide_visual_df =
                                     "^Socio-political homicide.*", 
                                     "Socio-political homicide"))
 
+write.csv(homicide_visual_df, file = "./data/homicide_visual.csv")
 ```
 
 The tidied homicide dataset includes country, region, category of homicide 
@@ -135,7 +136,7 @@ both counts and rates per 100,000 people. Therefore, we filtered to choose rates
 per 100,000 people since it allows standardization for comparability by 
 adjusting for differences in population size.
 
-### Violence
+### Violence Dataset
 ```{r}
 violence_visual_df = 
     read_excel(path = "data/unodc/violent_sexual_crime.xlsx",
@@ -148,6 +149,8 @@ violence_visual_df =
   mutate(category = str_replace_all(category, 
                                     "^Sexual violence.*", 
                                     "Sexual violence"))
+
+write.csv(violence_visual_df, file = "./data/violence_visual.csv")
 ```
 
 The tidied violence dataset includes country, region, indicator, category of 
@@ -156,7 +159,7 @@ for violence (violent offences and victims) which are explored further in
 EDA. Rates per 100,000 people were chosen also for this dataset for 
 comparability. 
 
-## Regression Data
+## Tidy Regression Data
 
 For regression, the datasets for all the chosen predictors and outcomes are 
 tidied and merged for modeling process and analysis. 

@@ -3,7 +3,7 @@ output_dir: "."
 navbar:
   title: "Home"
   left:
-    - text: "Data"
+    - text: "Data Cleaning"
       href: data_cleaning.html
     - text: "EDA"
       href: eda.html
