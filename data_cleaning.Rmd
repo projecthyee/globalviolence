@@ -15,9 +15,10 @@ library(countrycode)
 
 # *Source*
 
-Since there are many determinants and indicators of violence, we chose the 
-indicators and outcomes that seem most relevant and interesting in 
-exploring violence from the following sources:
+Though there are many determinants and indicators of violence, we chose  
+indicators and outcomes that were most interesting and came from one 
+fairly consistent data source to try to limit discrepancies across
+data collection methods. They came from the following sources:
 
 * United Nations Development Program (UNDP): 
   - Human Development Index
@@ -118,8 +119,8 @@ write.csv(violence_visual_df, file = "./data/violence_visual.csv")
 The tidied violence dataset includes country, region, indicator, category of 
 violence, sex, year and violence rate. The indicator includes different rates 
 for violence (violent offences and victims) which will be explored further in 
-EDA. Rates per 100,000 people were chosen also for this dataset for 
-comparability. 
+EDA. Rates per 100,000 people was chosen as the measurement since it takes into
+account the differing populations across countries.
 
 # *Tidy Regression Data*
 

@@ -28,19 +28,16 @@ merged_violence_df <- read_csv(
 
 # *Background*
 Our motivation for doing regression is to determine the significant predictors 
-of the two measures of violence: (1) homicide rate and (2) violence rate. 
+of the two measures of violence: (1) homicide victim rate and (2) violent offences rate. 
 
-Violence is a complex and multifaceted issue, especially when considered in a global context. 
-To better understand its various dimensions, we aimed to include a diverse set 
-of predictors that reflect different underlying factors driving violence. 
-Specifically, economic indicators like GDP, inflation rate, and 
-the Human Development Index (HDI) capture aspects of economic inequality, 
-which can influence social unrest and violence. Economic crime rate, 
-personnel rate, and number of trafficked victims serve as indicators of 
-the level of criminal activity in a country, as well as potential efficacy of 
-law enforcement. Such indicators could be predictive of violence in the country. 
-Lastly, alcohol rate is included to address the possibility that substance 
-usage could influence the occurrence of violence.
+Global violence is a complex issue, depending on many factors, from political,
+cultural, to economic. We aimed to choose predictors that reflect inequality which are
+often related to social unrest and violence. Much numerical data exists for the economic indicators of a country
+such as GDP, inflation and unemployment rate, and we also wanted to include HDI since that in itself
+is a well-recognized global measurement. Intuitively, criminal activity is also related to violence,
+so indicators for economic crime rate and criminal justice personnel were considered. Lastly, alcohol rate was included
+because substance usage is often perceived to be correlated with violence. Subsequently, 
+we aim to develop models that show which factors are the best predictors of homicide and violence rates. 
 
 Given the plausible theoretical linkage between each of our included 
 predictor variables and the outcome variables of interest, we seek to develop 
@@ -386,7 +383,7 @@ baseline_MLR_viol %>%
   broom::tidy() %>% 
   knitr::kable()
 ```
-Results from MLR show that gdp, inflation rate, crime rate, personnel rate, 
+Results from MLR show that gdp, inflation rate, economic crime rate, personnel rate, 
 number of trafficked victims per 100,000 and alcohol consumption rates are 
 significant predictors of violence rate at significance level alpha = 0.01. 
 
@@ -519,7 +516,7 @@ multi-colinearity concerns.
 
 ### Interpretation
 The results from criterion-based procedures suggest that 
-significant predictors for violence_rate are gdp, inflation_rate, economic_crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. 
+significant predictors for `violence_rate` are `gdp`, `inflation_rate`, `economic_crime_rate`, `personnel_rate`, `trafficked_victims` and `alcohol_consumption rate`, with a total of 6 predictors. 
 This yields the most appropriate Cp value (5.363), which is approximately 
 close to the number of predictors, and highest adjusted R-squared (0.510).
 
@@ -565,7 +562,7 @@ multi-colinearity concerns.
 
 
 ### Interpretation
-For homicide_rate, the results are not as straightforward. 
+For `homicide_rate`, the results are not as straightforward.
 The best model based on Cp and R-squared seems to be the model with 
 4 predictors because it has the lowest Cp (6.36), and a relatively high 
 adjusted R-squared (0.331), indicating a good balance between fit and 
@@ -732,9 +729,9 @@ check_model(baseline_hom_resid_df, "MLR All Predictors Homicide Rate")
 check_model(baseline_viol_resid_df, "MLR All Predictors Violence Rate")
 ```
 Examining the QQ-plots for the MLRs with all predictor variables included, we 
-notice that our assumption of normality of residuals may be in violation, as 
-there appear to many lower-bound and upper-bound outliers that do not fall along 
-the reference line. Regarding the plots of fitted values versus residuals, we 
+notice that our assumption of normality of residuals may be violated, as 
+there are many lower-bound and upper-bound outliers that do not fall along 
+the reference line. For the plots of fitted values versus residuals, we 
 see differing results based on whether homicide rate or violence rate is 
 the outcome variable. With homicide as the outcome variable, we can see 
 residuals oscillate above and below the reference line, indicating approximate 
@@ -806,13 +803,13 @@ Homicide Rate.
 The best-subset regression model for predicting violence 
 rate yielded an adjusted r-squared of 
 `r round(violence_best_subset_rsq[["Criterion"]], 2)` and included 
-the following variables a predictors: GDP, inflation rate, crime rate, 
+the following variables a predictors: GDP, inflation rate, economic crime rate, 
 personnel rate, trafficked victims, and alcohol consumption rate. The 
 best-subset regression model for predicting homicide rate returned an 
 r-squared of 
 `r round(subset_homicide_lm %>% broom::glance() %>% pull(adj.r.squared), 2)`. The 
 variables included in this model were inflation rate, unemployment rate, HDI,
-and crime rate. 
+and economic crime rate. 
 
 Despite moderately high R-squared values for each of these models, we must 
 acknowledge that the models' performance and accuracy may suffer from certain 
