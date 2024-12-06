@@ -512,10 +512,9 @@ that assess the assumptions of linear models.</p>
 <div id="visualizations-of-distributions" class="section level2">
 <h2>Visualizations of Distributions</h2>
 <p><img src="regression_files/figure-html/distributions-1.png" width="1920" /></p>
-<p>All variables are skewed right, except for human development index
-which is bimodal and slightly left-skewed. Hence, we decided to apply ln
-transformations and Box-Cox transformations to ensure noramlity of the
-data.</p>
+<p>All variables are skewed right, except for HDI which is bimodal and
+slightly left-skewed. Hence, we decided to apply ln transformations and
+Box-Cox transformations to ensure normality of the data.</p>
 </div>
 <div id="data-transformations" class="section level2">
 <h2>Data Transformations</h2>
@@ -608,7 +607,7 @@ and <code>trafficked_victims</code> (corr - 0.51).</p>
 </div>
 <div id="approach-to-pre-processing-data" class="section level2">
 <h2>Approach to Pre-Processing Data</h2>
-<p>Prior to performing any model fitting, we split our intial dataset
+<p>Prior to performing any model fitting, we split our initial dataset
 into separate homicide and violence datasets, each of which includes the
 outcome variable and all numeric predictor variables. Specific predictor
 and outcome dataframes, and an outcome matrix, are created for later use
@@ -651,9 +650,8 @@ violence_outcome &lt;- violence_df %&gt;%
 <h1><em>Baseline MLR with Additive Effects</em></h1>
 <p>First, we decided to fit a baseline MLR with additive effects from
 all possible predictor variables to use as a point of reference for our
-modeling process. This step provides basic understanding of the extent
-to which different covariates contribute to the outcomes of
-interest.</p>
+modeling process. This step provides insight into which<br />
+covariates contribute to the outcomes of interest.</p>
 <div id="predict-homicide-rates" class="section level2">
 <h2>Predict Homicide Rates</h2>
 <pre class="r"><code>baseline_MLR_hom &lt;- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
@@ -901,9 +899,11 @@ baseline_MLR_viol %&gt;%
 </tr>
 </tbody>
 </table>
-<p>Results from MLR show that gdp, inflation rate, unemployment rate,
-hdi, economic crime rate, and alcohol consumption rates are significant
-predictors of violence rate at significance level alpha = 0.01.</p>
+<p>Results from MLR show that <code>gdp</code>,
+<code>inflation_rate</code>, <code>unemployment_rate</code>,
+<code>hdi</code>, <code>economic_crime_rate</code>, and
+<code>alcohol_consumption_rate</code> are significant predictors of
+violence rate <span class="math inline">\(\alpha\)</span> = 0.01.</p>
 </div>
 <div id="collinearity-of-baseline-violence-model"
 class="section level2">
@@ -1402,7 +1402,7 @@ vif_subset_homicide_model %&gt;%
 </tbody>
 </table>
 <p>All variables have VIF value below 5, suggesting that there is no
-multi-colinearity issue</p>
+multi-colinearity issue.</p>
 </div>
 </div>
 <div id="interpretation-1" class="section level2">
@@ -1415,8 +1415,8 @@ predictors. Howeover, based on the Cp criterion (2.51), it’s the model
 with <code>hdi</code>, <code>economic_crime_rate</code> and
 <code>personnel_rate</code>.</p>
 <p>Subsequently, we will choose four predictors since it has a
-relatively high adjusted R-Squared (0.57) and we are interested in a
-model that can explain more variation in violence rates.</p>
+relatively high adjusted R-Squared (0.57) and we were interested in a
+model that explains more variation in violence rates.</p>
 </div>
 </div>
 <div id="model-comparison" class="section level1">
@@ -1516,8 +1516,8 @@ the few number of predictor variables that exist in our studied dataset.
 In general, each of the 3 models will not differ by many predictor
 variables, and therefore perform similarly. Comparing the 3 models, the
 best subset regression model may be considered optimal as it reduces
-model complexity, without the further caveat of difficulty interpreting
-beta coefficients, as is the case with lasso models.</p>
+model complexity, without the caveat of difficulty interpreting beta
+coefficients, which occurs with lasso models.</p>
 </div>
 <div id="homicide-1" class="section level3">
 <h3>Homicide</h3>
@@ -1540,16 +1540,16 @@ beta coefficients, as is the case with lasso models.</p>
 the distribution of RMSE across 100-fold cross-validation are nearly
 identical. This is likely in regard to the few predictor variables
 included in our dataset. In particular, with such few predictor
-variables, lasso is likely not the most well-suited for this task, as
+variables, lasso is likely not the most well-suited for this task, since
 there is not a serious need to reduce model complexity. Consequently,
-the number of variables included in each of the 3 models is quite
-similar, and the difference of 1 or 2 included predictors between each
-of the models does not produce a substantial change in model
-effectiveness. Comparing the 3 models, the best subset regression model
-may be considered the best as it reduces model complexity but maintains
-ease of interpretability of beta coefficients, having a slighlty greater
-spread in lower RMSE values compared to the other two models, which is
-not as noticeable.</p>
+the number of variables included in each of the 3 models is similar, and
+the difference of 1 or 2 included predictors between each of the models
+does not produce a substantial change in model effectiveness. Comparing
+the 3 models, the best subset regression model may be considered the
+best as it reduces model complexity but maintains ease of
+interpretationof beta coefficients, having a slightly greater spread in
+lower RMSE values compared to the other two models, which is not as
+noticeable.</p>
 </div>
 </div>
 </div>
@@ -1645,57 +1645,58 @@ this deviation is very insignificant.</p>
 best-subset regression models are most accurate at predicting the
 outcomes: (1) Violence Rate and (2) Homicide Rate.</p>
 <p>The best-subset regression model for predicting violence rate yielded
-an adjusted r-squared of 0.46 and included the following variables a
+an adjusted r-squared of 0.46 and included the following variables as
 predictors: GDP, inflation rate, economic crime rate, hdi, unemployment
 rate, personnel rate, and alcohol consumption rate. The best-subset
 regression model for predicting homicide rate returned an r-squared of
 0.57. The variables included in this model were unemployment rate, HDI,
 economic crime rate and personnel rate.</p>
-<p>Below are some important interpretations of our findings, based on
-the best-subset regression model for predicting homicide rate:</p>
+<p><strong>Below are some important interpretations of our findings,
+based on the best-subset regression model for predicting homicide
+rate:</strong></p>
 <p>HDI (Coefficient = -18.50047), p-value &lt; 2e-16: A 1-unit increase
-in the Human Development Index (HDI) results in a decrease of 18.50047
-units in the transformed homicide rate, holding all other variables
-constant. Since the p-value is very small (&lt; 2e-16), HDI has a strong
-negative effect on the transformed homicide rate.</p>
+in the HDI results in a decrease of 18.50047 units in the transformed
+homicide rate, holding all other variables constant. Since the p-value
+is very small, HDI has a strong negative effect on the transformed
+homicide rate.</p>
 <p>Economic Crime Rate (Coefficient = 0.12511, p-value = 9.21e-08): A
 1-unit increase in transformed economic crime rate results in an
 increase of 0.12511 units in transformed homicide rate, holding all
-other variables constant. The p-value is very small (9.21e-08),
-indicating statistical significance.</p>
+other variables constant. The p-value is very small, indicating
+statistical significance.</p>
 <p>Personnel Rate (Coefficient = 0.09847, p-value = 0.000268): A 1-unit
 increase in transformed personnel rate results in an increase of 0.09847
 units in the transformed homicide rate, holding other predictors
 constant. The small p-value (0.000268) also makes this effect
-statistically significant. This is rather surprising, because an
-increase in personnel rate should decrease homicide rate in theory.
-However, this finding could suggest that higher personnel rate may lead
-to more focused policing in some areas, which increase homicide
-reporting, or this could also reflect lack of personnel training,
-corruption or misallocation of resources.</p>
-<p>Here are some of our important findings based on the best-subset
-regression model for predicting violence rate:</p>
+statistically significant. This is rather surprising, because we
+believed an increase in personnel rate should decrease homicide rate.
+However, because personnel rate is a variable that also includes judges,
+this result might make sense.</p>
+<p><strong>Here are some of our important findings based on the
+best-subset regression model for predicting violence rate:</strong></p>
 <p>Economic Crime Rate (coefficient: 0.43184, p-value: &lt; 2e-16) A
 1-unit increase in the transformed economic crime rate results in an
 increase of 0.43184 units in the transformed violence rate, holding all
-other variables constant. The p-value is extremely small (&lt; 2e-16),
-indicating a highly significant relationship. This is consistent with
-the model predicting homicide rate.</p>
+other variables constant. The p-value is extremely small, indicating a
+significant relationship. This is consistent with the model predicting
+homicide rate.</p>
 <p>GDP (coefficient: 0.33523, p-value: 3.22e-07) A 1-unit increase in
 transformed GDP results in an increase of 0.33523 units in the
 transformed violence rate, holding all other variables constant. The
-p-value (3.22e-07) is very small, suggesting statistical significance.
-The association between economic growth and violence suggests that GDP
-growth may exacerbate inequality or create economic disparity, which
-might be a driver of violence.</p>
+p-value is very small, suggesting statistical significance. The
+association between economic growth and violence is surprising because
+we might previously associate higher crime with countries with lower
+GDP. However, these results may suggest that GDP growth can exacerbate
+inequality and drive violence.</p>
 <p>Alcohol Consumption Rate (coefficient: -0.19195, p-value: 0.000146) A
 1-unit increase in transformed alcohol consumption rate results in a
 decrease of 0.19195 units in the transformed violence rate, holding all
 other variables constant. The p-value is small (0.000146), indicating
-statistical significance. This result is rather counterintuitive, but in
-some settings, alcohol-related interventions and policies can help
-reduce violence (e.g., controlling alcohol abuse or fostering a safer
-drinking culture).</p>
+statistical significance. This result was also unexpected because we
+previously believed higher alcohol consumption would lead to an <a
+href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8729263/">increase in
+violence</a> (being associated with aggression, mood and personality
+disorders). This might be due to limitations in our data quality.</p>
 </div>
 
 
