@@ -12,7 +12,6 @@ output:
 library(readxl)
 library(countrycode)
 library(tidyverse)
-library(GGally)
 ```
 
 # *Motivation*
@@ -614,7 +613,21 @@ is that UNODC does check for consistency and coherence with other data sources.
 
 # *Regression*
 
-## Visualizations of distributions
+```{r regression setup, include=FALSE}
+library(glmnet)
+library(leaps)
+library(mgcv)
+library(ggcorrplot)
+library(modelr)
+library(GGally)
+set.seed(1)
+
+merged_violence_df <- read_csv(
+  file = "data/merged_violence.csv",
+  col_select = c(2:15))
+```
+
+## Visualizations of Distributions
 ```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
@@ -712,7 +725,7 @@ distribution is approximately normal. Using the convention that n > 30 allows fo
 the assumption of approximate normality, our 310 observation dataset suffices
 to be supported by CLT.
 
-## Multicolliniearity diagnostics
+## Multicolliniearity Diagnostics
 
 We used `cor()` to find the correlation between the eight predictors of 
 homicide rate and violence. 
@@ -735,15 +748,413 @@ There is moderate correlation between `hdi` and `alcohol_consumption_rate`,
 corr = 0.56, and moderately high correlation between `trafficked_victims` and 
 `gdp`, corr = 0.77. 
 
-## Model Building 
-Three types of models were made for the dataset: MLR, best subset, and lasso. 
+## Functions for Fitting Data
 
-(NOT SURE IF WE SHOULD PUT EVERYTHING. IF WE DO PUT EVERYTHING FROM REGRESSION 
-FILE THIS IS GOING TO GET REALLY LONG)
+### Best_subset
+```{r }
+best_subset = function(predictor, outcome, criterion) {
+  
+  optimal_subset <- 
+    leaps(x = predictor, y = outcome, nbest = 3, 
+      method = criterion, names = names(predictor))
+  
+  if (criterion == "Cp") {
+    optimal_criterion <- optimal_subset[[criterion]] %>% min()
+    optimal_subset_idx <- optimal_subset[[criterion]] %>% which.min()
+    
+  } else {
+    optimal_criterion <- optimal_subset[[criterion]] %>% max()
+    optimal_subset_idx <- optimal_subset[[criterion]] %>% which.max()
+  }
+  
+  return(list(Criterion = optimal_criterion , 
+       Variable_Selection = optimal_subset$which[optimal_subset_idx,]))
+  
+}
+```
+This function serves as a wrapper around the leaps function. It performs 
+best-subset variable selection and then prints out the optimal model diagnostic 
+and the predictor variables included in the regression model.
 
-## Model Comparison 
+### fit_glmnet
+```{r }
+fit_glmnet = function(df, alpha, outcome, lambda) {
+  
+  outcome_formula <- as.formula(paste(outcome, "~."))
+  predictor <- model.matrix(outcome_formula, data = df)[,-1]
+  predicted <- df %>% pull(outcome)
+  
+  model_fit <- 
+    glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  model_cv <-
+    cv.glmnet(predictor, predicted, lambda = lambda, alpha = alpha)
+  
+  lambda_opt = model_cv[["lambda.min"]]
+  
+  model_fit <-
+    glmnet(predictor, predicted, lambda = lambda_opt, alpha = alpha)
+  
+  return(model_fit)
+  
+}
+```
+This function serves as a wrapper for the glmnet fitting processing and 
+covers both the fitting and cross-validation process. It returns the glmnet 
+object produced after fitting with optimal lambda value.
 
-### Training and Testing Datasets
+### rmse_glmnet
+```{r }
+rmse_glmnet = function(model, test, outcome) {
+  outcome_formula <- as.formula(paste(outcome, "~."))
+  predictor <- model.matrix(outcome_formula, data = test)[,-1]
+  predictions <- predict.glmnet(model, model[["lambda"]], newx = predictor,
+                               type = "response")
+  
+  predictions <- as.vector(predictions)
+  observed <- test %>% 
+    pull(outcome)
+  
+  return(caret::RMSE(predictions, observed))
+  
+}
+```
+This is a wrapper function for the glmnet prediction and evaluation process. 
+Given a fitted glmnet model, a test dataset, and an outcome variable of 
+interest, this function predicts the avlues in the test dataset and then 
+calculates and returns the rmse. 
+
+### check_model
+```{r}
+check_model = function(data, name) {
+  
+  diagnostics = list()
+  
+  resid_fit =
+    data |>
+    ggplot(aes(y = resid, x = pred)) +
+    geom_point() +
+    geom_smooth(method = "lm") + 
+    labs(title = name,
+         y = "Residual", 
+         x = "Fitted Value")
+
+  qqplot = 
+    data |>
+      filter(is.finite(resid)) |>
+      ggplot(aes(sample = resid)) +
+      stat_qq() +
+      stat_qq_line(col = "red") +
+      xlab("Theoretical Quantiles") +
+      ylab("Residuals") +
+      ggtitle(name)
+  
+  qqnorm(pull(data, resid), main = "QQ Plot of Residuals")
+  qqline(pull(data, resid), col = "red")
+      
+  diagnostics = append(diagnostics, list(qqplot, resid_fit))
+  patchwork::wrap_plots(diagnostics)
+}
+```
+This is a plotting function to combine several different plot types that assess 
+the assumptions of linear models
+
+### Define Lambda Range
+```{r}
+lambda = 10^(seq(-2, 2.75, 0.1))
+```
+
+## Data Pre-Processing
+
+### Approach to Pre-Processing Data
+
+Prior to performing any model fitting, we split our intial dataset into 
+separate homicide and violence datasets, each of which includes the outcome 
+variable and all numeric predictor variables. Specific predictor and outcome 
+dataframes, and an outcome matrix, are created for later use in linear models, 
+as well as lasso.
+
+#### Pre-Processing for Homicide
+```{r}
+homicide_df =
+  merged_violence_df |> 
+  ungroup() |> 
+  select(
+    homicide_rate, everything(), -violence_rate, -year, -country, -region, 
+    -iso3_code) |> 
+  drop_na()
+
+homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
+
+homicide_predictors <- homicide_df %>% 
+  select(-homicide_rate)
+
+homicide_outcome <- homicide_df %>% 
+  pull(homicide_rate)
+```
+
+#### Pre-Processing for Violence
+```{r }
+violence_df =
+  merged_violence_df |> 
+  ungroup() |> 
+  select(
+    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
+    -iso3_code) |>
+  drop_na()
+
+violence_matrix <- model.matrix(violence_rate ~., data = violence_df)[,-1]
+  
+violence_predictors <- violence_df %>% 
+  select(-violence_rate)
+
+violence_outcome <- violence_df %>% 
+  pull(violence_rate)
+
+```
+
+## Baseline MLR with Additive Effects
+
+First, we decided to fit a baseline MLR with additive effects from all possible 
+predictor variables to use as a point of reference for our modeling process. 
+This step provides basic understanding of the extent to which different 
+covariates contribute to the outcomes of interest. 
+
+### Predict Homicide Rates
+```{r }
+baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+
+baseline_MLR_hom_fitted <- baseline_MLR_hom[["fitted.values"]]
+
+baseline_MLR_hom %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+```
+Results from baseline MLR show that that inflation rate, unemployment rate and 
+hdi are significant predictors of homicide rate at 
+alpha = 0.05. 
+
+### Check Baseline Homicide Model for Collinearity
+```{r }
+vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
+vif_baseline_hom_MLR %>% 
+  tibble(
+    variable = names(vif_baseline_hom_MLR),
+    VIF = vif_baseline_hom_MLR
+  ) %>% 
+  select(variable, VIF) %>% 
+  knitr::kable()
+
+```
+
+Results from VIF show that there is no multicollinearity issue (VIF < 5).
+
+### Predict Violence Rates
+```{r }
+baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
+                   hdi + crime_rate + personnel_rate + trafficked_victims + 
+                    alcohol_consumption_rate , data = merged_violence_df)
+
+baseline_MLR_viol_fitted <- baseline_MLR_viol[["fitted.values"]]
+
+baseline_MLR_viol %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+```
+Results from MLR show that gdp, inflation rate, crime rate, personnel rate, 
+number of trafficked victims per 100,000 and alcohol consumption rates are 
+significant predictors of violence rate at significance level alpha = 0.01. 
+
+### Calculate VIF for Baseline Violence MLR
+```{r }
+vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
+vif_baseline_viol_MLR %>% 
+  tibble(
+    variable = names(vif_baseline_viol_MLR),
+    VIF = vif_baseline_viol_MLR
+  ) %>% 
+  select(variable, VIF) %>% 
+  knitr::kable()
+```
+Results from VIF show that there is no multicollinearity issue (VIF < 5).
+
+## Lasso
+We used lasso to as a feature selection tool to find the most important 
+variables in predicting homicide rate and violence rate. 
+
+### Predictors for Violence Rate
+```{r }
+lasso_violence_fit = 
+  glmnet(violence_matrix, violence_outcome, lambda = lambda)
+
+lasso_violence_cv = 
+  cv.glmnet(violence_matrix, violence_outcome, lambda = lambda)
+
+lambda_violence_opt = 
+  lasso_violence_cv[["lambda.min"]]
+
+lasso_violence_fit = 
+  glmnet(violence_matrix, violence_outcome, lambda = lambda_violence_opt)
+
+lasso_violence_fit |> 
+  broom::tidy() |> 
+  knitr::kable()
+
+lasso_predict_violence <- 
+  predict.glmnet(lasso_violence_fit, lambda_violence_opt, 
+                 newx = violence_matrix, type = "response")
+  
+lasso_predict_violence <- as.vector(lasso_predict_violence)
+
+lasso_violence_resid <- tibble(
+  residuals = violence_outcome - lasso_predict_violence
+)
+
+```
+
+The optimal lambda for violence rate is `r lambda_violence_opt`. Based on 
+lasso estimates, the coefficient for `gdp` was shrunk to 0.
+
+
+### Predictors for Homicide Rate
+```{r }
+lasso_homicide_fit = 
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
+
+lasso_homicide_cv = 
+  cv.glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
+
+lambda_homicide_opt = 
+  lasso_homicide_cv[["lambda.min"]]
+
+lasso_homicide_fit = 
+  glmnet(homicide_matrix, homicide_outcome, lambda = lambda_homicide_opt)
+
+lasso_homicide_fit |> 
+  broom::tidy() |> 
+  knitr::kable()
+
+lasso_predict_homicide <- 
+  predict.glmnet(lasso_homicide_fit, lambda_homicide_opt, 
+                 newx = homicide_matrix, type = "response")
+  
+lasso_predict_homicide <- as.vector(lasso_predict_homicide)
+
+lasso_homicide_resid <- tibble(
+  residuals = homicide_outcome - lasso_predict_homicide
+)
+
+```
+
+The optimal lambda for homicide rate is `r lambda_homicide_opt`. Similar 
+to the results from violence, the coefficient for `gdp` was shrunk to 0. 
+
+## Criterion-Based Procedure
+
+### Best-Subset Regression for Violence 
+
+#### Predict Violence Rate using R-Squared
+```{r }
+violence_best_subset_rsq <- 
+  best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+              criterion = "adjr2")
+
+violence_best_subset_rsq
+```
+
+#### Predict Violence Rate using Cp 
+```{r }
+violence_best_subset_Cp <- 
+  best_subset(predictor = violence_predictors, outcome = violence_outcome, 
+              criterion = "Cp")
+violence_best_subset_Cp
+```
+
+#### Collinearity Check in Best-Subset Violence Model 
+```{r }
+subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
+                           crime_rate + personnel_rate + trafficked_victims +
+                           alcohol_consumption_rate, data = violence_df)
+
+subset_violence_fitted <- subset_violence_lm[["fitted.values"]]
+
+
+vif_subset_violence_model <- car::vif(subset_violence_lm) 
+
+vif_subset_violence_model %>% 
+  tibble(
+    variable = names(vif_subset_violence_model),
+    VIF = vif_subset_violence_model
+  ) %>% 
+  select(variable, VIF) %>% 
+  knitr::kable()
+```
+All variables have VIF value below 5, suggesting that there is no 
+multi-colinearity concerns.
+
+#### Interpretation
+The results from criterion-based procedures suggest that 
+significant predictors for violence_rate are gdp, inflation_rate, crime_rate, personnel_rate, trafficked_victims and alcohol_consumption rate, with a total of 6 predictors. 
+This yields the most appropriate Cp value (5.363), which is approximately 
+close to the number of predictors, and highest adjusted R-squared (0.510).
+
+### Best Subset Regression for Homicide 
+
+#### Predict Homicide Rate using R-Squared 
+```{r }
+homicide_best_subset_rsq <- 
+  best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+              criterion = "adjr2")
+
+homicide_best_subset_rsq
+```
+
+#### Predict Homicide Rate using Cp
+```{r }
+homicide_best_subset_Cp <- 
+  best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
+              criterion = "Cp")
+
+homicide_best_subset_Cp
+```
+
+#### Collinearity Check in Best-Subset Homicide Model
+```{r }
+subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
+                           hdi + crime_rate, data = homicide_df)
+
+subset_homicide_fitted <- subset_homicide_lm[["fitted.values"]]
+
+
+vif_subset_homicide_model <- car::vif(subset_homicide_lm)
+vif_subset_homicide_model %>% 
+  tibble(
+    variable = names(vif_subset_homicide_model),
+    VIF = vif_subset_homicide_model
+  ) %>% 
+  select(variable, VIF) %>% 
+  knitr::kable()
+```
+All variables have VIF value below 5, suggesting that there is no 
+multi-colinearity concerns.
+
+
+#### Interpretation
+For homicide_rate, the results are not as straightforward. 
+The best model based on Cp and R-squared seems to be the model with 
+4 predictors because it has the lowest Cp (6.36), and a relatively high 
+adjusted R-squared (0.331), indicating a good balance between fit and 
+complexity. As more predictors are added, R-squared adjusts slightly but Cp 
+levels off at around 6 predictors. The model with 4 predictors, which includes 
+inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a 
+better trade-off.
+
+
+## Model Comparison
+
+### Create Training and Testing Datasets
 ```{r}
 cv_df_violence <- 
   modelr::crossv_mc(violence_df, 100)
@@ -765,7 +1176,9 @@ cv_df_homicide <- cv_df_homicide %>%
 
 ```
 
-### Violence Model
+### Fit Models
+
+#### Violence
 ```{r}
 cv_df_violence <-
   cv_df_violence %>% 
@@ -789,7 +1202,7 @@ cv_df_violence <-
 
 ```
 
-### Homicide Model
+#### Homicide
 ```{r}
 cv_df_homicide <-
   cv_df_homicide %>% 
@@ -812,8 +1225,9 @@ cv_df_homicide <-
 ```
 
 
-### Comparing the RMSE for Violence 
+### Comparing the RMSE
 
+#### Violence
 ```{r }
 cv_df_violence %>%
   pivot_longer(
@@ -832,20 +1246,20 @@ cv_df_violence %>%
 ```
 
 Examining the distribution of RMSEs for each of the 3 models for 
-predicting violence rate, we can see that they are relatively similar but MLR
-including all predictor variables has a greater spread than the others with a 
-higher upper bound in the violin plot. 
+predicting violence rate, we see that they are relatively similar. It appears 
+that the MLR including all predictor variables has greater spread than the 
+other two distributions, as it has a higher upper bound in the violin plot.
 
-In general, each of the 3 models will not differ by many predictor variables due
-to the few number of predictor variables in out dataset and thus perform similarly. 
-Comparing the 3 models, the best subset regression model
+The similarity in performance among all 3 models likely relates to the few
+number of predictor variables that exist in our studied dataset. In general,
+each of the 3 models will not differ by many predictor variables, and therefore
+perform similarly. Comparing the 3 models, the best subset regression model
 may be considered optimal as it reduces model complexity, without the 
 further caveat of difficulty interpreting beta coefficients, as is the case 
 with lasso models.
 
 
-### Comparing the RMSE for Homicide
-
+#### Homicide
 ```{r }
 cv_df_homicide %>%
   pivot_longer(
@@ -863,7 +1277,7 @@ cv_df_homicide %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Examining the 3 models we used to predict homicide rate, we can see that 
+Examining the 3 models we used to predict homicide rate, we see that 
 the distribution of RMSE across 100-fold cross-validation are nearly identical. 
 This is likely in regard to the few predictor variables included in our dataset.
 In particular, with such few predictor variables, lasso is likely not the most 
@@ -875,15 +1289,40 @@ effectiveness. Comparing the 3 models, the best subset regression model
 may be considered the best as it reduces model complexity but maintains 
 ease of interpretability of beta coefficients.
 
-### Model Diagnostics for Best Subset 
+
+## Model Diagnostics
+
+### All Variables included MLR
 
 ```{r, message = FALSE, warning = FALSE}
-subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
-                           hdi + crime_rate, data = homicide_df)
-subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
-                           crime_rate + personnel_rate + trafficked_victims +
-                           alcohol_consumption_rate, data = violence_df)
+baseline_hom_resid_df = 
+  merged_violence_df |>
+  add_residuals(baseline_MLR_hom) |>
+  add_predictions(baseline_MLR_hom) 
 
+baseline_viol_resid_df = 
+  merged_violence_df |>
+  add_residuals(baseline_MLR_viol) |>
+  add_predictions(baseline_MLR_viol) 
+
+check_model(baseline_hom_resid_df, "MLR All Predictors Homicide Rate") 
+check_model(baseline_viol_resid_df, "MLR All Predictors Violence Rate")
+```
+Examining the QQ-plots for the MLRs with all predictor variables included, we 
+notice that our assumption of normality of residuals may be in violation, as 
+there appear to many lower-bound and upper-bound outliers that do not fall along 
+the reference line. Regarding the plots of fitted values versus residuals, we 
+see differing results based on whether homicide rate or violence rate is 
+the outcome variable. With homicide as the outcome variable, we can see 
+residuals oscillate above and below the reference line, indicating approximate 
+linearity of the relationship between the predictors and the outcome variables. 
+However, the greater variability in the residuals as fitted values increase, 
+suggests that we are seeing heteroscedasticity. Regarding violence rate as the 
+outcome variable, we see both issues with heteroscedasticity and linearity. 
+
+### Best Subset MLR
+
+```{r, message = FALSE, warning = FALSE}
 subset_homicide_resid_df = 
   merged_violence_df |>
   add_residuals(subset_homicide_lm) |>
@@ -909,7 +1348,34 @@ reference line, and therefore better implies linearity of relationship between
 predictor variables and outcome. 
 
 
-## Conclusion 
+### Lasso
+
+```{r, message = FALSE, warning - FALSE}
+lasso_homicide_resid_df =
+  lasso_homicide_resid |> 
+  pull(residuals) |>
+  bind_cols(lasso_predict_homicide) |>
+  rename(resid = "...1", pred = "...2")
+
+lasso_violence_resid_df =
+  lasso_violence_resid |> 
+  pull(residuals) |>
+  bind_cols(lasso_predict_violence) |>
+  rename(resid = "...1", pred = "...2")
+
+check_model(lasso_homicide_resid_df, "Lasso Homicide Rate")
+check_model(lasso_violence_resid_df, "Lasso Violence Rate")
+```
+
+Consistent with results from the QQ-plots of the previous two MLR models, lasso 
+models for both homicide rate and violence rate show potential violations of the 
+assumption of normality, as many lower-bound and upper-bound outlier residuals
+do not fall along the reference line. For the fitted versus residuals plot 
+of homicide rate, we see possible heteroscedascity, while the equivalent plot 
+for homicide rate shows both possible heteroscedascity and non-linearity. 
+
+## Conclusion
+
 Based on our comparisons of RMSE, we can conclude that our best-subset regression 
 models are most accurate at predicting the outcomes: (1) Violence Rate and (2) 
 Homicide Rate. 

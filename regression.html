@@ -508,16 +508,14 @@ dataset and then calculates and returns the rmse.</p>
 that assess the assumptions of linear models</p>
 </div>
 </div>
-<div id="exploratory-data-analysis" class="section level1">
-<h1><em>Exploratory data analysis </em></h1>
+<div id="descriptive-statistics" class="section level1">
+<h1><em>Descriptive Statistics</em></h1>
 <div id="visualizations-of-distributions" class="section level2">
-<h2>Visualizations of distributions</h2>
+<h2>Visualizations of Distributions</h2>
 <p><img src="regression_files/figure-html/distributions-1.png" width="1920" /></p>
 <p>All variables are skewed right, except for human development index
 which is bimodal and slightly left-skewed. Hence, we decided to apply ln
-transformations and Box-Cox transformations to these variables in order
-to account for concerns regarding the constancy of variance in linear
-models. Transformations are intended to approximately normalize the
+transformations and Box-Cox transformations to ensure noramlity of the
 data.</p>
 </div>
 <div id="transformations" class="section level2">
@@ -527,8 +525,8 @@ transformation and a function for Box-Cox transformation. The functions
 are mapped into the nested list col which includes all continuous
 variables in the <code>merged_violence_df</code> dataset.</p>
 </div>
-<div id="natural-log-transform" class="section level2">
-<h2>Natural Log Transform</h2>
+<div id="natural-log-transformation" class="section level2">
+<h2>Natural Log Transformation</h2>
 <pre class="r"><code>ln_transform = function(value) {
   return(log(abs(value)))
 }
@@ -543,8 +541,8 @@ ln_df |&gt;
   ggpairs()</code></pre>
 <p><img src="regression_files/figure-html/ln-transform-1.png" width="1920" /></p>
 </div>
-<div id="box-cox-transform" class="section level2">
-<h2>Box-Cox Transform</h2>
+<div id="box-cox-transformation" class="section level2">
+<h2>Box-Cox Transformation</h2>
 <pre class="r"><code>boxcox_transform = function(value) {
   if (all(is.na(value))) {
     return(value) 
@@ -602,7 +600,7 @@ n &gt; 30 allows for the assumption of approximate normality, our 310
 observation dataset suffices to be supported by CLT.</p>
 </div>
 <div id="multicolliniearity-diagnostics" class="section level2">
-<h2>Multicolliniearity diagnostics</h2>
+<h2>Multicolliniearity Diagnostics</h2>
 <p>We used <code>cor()</code> to find the correlation between the eight
 predictors of homicide rate and violence.</p>
 <pre class="r"><code>cor_matrix = 
@@ -633,7 +631,7 @@ later statistical modelling.</p>
 <pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))</code></pre>
 </div>
 <div id="approach-to-pre-processing-data" class="section level2">
-<h2>Approach to pre-processing data</h2>
+<h2>Approach to Pre-Processing Data</h2>
 <p>Prior to performing any model fitting, we split our intial dataset
 into separate homicide and violence datasets, each of which includes the
 outcome variable and all numeric predictor variables. Specific predictor
@@ -641,7 +639,7 @@ and outcome dataframes, and an outcome matrix, are created for later use
 in linear models, as well as lasso.</p>
 </div>
 <div id="pre-processing-for-homicide" class="section level2">
-<h2>Pre-processing for homicide</h2>
+<h2>Pre-Processing for Homicide</h2>
 <pre class="r"><code>homicide_df =
   merged_violence_df |&gt; 
   ungroup() |&gt; 
@@ -659,7 +657,7 @@ homicide_outcome &lt;- homicide_df %&gt;%
   pull(homicide_rate)</code></pre>
 </div>
 <div id="pre-processing-for-violence" class="section level2">
-<h2>Pre-processing for violence</h2>
+<h2>Pre-Processing for Violence</h2>
 <pre class="r"><code>violence_df =
   merged_violence_df |&gt; 
   ungroup() |&gt; 
@@ -678,7 +676,7 @@ violence_outcome &lt;- violence_df %&gt;%
 </div>
 </div>
 <div id="baseline-mlr-with-additive-effects" class="section level1">
-<h1><em>Baseline MLR with additive effects</em></h1>
+<h1><em>Baseline MLR with Additive Effects</em></h1>
 <p>First, we decided to fit a baseline MLR with additive effects from
 all possible predictor variables to use as a point of reference for our
 modeling process. This step provides basic understanding of the extent
@@ -782,9 +780,9 @@ baseline_MLR_hom %&gt;%
 rate and hdi are significant predictors of homicide rate at alpha =
 0.05.</p>
 </div>
-<div id="check-baseline-homicide-prediction-model-for-colinearity"
+<div id="check-baseline-homicide-model-for-collinearity"
 class="section level2">
-<h2>Check Baseline Homicide Prediction Model for Colinearity</h2>
+<h2>Check Baseline Homicide Model for Collinearity</h2>
 <pre class="r"><code>vif_baseline_hom_MLR &lt;- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %&gt;% 
   tibble(
@@ -939,7 +937,7 @@ alpha = 0.01.</p>
 </div>
 <div id="calculate-vif-for-baseline-violence-mlr"
 class="section level2">
-<h2>Calculate VIF for baseline violence MLR</h2>
+<h2>Calculate VIF for Baseline Violence MLR</h2>
 <pre class="r"><code>vif_baseline_viol_MLR &lt;- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %&gt;% 
   tibble(
@@ -999,7 +997,7 @@ vif_baseline_viol_MLR %&gt;%
 <p>We used lasso to as a feature selection tool to find the most
 important variables in predicting homicide rate and violence rate.</p>
 <div id="predictors-for-violence-rate" class="section level2">
-<h2>Predictors for violence rate</h2>
+<h2>Predictors for Violence Rate</h2>
 <pre class="r"><code>lasso_violence_fit = 
   glmnet(violence_matrix, violence_outcome, lambda = lambda)
 
@@ -1104,7 +1102,7 @@ lasso_violence_resid &lt;- tibble(
 estimates, the coefficient for <code>gdp</code> was shrunk to 0.</p>
 </div>
 <div id="predictors-for-homicide-rate" class="section level2">
-<h2>Predictors for homicide rate</h2>
+<h2>Predictors for Homicide Rate</h2>
 <pre class="r"><code>lasso_homicide_fit = 
   glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
 
@@ -1211,13 +1209,11 @@ to 0.</p>
 </div>
 </div>
 <div id="criterion-based-procedure" class="section level1">
-<h1><em>Criterion-based procedure</em></h1>
-<div id="best-subset-regression-for-violence-rate"
-class="section level2">
-<h2>Best-Subset Regression for Violence Rate</h2>
-<div id="predict-violence-rate-using-r-squared-as-criterion"
-class="section level3">
-<h3>Predict violence rate using r-squared as criterion</h3>
+<h1><em>Criterion-Based Procedure</em></h1>
+<div id="best-subset-regression-for-violence" class="section level2">
+<h2>Best-Subset Regression for Violence</h2>
+<div id="predict-violence-rate-using-r-squared" class="section level3">
+<h3>Predict Violence Rate using R-Squared</h3>
 <pre class="r"><code>violence_best_subset_rsq &lt;- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
               criterion = &quot;adjr2&quot;)
@@ -1234,9 +1230,8 @@ violence_best_subset_rsq</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
 </div>
-<div id="predict-violence_rate-using-cp-as-criterion"
-class="section level3">
-<h3>Predict violence_rate using Cp as criterion</h3>
+<div id="predict-violence-rate-using-cp" class="section level3">
+<h3>Predict Violence Rate using Cp</h3>
 <pre class="r"><code>violence_best_subset_Cp &lt;- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
               criterion = &quot;Cp&quot;)
@@ -1252,9 +1247,9 @@ violence_best_subset_Cp</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
 </div>
-<div id="check-for-co-linearity-in-best-subset-violence-model"
+<div id="collinearity-check-in-best-subset-violence-model"
 class="section level3">
-<h3>Check for co-linearity in best-subset violence model</h3>
+<h3>Collinearity check in Best-Subset Violence Model</h3>
 <pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
@@ -1318,12 +1313,10 @@ total of 6 predictors. This yields the most appropriate Cp value
 highest adjusted R-squared (0.510).</p>
 </div>
 </div>
-<div id="best-subset-regression-for-homicide-rate"
-class="section level2">
-<h2>Best subset regression for Homicide Rate</h2>
-<div id="predict-homicide-rate-using-r-squared-as-criterion"
-class="section level3">
-<h3>Predict homicide rate using R-squared as criterion</h3>
+<div id="best-subset-regression-for-homicide" class="section level2">
+<h2>Best Subset Regression for Homicide</h2>
+<div id="predict-homicide-rate-using-r-squared" class="section level3">
+<h3>Predict Homicide Rate using R-Squared</h3>
 <pre class="r"><code>homicide_best_subset_rsq &lt;- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
               criterion = &quot;adjr2&quot;)
@@ -1340,9 +1333,8 @@ homicide_best_subset_rsq</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                     TRUE</code></pre>
 </div>
-<div id="predict-homicide-rates-using-cp-as-criterion"
-class="section level3">
-<h3>Predict Homicide Rates using Cp as criterion</h3>
+<div id="predict-homicide-rate-using-cp" class="section level3">
+<h3>Predict Homicide Rate using Cp</h3>
 <pre class="r"><code>homicide_best_subset_Cp &lt;- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
               criterion = &quot;Cp&quot;)
@@ -1359,9 +1351,9 @@ homicide_best_subset_Cp</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                    FALSE</code></pre>
 </div>
-<div id="check-for-co-linearity-in-best-subset-homicide-model"
+<div id="collinearity-check-in-best-subset-homicide-model"
 class="section level3">
-<h3>Check for co-linearity in best subset homicide model</h3>
+<h3>Collinearity Check in Best-Subset Homicide Model</h3>
 <pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + crime_rate, data = homicide_df)
 
@@ -1535,18 +1527,18 @@ beta coefficients, as is the case with lasso models.</p>
   ggtitle(&quot;RMSE by Model for Predicting Homicide Rate&quot;) +
   theme(plot.title = element_text(hjust = 0.5))</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
-<p>Examining the three models we used to predict homicide rate, we see
-that the distribution of RMSE across 100-fold cross-validation are
-nearly identical. This is likely in regard to the few predictor
-variables included in our dataset. In particular, with such few
-predictor variables, lasso is likely not the most well-suited for this
-task, as there is not a serious need to reduce model complexity.
-Consequently, the number of variables included in each of the 3 models
-is quite similar, and the difference of 1 or 2 included predictors
-between each of the models does not produce a substantial change in
-model effectiveness. Comparing the 3 models, the best subset regression
-model may be considered the best as it reduces model complexity but
-maintains ease of interpretability of beta coefficients.</p>
+<p>Examining the 3 models we used to predict homicide rate, we see that
+the distribution of RMSE across 100-fold cross-validation are nearly
+identical. This is likely in regard to the few predictor variables
+included in our dataset. In particular, with such few predictor
+variables, lasso is likely not the most well-suited for this task, as
+there is not a serious need to reduce model complexity. Consequently,
+the number of variables included in each of the 3 models is quite
+similar, and the difference of 1 or 2 included predictors between each
+of the models does not produce a substantial change in model
+effectiveness. Comparing the 3 models, the best subset regression model
+may be considered the best as it reduces model complexity but maintains
+ease of interpretability of beta coefficients.</p>
 </div>
 </div>
 </div>
@@ -1610,7 +1602,7 @@ horizontal reference line, and therefore better implies linearity of
 relationship between predictor variables and outcome.</p>
 </div>
 <div id="lasso-1" class="section level2">
-<h2><em>Lasso</em></h2>
+<h2>Lasso</h2>
 <pre class="r"><code>lasso_homicide_resid_df =
   lasso_homicide_resid |&gt; 
   pull(residuals) |&gt;

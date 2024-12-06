@@ -159,9 +159,9 @@ This is a plotting function to combine several different plot types that assess
 the assumptions of linear models
 
 
-# *Exploratory data analysis *
+# *Descriptive Statistics*
 
-## Visualizations of distributions
+## Visualizations of Distributions
 ```{r distributions, fig.width = 20, fig.height = 20, warning = FALSE, message = FALSE, echo = FALSE}
 plot_distributions = function(column, name) {
   if(is.numeric(column) & name != "year") {
@@ -188,7 +188,7 @@ and a function for Box-Cox transformation. The functions are mapped into the
 nested list col which includes all continuous variables in 
 the `merged_violence_df` dataset. 
 
-## Natural Log Transform
+## Natural Log Transformation
 ```{r ln-transform, fig.width = 20, fig.height = 20, warning = FALSE}
 ln_transform = function(value) {
   return(log(abs(value)))
@@ -205,7 +205,7 @@ ln_df |>
 
 ```
 
-## Box-Cox Transform
+## Box-Cox Transformation
 ```{r boxcox, fig.width = 20, fig.height = 20, warning = FALSE}
 boxcox_transform = function(value) {
   if (all(is.na(value))) {
@@ -269,7 +269,7 @@ the assumption of approximate normality, our 310 observation dataset suffices
 to be supported by CLT.
 
 
-## Multicolliniearity diagnostics
+## Multicolliniearity Diagnostics
 
 We used `cor()` to find the correlation between the eight predictors of 
 homicide rate and violence. 
@@ -303,7 +303,7 @@ statistical modelling.
 lambda = 10^(seq(-2, 2.75, 0.1))
 ```
 
-## Approach to pre-processing data
+## Approach to Pre-Processing Data
 
 Prior to performing any model fitting, we split our intial dataset into 
 separate homicide and violence datasets, each of which includes the outcome 
@@ -311,7 +311,7 @@ variable and all numeric predictor variables. Specific predictor and outcome
 dataframes, and an outcome matrix, are created for later use in linear models, 
 as well as lasso.
 
-## Pre-processing for homicide
+## Pre-Processing for Homicide
 ```{r}
 homicide_df =
   merged_violence_df |> 
@@ -330,7 +330,7 @@ homicide_outcome <- homicide_df %>%
   pull(homicide_rate)
 ```
 
-## Pre-processing for violence
+## Pre-Processing for Violence
 ```{r }
 violence_df =
   merged_violence_df |> 
@@ -350,7 +350,7 @@ violence_outcome <- violence_df %>%
 
 ```
 
-# *Baseline MLR with additive effects*
+# *Baseline MLR with Additive Effects*
 
 First, we decided to fit a baseline MLR with additive effects from all possible 
 predictor variables to use as a point of reference for our modeling process. 
@@ -373,7 +373,7 @@ Results from baseline MLR show that that inflation rate, unemployment rate and
 hdi are significant predictors of homicide rate at 
 alpha = 0.05. 
 
-## Check Baseline Homicide Model for Colinearity
+## Check Baseline Homicide Model for Collinearity
 ```{r }
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %>% 
@@ -404,7 +404,7 @@ Results from MLR show that gdp, inflation rate, crime rate, personnel rate,
 number of trafficked victims per 100,000 and alcohol consumption rates are 
 significant predictors of violence rate at significance level alpha = 0.01. 
 
-## Calculate VIF for baseline violence MLR
+## Calculate VIF for Baseline Violence MLR
 ```{r }
 vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %>% 
@@ -421,7 +421,7 @@ Results from VIF show that there is no multicollinearity issue (VIF < 5).
 We used lasso to as a feature selection tool to find the most important 
 variables in predicting homicide rate and violence rate. 
 
-## Predictors for violence rate
+## Predictors for Violence Rate
 ```{r }
 lasso_violence_fit = 
   glmnet(violence_matrix, violence_outcome, lambda = lambda)
@@ -455,7 +455,7 @@ The optimal lambda for violence rate is `r lambda_violence_opt`. Based on
 lasso estimates, the coefficient for `gdp` was shrunk to 0.
 
 
-## Predictors for homicide rate
+## Predictors for Homicide Rate
 ```{r }
 lasso_homicide_fit = 
   glmnet(homicide_matrix, homicide_outcome, lambda = lambda)
@@ -488,11 +488,11 @@ lasso_homicide_resid <- tibble(
 The optimal lambda for homicide rate is `r lambda_homicide_opt`. Similar 
 to the results from violence, the coefficient for `gdp` was shrunk to 0. 
 
-# *Criterion-based procedure*
+# *Criterion-Based Procedure*
 
 ## Best-Subset Regression for Violence 
 
-### Predict violence rate using R-squared
+### Predict Violence Rate using R-Squared
 ```{r }
 violence_best_subset_rsq <- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
@@ -501,7 +501,7 @@ violence_best_subset_rsq <-
 violence_best_subset_rsq
 ```
 
-### Predict violence rate using Cp 
+### Predict Violence Rate using Cp 
 ```{r }
 violence_best_subset_Cp <- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
@@ -509,7 +509,7 @@ violence_best_subset_Cp <-
 violence_best_subset_Cp
 ```
 
-### Co-linearity check in best-subset violence model 
+### Collinearity check in Best-Subset Violence Model 
 ```{r }
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            crime_rate + personnel_rate + trafficked_victims +
@@ -537,9 +537,9 @@ significant predictors for violence_rate are gdp, inflation_rate, crime_rate, pe
 This yields the most appropriate Cp value (5.363), which is approximately 
 close to the number of predictors, and highest adjusted R-squared (0.510).
 
-## Best subset regression for Homicide 
+## Best Subset Regression for Homicide 
 
-### Predict homicide rate using R-squared 
+### Predict Homicide Rate using R-Squared 
 ```{r }
 homicide_best_subset_rsq <- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
@@ -548,7 +548,7 @@ homicide_best_subset_rsq <-
 homicide_best_subset_rsq
 ```
 
-### Predict Homicide rate using Cp
+### Predict Homicide Rate using Cp
 ```{r }
 homicide_best_subset_Cp <- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
@@ -557,7 +557,7 @@ homicide_best_subset_Cp <-
 homicide_best_subset_Cp
 ```
 
-### Co-linearity check in best-subset homicide model
+### Collinearity Check in Best-Subset Homicide Model
 ```{r }
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + crime_rate, data = homicide_df)
