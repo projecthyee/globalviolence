@@ -1409,7 +1409,7 @@ be inaccurate and different forms of modelling, such as a non-linear approach,
 may be better suited for exploring what variables predict violence and homicide 
 rates.
 
-# Discussion
+# *Discussion*
 
 The findings from our project highlight several important observations:
 
