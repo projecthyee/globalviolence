@@ -1430,8 +1430,11 @@ Limitations to our methodology include not being able to account for temporality
 
 # *Citation*
 
+* National Library of Medicine (2021), Alcohol, Aggression, and Violence: From 
+Public Health to Neuroscience. https://pmc.ncbi.nlm.nih.gov/articles/PMC8729263/ 
+(Accessed on Dec. 2024)
 * United Nations, A New Era of Conflict and Violence. 
-https://www.un.org/en/un75/new-era-conflict-and-violence (Accessed on Dec 2024).
+https://www.un.org/en/un75/new-era-conflict-and-violence (Accessed on Dec. 2024).
 * UNODC (2024), UNODC Research - Data Portal – Access and
 functioning of justice. https://dataunodc.un.org/dp-cjs-persons-convicted (Accessed on Nov. 2024).
 * UNODC (2024), UNODC Research - Data Portal – Corruption and
