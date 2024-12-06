@@ -361,7 +361,7 @@ div.tocify {
   <a href="aboutus.html">About Us</a>
 </li>
 <li>
-  <a href="https://github.com/projecthyee/p8105_fp_violence">
+  <a href="https://github.com/projecthyee/globalviolence">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -1425,8 +1425,9 @@ baseline_MLR_hom %&gt;%
 rate and hdi are significant predictors of homicide rate at alpha =
 0.05.</p>
 </div>
-<div id="collinearity-in-homicide-model" class="section level3">
-<h3>Collinearity in Homicide Model</h3>
+<div id="collinearity-of-baseline-homicide-model"
+class="section level3">
+<h3>Collinearity of Baseline Homicide Model</h3>
 <pre class="r"><code>vif_baseline_hom_MLR &lt;- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %&gt;% 
   tibble(
@@ -1578,8 +1579,10 @@ baseline_MLR_viol %&gt;%
 rate, number of trafficked victims per 100,000 and alcohol consumption
 rates are significant predictors of violence rate at significance level
 alpha = 0.01.</p>
-<div id="collinearity-in-violence-model" class="section level4">
-<h4>Collinearity in Violence Model</h4>
+</div>
+<div id="collinearity-of-baseline-violence-model"
+class="section level3">
+<h3>Collinearity of Baseline Violence Model</h3>
 <pre class="r"><code>vif_baseline_viol_MLR &lt;- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %&gt;% 
   tibble(
@@ -1632,7 +1635,6 @@ vif_baseline_viol_MLR %&gt;%
 </table>
 <p>Results from VIF show that there is no multicollinearity issue (VIF
 &lt; 5).</p>
-</div>
 </div>
 </div>
 <div id="lasso" class="section level2">
@@ -1855,8 +1857,8 @@ to 0.</p>
 <h2>Criterion-Based Procedure</h2>
 <div id="best-subset-regression-for-violence" class="section level3">
 <h3>Best-Subset Regression for Violence</h3>
-<div id="predict-violence-rate-using-r-squared" class="section level4">
-<h4>Predict Violence Rate using R-Squared</h4>
+<div id="predict-violence-rate-with-r-squared" class="section level4">
+<h4>Predict Violence Rate with R-Squared</h4>
 <pre class="r"><code>violence_best_subset_rsq &lt;- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
               criterion = &quot;adjr2&quot;)
@@ -1873,8 +1875,8 @@ violence_best_subset_rsq</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
 </div>
-<div id="predict-violence-rate-using-cp" class="section level4">
-<h4>Predict Violence Rate using Cp</h4>
+<div id="predict-violence-rate-with-cp" class="section level4">
+<h4>Predict Violence Rate with Cp</h4>
 <pre class="r"><code>violence_best_subset_Cp &lt;- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
               criterion = &quot;Cp&quot;)
@@ -1890,9 +1892,9 @@ violence_best_subset_Cp</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                     TRUE                     TRUE</code></pre>
 </div>
-<div id="collinearity-check-in-best-subset-violence-model"
+<div id="collinearity-of-best-subset-violence-model"
 class="section level4">
-<h4>Collinearity Check in Best-Subset Violence Model</h4>
+<h4>Collinearity of Best-Subset Violence Model</h4>
 <pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + 
                            economic_crime_rate + personnel_rate + trafficked_victims +
                            alcohol_consumption_rate, data = violence_df)
@@ -1958,8 +1960,8 @@ number of predictors, and highest adjusted R-squared (0.510).</p>
 </div>
 <div id="best-subset-regression-for-homicide" class="section level3">
 <h3>Best Subset Regression for Homicide</h3>
-<div id="predict-homicide-rate-using-r-squared" class="section level4">
-<h4>Predict Homicide Rate using R-Squared</h4>
+<div id="predict-homicide-rate-with-r-squared" class="section level4">
+<h4>Predict Homicide Rate with R-Squared</h4>
 <pre class="r"><code>homicide_best_subset_rsq &lt;- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
               criterion = &quot;adjr2&quot;)
@@ -1976,8 +1978,8 @@ homicide_best_subset_rsq</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                     TRUE</code></pre>
 </div>
-<div id="predict-homicide-rate-using-cp" class="section level4">
-<h4>Predict Homicide Rate using Cp</h4>
+<div id="predict-homicide-rate-with-cp" class="section level4">
+<h4>Predict Homicide Rate with Cp</h4>
 <pre class="r"><code>homicide_best_subset_Cp &lt;- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
               criterion = &quot;Cp&quot;)
@@ -1994,9 +1996,9 @@ homicide_best_subset_Cp</code></pre>
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                    FALSE</code></pre>
 </div>
-<div id="collinearity-check-in-best-subset-homicide-model"
+<div id="collinearity-of-best-subset-homicide-model"
 class="section level4">
-<h4>Collinearity Check in Best-Subset Homicide Model</h4>
+<h4>Collinearity of Best-Subset Homicide Model</h4>
 <pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + economic_crime_rate, data = homicide_df)
 

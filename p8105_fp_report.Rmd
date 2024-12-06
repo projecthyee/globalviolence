@@ -959,7 +959,7 @@ Results from baseline MLR show that that inflation rate, unemployment rate and
 hdi are significant predictors of homicide rate at 
 alpha = 0.05. 
 
-### Collinearity in Homicide Model
+### Collinearity of Baseline Homicide Model 
 ```{r }
 vif_baseline_hom_MLR <- car::vif(baseline_MLR_hom)
 vif_baseline_hom_MLR %>% 
@@ -990,7 +990,7 @@ Results from MLR show that gdp, inflation rate, crime rate, personnel rate,
 number of trafficked victims per 100,000 and alcohol consumption rates are 
 significant predictors of violence rate at significance level alpha = 0.01. 
 
-#### Collinearity in Violence Model
+### Collinearity of Baseline Violence Model
 ```{r }
 vif_baseline_viol_MLR <- car::vif(baseline_MLR_viol)
 vif_baseline_viol_MLR %>% 
@@ -1078,7 +1078,7 @@ to the results from violence, the coefficient for `gdp` was shrunk to 0.
 
 ### Best-Subset Regression for Violence 
 
-#### Predict Violence Rate using R-Squared
+#### Predict Violence Rate with R-Squared
 ```{r }
 violence_best_subset_rsq <- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
@@ -1087,7 +1087,7 @@ violence_best_subset_rsq <-
 violence_best_subset_rsq
 ```
 
-#### Predict Violence Rate using Cp 
+#### Predict Violence Rate with Cp 
 ```{r }
 violence_best_subset_Cp <- 
   best_subset(predictor = violence_predictors, outcome = violence_outcome, 
@@ -1095,7 +1095,7 @@ violence_best_subset_Cp <-
 violence_best_subset_Cp
 ```
 
-#### Collinearity Check in Best-Subset Violence Model 
+#### Collinearity of Best-Subset Violence Model
 ```{r }
 subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
                            economic_crime_rate + personnel_rate + trafficked_victims +
@@ -1125,7 +1125,7 @@ close to the number of predictors, and highest adjusted R-squared (0.510).
 
 ### Best Subset Regression for Homicide 
 
-#### Predict Homicide Rate using R-Squared 
+#### Predict Homicide Rate with R-Squared 
 ```{r }
 homicide_best_subset_rsq <- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
@@ -1134,7 +1134,7 @@ homicide_best_subset_rsq <-
 homicide_best_subset_rsq
 ```
 
-#### Predict Homicide Rate using Cp
+#### Predict Homicide Rate with Cp
 ```{r }
 homicide_best_subset_Cp <- 
   best_subset(predictor = homicide_predictors, outcome = homicide_outcome, 
@@ -1143,7 +1143,7 @@ homicide_best_subset_Cp <-
 homicide_best_subset_Cp
 ```
 
-#### Collinearity Check in Best-Subset Homicide Model
+#### Collinearity of Best-Subset Homicide Model
 ```{r }
 subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
                            hdi + economic_crime_rate, data = homicide_df)
