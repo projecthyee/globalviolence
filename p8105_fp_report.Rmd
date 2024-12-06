@@ -657,7 +657,7 @@ different factors influence homicide rate and violence rate as outcomes.
 
 ## Functions for Fitting Data
 
-### Best_subset
+### best_subset
 ```{r }
 best_subset = function(predictor, outcome, criterion) {
   
@@ -1394,7 +1394,7 @@ GDP (coefficient: 0.33523, p-value: 3.22e-07)
 A 1-unit increase in transformed GDP results in an increase of 0.33523 units in the transformed violence rate, holding all other variables constant. The p-value is very small, suggesting statistical significance. The association between economic growth and violence is surprising because we might previously associate higher crime with countries with lower GDP. However, these results may suggest that GDP growth can exacerbate inequality and drive violence. 
 
 Alcohol Consumption Rate (coefficient: -0.19195, p-value: 0.000146)
-A 1-unit increase in transformed alcohol consumption rate results in a decrease of 0.19195 units in the transformed violence rate, holding all other variables constant. The p-value is small (0.000146), indicating statistical significance. This result was also unexpected because we previously believed higher alcohol consumption would lead to an [increase in violence](https://pmc.ncbi.nlm.nih.gov/articles/PMC8729263/) (being associated with aggression, mood and personality disorders). This might be due to 
+A 1-unit increase in transformed alcohol consumption rate results in a decrease of 0.19195 units in the transformed violence rate, holding all other variables constant. The p-value is small (0.000146), indicating statistical significance. This result was also unexpected because we previously believed higher alcohol consumption would lead to an [increase in violence](https://pmc.ncbi.nlm.nih.gov/articles/PMC8729263/), since it's associated with aggression, mood and personality disorders. This might be due to 
 limitations in our data quality. 
 
 
@@ -1418,7 +1418,7 @@ The results of our regression analysis are consistent with global trends in viol
 
 Furthermore, our analysis shows economic crime rates as a predictor of homicide, reflecting the UN’s own observations that organized crime and corruption drive violence, particularly in areas with weak governance and political instability. The UN has emphasized that non-state actors, such as criminal organizations and militias, play a role in perpetuating violence in regions where state institutions are fragile. 
 
-Finally, our findings on the role of human development indicators and substance abuse, such as alcohol consumption and human trafficking, are also reflected by broader global trends. The UN reported that women and children are disproportionately affected by domestic violence and gender-based homicides, which are often exacerbated by substance abuse and human trafficking. These insights align with our model’s predictors, emphasizing the intersection of social inequality, substance abuse, and violence. 
+Finally, our findings on the role of human development indicators and substance abuse, such as alcohol consumption, are also reflected by broader global trends. The UN reported that women and children are disproportionately affected by domestic violence and gender-based homicides, which are often exacerbated by substance abuse. These insights align with our model’s predictors, emphasizing the intersection of social inequality, substance abuse, and violence. 
 
 **Source: https://www.un.org/en/un75/new-era-conflict-and-violence**
 
