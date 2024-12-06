@@ -23,7 +23,7 @@ navbar:
     - text: "About Us"
       href: aboutus.html
     - icon: fa-github fa-lg
-      href: https://github.com/projecthyee/p8105_fp_violence
+      href: https://github.com/projecthyee/globalviolence
 output:
   html_document:
     theme: cosmo
