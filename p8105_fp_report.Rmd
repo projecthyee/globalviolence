@@ -834,13 +834,8 @@ did not substantially improve the data's distribution. Box-Cox transformation
 requires shifting data to be strictly positive, which could introduce 
 unnecessary complexity.
 
-Since neither transformation substantially approved the shapes of the distributions, 
-we ultimately decided to use the original data. Concerns regarding the 
-normality of the distributions are alleviated by the Central Limit Theorem. 
-With a sufficiently large amount of data points, we can assume that the sampling 
-distribution is approximately normal. Using the convention that n > 30 allows for 
-the assumption of approximate normality, our 310 observation dataset suffices
-to be supported by Central Limit Theorem (CLT).
+Since boxcox transformation substantially approved the shapes of the distributions, 
+we ultimately decided to use the boxcox data for regression.
 
 ### Multicolliniearity Diagnostics
 
@@ -849,7 +844,7 @@ homicide rate and violence.
 
 ```{r }
 cor_matrix = 
-  cor(merged_violence_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi",
+  cor(boxcox_df[, c("gdp", "inflation_rate", "unemployment_rate", "hdi",
                              "economic_crime_rate", "personnel_rate", "trafficked_victims", 
                              "alcohol_consumption_rate")], use = "pairwise.complete.obs")
 
@@ -885,11 +880,9 @@ as well as lasso.
 #### Pre-Processing for Homicide
 ```{r}
 homicide_df =
-  merged_violence_df |> 
+  boxcox_df |> 
   ungroup() |> 
-  select(
-    homicide_rate, everything(), -violence_rate, -year, -country, -region, 
-    -iso3_code) |> 
+  select(-violence_rate, -year, -country, -region, -iso3_code) |> 
   drop_na()
 
 homicide_matrix <- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
@@ -904,11 +897,9 @@ homicide_outcome <- homicide_df %>%
 #### Pre-Processing for Violence
 ```{r }
 violence_df =
-  merged_violence_df |> 
+  boxcox_df |> 
   ungroup() |> 
-  select(
-    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
-    -iso3_code) |>
+  select(-year, -homicide_rate, -country, -region, -iso3_code) |>
   drop_na()
 
 violence_matrix <- model.matrix(violence_rate ~., data = violence_df)[,-1]
@@ -932,7 +923,7 @@ covariates contribute to the outcomes of interest.
 ```{r }
 baseline_MLR_hom <- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
-                    alcohol_consumption_rate , data = merged_violence_df)
+                    alcohol_consumption_rate , data = homicide_df)
 
 baseline_MLR_hom_fitted <- baseline_MLR_hom[["fitted.values"]]
 
@@ -963,7 +954,7 @@ Results from VIF show that there is no multicollinearity issue (VIF < 5).
 ```{r }
 baseline_MLR_viol <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
-                    alcohol_consumption_rate , data = merged_violence_df)
+                    alcohol_consumption_rate , data = violence_df)
 
 baseline_MLR_viol_fitted <- baseline_MLR_viol[["fitted.values"]]
 
@@ -1022,8 +1013,7 @@ lasso_violence_resid <- tibble(
 
 ```
 
-The optimal lambda for violence rate is `r lambda_violence_opt`. Based on 
-lasso estimates, the coefficient for `gdp` was shrunk to 0.
+The optimal lambda for violence rate is `r round(lambda_violence_opt, 2)`. 
 
 
 ### Predictors for Homicide Rate
@@ -1056,8 +1046,7 @@ lasso_homicide_resid <- tibble(
 
 ```
 
-The optimal lambda for homicide rate is `r lambda_homicide_opt`. Similar 
-to the results from violence, the coefficient for `gdp` was shrunk to 0. 
+The optimal lambda for homicide rate is `r round(lambda_homicide_opt, 2)`.  
 
 ## Criterion-Based Procedure
 
@@ -1082,8 +1071,8 @@ violence_best_subset_Cp
 
 #### Collinearity of Best-Subset Violence Model
 ```{r }
-subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + 
-                           economic_crime_rate + personnel_rate + trafficked_victims +
+subset_violence_lm <- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
+                           economic_crime_rate + personnel_rate +
                            alcohol_consumption_rate, data = violence_df)
 
 subset_violence_fitted <- subset_violence_lm[["fitted.values"]]
@@ -1104,9 +1093,11 @@ multi-colinearity concerns.
 
 #### Interpretation
 The results from criterion-based procedures suggest that 
-significant predictors for `violence_rate` are `gdp`, `inflation_rate`, `economic_crime_rate`, `personnel_rate`, `trafficked_victims` and `alcohol_consumption rate`, with a total of 6 predictors. 
-This yields the most appropriate Cp value (5.363), which is approximately 
-close to the number of predictors, and highest adjusted R-squared (0.510).
+significant predictors for `violence_rate` are `gdp`, `inflation_rate`, 
+`unemployment_rate`, `economic_crime_rate`, `personnel_rate`, `hdi` 
+and `alcohol_consumption rate`, with a total of 7 predictors. 
+This yields the most appropriate Cp value (6.94), which is approximately 
+close to the number of predictors, and highest adjusted R-squared (0.46).
 
 ### Best Subset Regression for Homicide 
 
@@ -1130,8 +1121,9 @@ homicide_best_subset_Cp
 
 #### Collinearity of Best-Subset Homicide Model
 ```{r }
-subset_homicide_lm <- lm(homicide_rate ~ inflation_rate + unemployment_rate +
-                           hdi + economic_crime_rate, data = homicide_df)
+subset_homicide_lm <- lm(homicide_rate ~ unemployment_rate + hdi + 
+                           economic_crime_rate + personnel_rate, 
+                         data = homicide_df)
 
 subset_homicide_fitted <- subset_homicide_lm[["fitted.values"]]
 
@@ -1151,13 +1143,13 @@ multi-colinearity concerns.
 
 #### Interpretation
 For `homicide_rate`, the results are not as straightforward. 
-The best model based on Cp and R-squared seems to be the model with 
-4 predictors because it has the lowest Cp (6.36), and a relatively high 
-adjusted R-squared (0.331), indicating a good balance between fit and 
-complexity. As more predictors are added, R-squared adjusts slightly but Cp 
-levels off at around 6 predictors. The model with 4 predictors, which includes 
-inflation_rate, unemployment_rate, hdi, personnel_rate, seems to be a 
-better trade-off.
+The best model based on R-squared (0.57) is the model with `unemployment_rate`, `hdi`, 
+`economic_crime_rate` and `personnel_rate` as predictors. Howeover, based on the 
+Cp criterion (2.51), it's the model with `hdi`, `economic_crime_rate` and `personnel_rate`.
+
+Subsequently, we will choose four predictors since it has a relatively high adjusted 
+R-Squared (0.57) and we are interested in a model that can explain more variances 
+of violence rates. 
 
 ## Model Comparison
 
@@ -1192,7 +1184,7 @@ cv_df_violence <-
   mutate(
     MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
-                           economic_crime_rate + personnel_rate + trafficked_victims +
+                          unemployment_rate + hdi + economic_crime_rate + personnel_rate +
                            alcohol_consumption_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = "violence_rate", 
                                         alpha = 1,lambda = lambda))
@@ -1215,8 +1207,9 @@ cv_df_homicide <-
   cv_df_homicide %>% 
   mutate(
     MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
-    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
-                          + unemployment_rate + hdi + economic_crime_rate, data = df)),
+    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ unemployment_rate + 
+                                            personnel_rate + hdi + economic_crime_rate, 
+                                          data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = "homicide_rate", 
                                         alpha = 1,lambda = lambda))
   ) %>% 
@@ -1254,8 +1247,8 @@ cv_df_violence %>%
 
 Examining the distribution of RMSEs for each of the 3 models for 
 predicting violence rate, we see that they are relatively similar. It appears 
-that the MLR including all predictor variables has greater spread than the 
-other two distributions, as it has a higher upper bound in the violin plot.
+that the MLR including all predictor variables has greater spread in lower 
+RMSE values compared to the other two models.
 
 The similarity in performance among all 3 models likely relates to the few
 number of predictor variables that exist in our studied dataset. In general,
@@ -1294,7 +1287,9 @@ models is quite similar, and the difference of 1 or 2 included predictors
 between each of the models does not produce a substantial change in model 
 effectiveness. Comparing the 3 models, the best subset regression model 
 may be considered the best as it reduces model complexity but maintains 
-ease of interpretability of beta coefficients.
+ease of interpretability of beta coefficients, having a slighlty greater 
+spread in lower RMSE values compared to the other two models, which is not 
+as noticeable. 
 
 
 ## Model Diagnostics
@@ -1303,12 +1298,12 @@ ease of interpretability of beta coefficients.
 
 ```{r, message = FALSE, warning = FALSE}
 baseline_hom_resid_df = 
-  merged_violence_df |>
+  homicide_df |>
   add_residuals(baseline_MLR_hom) |>
   add_predictions(baseline_MLR_hom) 
 
 baseline_viol_resid_df = 
-  merged_violence_df |>
+  violence_df |>
   add_residuals(baseline_MLR_viol) |>
   add_predictions(baseline_MLR_viol) 
 
@@ -1331,12 +1326,12 @@ outcome variable, we see both issues with heteroscedasticity and linearity.
 
 ```{r, message = FALSE, warning = FALSE}
 subset_homicide_resid_df = 
-  merged_violence_df |>
+  homicide_df |>
   add_residuals(subset_homicide_lm) |>
   add_predictions(subset_homicide_lm) 
 
 subset_violence_resid_df = 
-  merged_violence_df |>
+  violence_df |>
   add_residuals(subset_violence_lm) |>
   add_predictions(subset_violence_lm) 
 
@@ -1378,8 +1373,9 @@ Consistent with results from the QQ-plots of the previous two MLR models, lasso
 models for both homicide rate and violence rate show potential violations of the 
 assumption of normality, as many lower-bound and upper-bound outlier residuals
 do not fall along the reference line. For the fitted versus residuals plot 
-of homicide rate, we see possible heteroscedascity, while the equivalent plot 
-for homicide rate shows both possible heteroscedascity and non-linearity. 
+of homicide and violence rates, we see a very low possibility of heteroscedascity 
+and non-linearity, since the horizontal line crosses the value of zero, but this 
+acceptable since this deviation is very insignificant.
 
 ## Conclusion
 
@@ -1391,23 +1387,11 @@ The best-subset regression model for predicting violence
 rate yielded an adjusted r-squared of 
 `r round(violence_best_subset_rsq[["Criterion"]], 2)` and included 
 the following variables a predictors: GDP, inflation rate, economic crime rate, 
-personnel rate, trafficked victims, and alcohol consumption rate. The 
+unemployment rate, personnel rate, and alcohol consumption rate. The 
 best-subset regression model for predicting homicide rate returned an 
-r-squared of 
-`r round(subset_homicide_lm %>% broom::glance() %>% pull(adj.r.squared), 2)`. The 
-variables included in this model were inflation rate, unemployment rate, HDI,
-and economic crime rate. 
-
-Despite moderately high R-squared values for each of these models, we must 
-acknowledge that the models' performance and accuracy may suffer from certain 
-drawbacks. In particular, model diagnostics revealed concerns regarding the 
-normality, linearity, and homoscedascity of the dataset used to produce these 
-models. Additionally, transformations applied to cope with the concerns regarding 
-normality failed to produce more normalized distributions for any of the 
-predictor variables. As a result, the R-squared values for our models may 
-be inaccurate and different forms of modelling, such as a non-linear approach,
-may be better suited for exploring what variables predict violence and homicide 
-rates.
+r-squared of `r round(homicide_best_subset_rsq[["Criterion"]], 2)`. The 
+variables included in this model were unemployment rate, HDI, economic crime 
+rate and personnel rate. 
 
 # *Discussion*
 
@@ -1422,7 +1406,7 @@ Looking closer at the high homicide rates of the Americas and Asia, the relation
 Oceania has the highest rate of violent offences for all years until 2022, where the Americas meets it. The most common offence category for Oceania (and in general) was serious assault. Acts intended to induce emotional fear or distress was the second highest. Given media coverage and our own preconceived notions, sexual violence rates being low was unexpected. Therefore, we wanted to look more in-depth into sexual violence trends since in comparison to the magnitude other violence categories, it may have been hidden. In that exploration, we see that there have been increasing rates of sexual violence against women across all regions except for Asia. This reflects what we know and is reiterated by UN reports on the changing nature of global violence.
 
 **Statistical Analyses**
-We employed several statistical methods to determine the optimal model for predicting homicide and violence rates. We found that using `regsubset` yielded the best models, where important predictors for violence rate are GDP, inflation rate, economic crime rate, personnel rate, trafficked victims, and alcohol consumption rate, and important predictors for homicide rate are inflation rate, unemployment rate, HDI, and economic crime rate.
+We employed several statistical methods to determine the optimal model for predicting homicide and violence rates. We found that using `regsubset` yielded the best models, where important predictors for violence rate are GDP, inflation rate, unemployment rate, economic crime rate, personnel rate, and alcohol consumption rate, and important predictors for homicide rate are unemployment rate, HDI, economic crime rate and personnel rate.
 
 **Significance of Findings**
 The results of our regression analysis are consistent with global trends in violence, emphasizing the impact of socioeconomic factors and crime. Our model suggests that economic instability, indicated by inflation and unemployment rates, and socioeconomic development, indicated by HDI, are significant factors for homicide and violence. This makes sense, as economic crises exacerbate social tensions, leading to increased crimes of violence. The UN highlights that regions with high economic volatility and low development are more prone to conflict and violence, since unemployment and inflation create opportunity for criminal activities and homicides.

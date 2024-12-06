@@ -1223,14 +1223,9 @@ reasonable representation of the underlying distribution.</p>
 transformation did not substantially improve the data’s distribution.
 Box-Cox transformation requires shifting data to be strictly positive,
 which could introduce unnecessary complexity.</p>
-<p>Since neither transformation substantially approved the shapes of the
-distributions, we ultimately decided to use the original data. Concerns
-regarding the normality of the distributions are alleviated by the
-Central Limit Theorem. With a sufficiently large amount of data points,
-we can assume that the sampling distribution is approximately normal.
-Using the convention that n &gt; 30 allows for the assumption of
-approximate normality, our 310 observation dataset suffices to be
-supported by Central Limit Theorem (CLT).</p>
+<p>Since boxcox transformation substantially approved the shapes of the
+distributions, we ultimately decided to use the boxcox data for
+regression.</p>
 </div>
 </div>
 <div id="multicolliniearity-diagnostics" class="section level3">
@@ -1238,7 +1233,7 @@ supported by Central Limit Theorem (CLT).</p>
 <p>We used <code>cor()</code> to find the correlation between the eight
 predictors of homicide rate and violence.</p>
 <pre class="r"><code>cor_matrix = 
-  cor(merged_violence_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,
+  cor(boxcox_df[, c(&quot;gdp&quot;, &quot;inflation_rate&quot;, &quot;unemployment_rate&quot;, &quot;hdi&quot;,
                              &quot;economic_crime_rate&quot;, &quot;personnel_rate&quot;, &quot;trafficked_victims&quot;, 
                              &quot;alcohol_consumption_rate&quot;)], use = &quot;pairwise.complete.obs&quot;)
 
@@ -1273,11 +1268,9 @@ in linear models, as well as lasso.</p>
 <div id="pre-processing-for-homicide" class="section level4">
 <h4>Pre-Processing for Homicide</h4>
 <pre class="r"><code>homicide_df =
-  merged_violence_df |&gt; 
+  boxcox_df |&gt; 
   ungroup() |&gt; 
-  select(
-    homicide_rate, everything(), -violence_rate, -year, -country, -region, 
-    -iso3_code) |&gt; 
+  select(-violence_rate, -year, -country, -region, -iso3_code) |&gt; 
   drop_na()
 
 homicide_matrix &lt;- model.matrix(homicide_rate ~., data = homicide_df)[,-1]
@@ -1291,11 +1284,9 @@ homicide_outcome &lt;- homicide_df %&gt;%
 <div id="pre-processing-for-violence" class="section level4">
 <h4>Pre-Processing for Violence</h4>
 <pre class="r"><code>violence_df =
-  merged_violence_df |&gt; 
+  boxcox_df |&gt; 
   ungroup() |&gt; 
-  select(
-    violence_rate, everything(), -year, -homicide_rate, -country, -region, 
-    -iso3_code) |&gt;
+  select(-year, -homicide_rate, -country, -region, -iso3_code) |&gt;
   drop_na()
 
 violence_matrix &lt;- model.matrix(violence_rate ~., data = violence_df)[,-1]
@@ -1319,19 +1310,19 @@ interest.</p>
 <h3>Predict Homicide Rates</h3>
 <pre class="r"><code>baseline_MLR_hom &lt;- lm(homicide_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
-                    alcohol_consumption_rate , data = merged_violence_df)
+                    alcohol_consumption_rate , data = homicide_df)
 
 baseline_MLR_hom_fitted &lt;- baseline_MLR_hom[[&quot;fitted.values&quot;]]
 
 baseline_MLR_hom %&gt;% 
   broom::tidy() %&gt;% 
   knitr::kable()</code></pre>
-<table>
+<table style="width:100%;">
 <colgroup>
 <col width="36%" />
 <col width="17%" />
 <col width="14%" />
-<col width="16%" />
+<col width="17%" />
 <col width="14%" />
 </colgroup>
 <thead>
@@ -1346,66 +1337,66 @@ baseline_MLR_hom %&gt;%
 <tbody>
 <tr class="odd">
 <td align="left">(Intercept)</td>
-<td align="right">77.1223904</td>
-<td align="right">6.8949976</td>
-<td align="right">11.1852672</td>
-<td align="right">0.0000000</td>
+<td align="right">-3.9032006</td>
+<td align="right">1.4399630</td>
+<td align="right">-2.7106255</td>
+<td align="right">0.0071011</td>
 </tr>
 <tr class="even">
 <td align="left">gdp</td>
-<td align="right">0.0000000</td>
-<td align="right">0.0000000</td>
-<td align="right">1.4401126</td>
-<td align="right">0.1508748</td>
+<td align="right">0.0299927</td>
+<td align="right">0.0541667</td>
+<td align="right">0.5537121</td>
+<td align="right">0.5801870</td>
 </tr>
 <tr class="odd">
 <td align="left">inflation_rate</td>
-<td align="right">-0.7310164</td>
-<td align="right">0.1997345</td>
-<td align="right">-3.6599403</td>
-<td align="right">0.0002978</td>
+<td align="right">0.0795285</td>
+<td align="right">0.0844521</td>
+<td align="right">0.9416997</td>
+<td align="right">0.3471015</td>
 </tr>
 <tr class="even">
 <td align="left">unemployment_rate</td>
-<td align="right">-0.3801340</td>
-<td align="right">0.1437800</td>
-<td align="right">-2.6438594</td>
-<td align="right">0.0086262</td>
+<td align="right">-0.0988592</td>
+<td align="right">0.0930715</td>
+<td align="right">-1.0621849</td>
+<td align="right">0.2890032</td>
 </tr>
 <tr class="odd">
 <td align="left">hdi</td>
-<td align="right">-79.7616365</td>
-<td align="right">9.3579304</td>
-<td align="right">-8.5234270</td>
+<td align="right">-18.4277564</td>
+<td align="right">1.4752699</td>
+<td align="right">-12.4911086</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td align="left">economic_crime_rate</td>
-<td align="right">0.0047858</td>
-<td align="right">0.0037406</td>
-<td align="right">1.2793927</td>
-<td align="right">0.2017441</td>
+<td align="right">0.1235555</td>
+<td align="right">0.0231158</td>
+<td align="right">5.3450640</td>
+<td align="right">0.0000002</td>
 </tr>
 <tr class="odd">
 <td align="left">personnel_rate</td>
-<td align="right">0.0090816</td>
-<td align="right">0.0064515</td>
-<td align="right">1.4076778</td>
-<td align="right">0.1602584</td>
+<td align="right">0.1026731</td>
+<td align="right">0.0272480</td>
+<td align="right">3.7681001</td>
+<td align="right">0.0001979</td>
 </tr>
 <tr class="even">
 <td align="left">trafficked_victims</td>
-<td align="right">-0.0004297</td>
-<td align="right">0.0005839</td>
-<td align="right">-0.7358718</td>
-<td align="right">0.4623817</td>
+<td align="right">-0.0156416</td>
+<td align="right">0.0821390</td>
+<td align="right">-0.1904282</td>
+<td align="right">0.8491019</td>
 </tr>
 <tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
-<td align="right">-0.2165605</td>
-<td align="right">0.2052374</td>
-<td align="right">-1.0551708</td>
-<td align="right">0.2921934</td>
+<td align="right">-0.0105024</td>
+<td align="right">0.0307245</td>
+<td align="right">-0.3418237</td>
+<td align="right">0.7327221</td>
 </tr>
 </tbody>
 </table>
@@ -1434,35 +1425,35 @@ vif_baseline_hom_MLR %&gt;%
 <tbody>
 <tr class="odd">
 <td align="left">gdp</td>
-<td align="right">2.396884</td>
+<td align="right">3.092922</td>
 </tr>
 <tr class="even">
 <td align="left">inflation_rate</td>
-<td align="right">1.176607</td>
+<td align="right">1.163745</td>
 </tr>
 <tr class="odd">
 <td align="left">unemployment_rate</td>
-<td align="right">1.164411</td>
+<td align="right">1.176497</td>
 </tr>
 <tr class="even">
 <td align="left">hdi</td>
-<td align="right">2.455203</td>
+<td align="right">4.019360</td>
 </tr>
 <tr class="odd">
 <td align="left">economic_crime_rate</td>
-<td align="right">1.700020</td>
+<td align="right">2.158875</td>
 </tr>
 <tr class="even">
 <td align="left">personnel_rate</td>
-<td align="right">1.306548</td>
+<td align="right">1.249265</td>
 </tr>
 <tr class="odd">
 <td align="left">trafficked_victims</td>
-<td align="right">2.315171</td>
+<td align="right">2.189643</td>
 </tr>
 <tr class="even">
 <td align="left">alcohol_consumption_rate</td>
-<td align="right">1.896571</td>
+<td align="right">2.086040</td>
 </tr>
 </tbody>
 </table>
@@ -1473,7 +1464,7 @@ vif_baseline_hom_MLR %&gt;%
 <h3>Predict Violence Rates</h3>
 <pre class="r"><code>baseline_MLR_viol &lt;- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
                    hdi + economic_crime_rate + personnel_rate + trafficked_victims + 
-                    alcohol_consumption_rate , data = merged_violence_df)
+                    alcohol_consumption_rate , data = violence_df)
 
 baseline_MLR_viol_fitted &lt;- baseline_MLR_viol[[&quot;fitted.values&quot;]]
 
@@ -1482,10 +1473,10 @@ baseline_MLR_viol %&gt;%
   knitr::kable()</code></pre>
 <table>
 <colgroup>
-<col width="36%" />
-<col width="17%" />
-<col width="15%" />
-<col width="15%" />
+<col width="37%" />
+<col width="16%" />
+<col width="14%" />
+<col width="16%" />
 <col width="14%" />
 </colgroup>
 <thead>
@@ -1500,66 +1491,66 @@ baseline_MLR_viol %&gt;%
 <tbody>
 <tr class="odd">
 <td align="left">(Intercept)</td>
-<td align="right">44.2045930</td>
-<td align="right">19.9655911</td>
-<td align="right">2.2140388</td>
-<td align="right">0.0275754</td>
+<td align="right">-7.2867592</td>
+<td align="right">2.4450455</td>
+<td align="right">-2.9802141</td>
+<td align="right">0.0031153</td>
 </tr>
 <tr class="even">
 <td align="left">gdp</td>
-<td align="right">0.0000000</td>
-<td align="right">0.0000000</td>
-<td align="right">2.7199674</td>
-<td align="right">0.0069083</td>
+<td align="right">0.3805697</td>
+<td align="right">0.0919746</td>
+<td align="right">4.1377720</td>
+<td align="right">0.0000456</td>
 </tr>
 <tr class="odd">
 <td align="left">inflation_rate</td>
-<td align="right">-2.0163975</td>
-<td align="right">0.5783639</td>
-<td align="right">-3.4863818</td>
-<td align="right">0.0005625</td>
+<td align="right">-0.3288844</td>
+<td align="right">0.1433989</td>
+<td align="right">-2.2934927</td>
+<td align="right">0.0225086</td>
 </tr>
 <tr class="even">
 <td align="left">unemployment_rate</td>
-<td align="right">-0.1171670</td>
-<td align="right">0.4163384</td>
-<td align="right">-0.2814226</td>
-<td align="right">0.7785796</td>
+<td align="right">-0.3365298</td>
+<td align="right">0.1580347</td>
+<td align="right">-2.1294676</td>
+<td align="right">0.0340269</td>
 </tr>
 <tr class="odd">
 <td align="left">hdi</td>
-<td align="right">-12.9837171</td>
-<td align="right">27.0974152</td>
-<td align="right">-0.4791497</td>
-<td align="right">0.6321801</td>
+<td align="right">-5.2981027</td>
+<td align="right">2.5049963</td>
+<td align="right">-2.1150142</td>
+<td align="right">0.0352503</td>
 </tr>
 <tr class="even">
 <td align="left">economic_crime_rate</td>
-<td align="right">0.1193201</td>
-<td align="right">0.0108316</td>
-<td align="right">11.0158771</td>
+<td align="right">0.4300738</td>
+<td align="right">0.0392505</td>
+<td align="right">10.9571663</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td align="left">personnel_rate</td>
-<td align="right">-0.0628082</td>
-<td align="right">0.0186813</td>
-<td align="right">-3.3620841</td>
-<td align="right">0.0008735</td>
+<td align="right">0.0553427</td>
+<td align="right">0.0462668</td>
+<td align="right">1.1961629</td>
+<td align="right">0.2325744</td>
 </tr>
 <tr class="even">
 <td align="left">trafficked_victims</td>
-<td align="right">0.0082359</td>
-<td align="right">0.0016908</td>
-<td align="right">4.8709129</td>
-<td align="right">0.0000018</td>
+<td align="right">-0.0960016</td>
+<td align="right">0.1394713</td>
+<td align="right">-0.6883249</td>
+<td align="right">0.4917783</td>
 </tr>
 <tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
-<td align="right">-1.6323824</td>
-<td align="right">0.5942983</td>
-<td align="right">-2.7467389</td>
-<td align="right">0.0063817</td>
+<td align="right">-0.1815850</td>
+<td align="right">0.0521699</td>
+<td align="right">-3.4806480</td>
+<td align="right">0.0005742</td>
 </tr>
 </tbody>
 </table>
@@ -1589,35 +1580,35 @@ vif_baseline_viol_MLR %&gt;%
 <tbody>
 <tr class="odd">
 <td align="left">gdp</td>
-<td align="right">2.396884</td>
+<td align="right">3.092922</td>
 </tr>
 <tr class="even">
 <td align="left">inflation_rate</td>
-<td align="right">1.176607</td>
+<td align="right">1.163745</td>
 </tr>
 <tr class="odd">
 <td align="left">unemployment_rate</td>
-<td align="right">1.164411</td>
+<td align="right">1.176497</td>
 </tr>
 <tr class="even">
 <td align="left">hdi</td>
-<td align="right">2.455203</td>
+<td align="right">4.019360</td>
 </tr>
 <tr class="odd">
 <td align="left">economic_crime_rate</td>
-<td align="right">1.700020</td>
+<td align="right">2.158875</td>
 </tr>
 <tr class="even">
 <td align="left">personnel_rate</td>
-<td align="right">1.306548</td>
+<td align="right">1.249265</td>
 </tr>
 <tr class="odd">
 <td align="left">trafficked_victims</td>
-<td align="right">2.315171</td>
+<td align="right">2.189643</td>
 </tr>
 <tr class="even">
 <td align="left">alcohol_consumption_rate</td>
-<td align="right">1.896571</td>
+<td align="right">2.086040</td>
 </tr>
 </tbody>
 </table>
@@ -1660,65 +1651,58 @@ lasso_violence_fit |&gt;
 <tr class="odd">
 <td align="left">(Intercept)</td>
 <td align="right">1</td>
-<td align="right">33.2327610</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">-5.0456542</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 <tr class="even">
 <td align="left">gdp</td>
 <td align="right">1</td>
-<td align="right">0.0000000</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">0.2945710</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 <tr class="odd">
 <td align="left">inflation_rate</td>
 <td align="right">1</td>
-<td align="right">-1.7615771</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">-0.2342246</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 <tr class="even">
 <td align="left">unemployment_rate</td>
 <td align="right">1</td>
-<td align="right">-0.0409621</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">-0.2542552</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 <tr class="odd">
 <td align="left">hdi</td>
 <td align="right">1</td>
-<td align="right">-1.7103106</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">-2.3970548</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 <tr class="even">
 <td align="left">economic_crime_rate</td>
 <td align="right">1</td>
-<td align="right">0.1133362</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">0.3989004</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 <tr class="odd">
 <td align="left">personnel_rate</td>
 <td align="right">1</td>
-<td align="right">-0.0548232</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">0.0392525</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 <tr class="even">
-<td align="left">trafficked_victims</td>
-<td align="right">1</td>
-<td align="right">0.0080624</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
-</tr>
-<tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
 <td align="right">1</td>
-<td align="right">-1.5437306</td>
-<td align="right">0.3981072</td>
-<td align="right">0.5192427</td>
+<td align="right">-0.1775654</td>
+<td align="right">0.0398107</td>
+<td align="right">0.4726878</td>
 </tr>
 </tbody>
 </table>
@@ -1731,8 +1715,7 @@ lasso_predict_violence &lt;- as.vector(lasso_predict_violence)
 lasso_violence_resid &lt;- tibble(
   residuals = violence_outcome - lasso_predict_violence
 )</code></pre>
-<p>The optimal lambda for violence rate is 0.3981072. Based on lasso
-estimates, the coefficient for <code>gdp</code> was shrunk to 0.</p>
+<p>The optimal lambda for violence rate is 0.04.</p>
 </div>
 <div id="predictors-for-homicide-rate" class="section level3">
 <h3>Predictors for Homicide Rate</h3>
@@ -1765,65 +1748,58 @@ lasso_homicide_fit |&gt;
 <tr class="odd">
 <td align="left">(Intercept)</td>
 <td align="right">1</td>
-<td align="right">75.5833480</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">-3.3086665</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 <tr class="even">
 <td align="left">gdp</td>
 <td align="right">1</td>
-<td align="right">0.0000000</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">0.0116957</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 <tr class="odd">
 <td align="left">inflation_rate</td>
 <td align="right">1</td>
-<td align="right">-0.6907875</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">0.0677735</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 <tr class="even">
 <td align="left">unemployment_rate</td>
 <td align="right">1</td>
-<td align="right">-0.3553263</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">-0.0806099</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 <tr class="odd">
 <td align="left">hdi</td>
 <td align="right">1</td>
-<td align="right">-78.2143914</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">-17.7625394</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 <tr class="even">
 <td align="left">economic_crime_rate</td>
 <td align="right">1</td>
-<td align="right">0.0043479</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">0.1134648</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 <tr class="odd">
 <td align="left">personnel_rate</td>
 <td align="right">1</td>
-<td align="right">0.0085533</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">0.0960788</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 <tr class="even">
-<td align="left">trafficked_victims</td>
-<td align="right">1</td>
-<td align="right">-0.0002459</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
-</tr>
-<tr class="odd">
 <td align="left">alcohol_consumption_rate</td>
 <td align="right">1</td>
-<td align="right">-0.2056343</td>
-<td align="right">0.0630957</td>
-<td align="right">0.3524531</td>
+<td align="right">-0.0068625</td>
+<td align="right">0.0125893</td>
+<td align="right">0.5730228</td>
 </tr>
 </tbody>
 </table>
@@ -1836,9 +1812,7 @@ lasso_predict_homicide &lt;- as.vector(lasso_predict_homicide)
 lasso_homicide_resid &lt;- tibble(
   residuals = homicide_outcome - lasso_predict_homicide
 )</code></pre>
-<p>The optimal lambda for homicide rate is 0.0630957. Similar to the
-results from violence, the coefficient for <code>gdp</code> was shrunk
-to 0.</p>
+<p>The optimal lambda for homicide rate is 0.01.</p>
 </div>
 </div>
 <div id="criterion-based-procedure" class="section level2">
@@ -1853,15 +1827,15 @@ to 0.</p>
 
 violence_best_subset_rsq</code></pre>
 <pre><code>## $Criterion
-## [1] 0.5103599
+## [1] 0.4649232
 ## 
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
-##                     TRUE                     TRUE                    FALSE 
+##                     TRUE                     TRUE                     TRUE 
 ##                      hdi      economic_crime_rate           personnel_rate 
-##                    FALSE                     TRUE                     TRUE 
+##                     TRUE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
-##                     TRUE                     TRUE</code></pre>
+##                    FALSE                     TRUE</code></pre>
 </div>
 <div id="predict-violence-rate-with-cp" class="section level4">
 <h4>Predict Violence Rate with Cp</h4>
@@ -1870,21 +1844,21 @@ violence_best_subset_rsq</code></pre>
               criterion = &quot;Cp&quot;)
 violence_best_subset_Cp</code></pre>
 <pre><code>## $Criterion
-## [1] 5.363491
+## [1] 6.942997
 ## 
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
-##                     TRUE                     TRUE                    FALSE 
+##                     TRUE                     TRUE                     TRUE 
 ##                      hdi      economic_crime_rate           personnel_rate 
-##                    FALSE                     TRUE                     TRUE 
+##                     TRUE                     TRUE                    FALSE 
 ##       trafficked_victims alcohol_consumption_rate 
-##                     TRUE                     TRUE</code></pre>
+##                    FALSE                     TRUE</code></pre>
 </div>
 <div id="collinearity-of-best-subset-violence-model"
 class="section level4">
 <h4>Collinearity of Best-Subset Violence Model</h4>
-<pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + 
-                           economic_crime_rate + personnel_rate + trafficked_victims +
+<pre class="r"><code>subset_violence_lm &lt;- lm(violence_rate ~ gdp + inflation_rate + unemployment_rate +
+                           economic_crime_rate + personnel_rate +
                            alcohol_consumption_rate, data = violence_df)
 
 subset_violence_fitted &lt;- subset_violence_lm[[&quot;fitted.values&quot;]]
@@ -1909,27 +1883,27 @@ vif_subset_violence_model %&gt;%
 <tbody>
 <tr class="odd">
 <td align="left">gdp</td>
-<td align="right">2.346184</td>
+<td align="right">1.273905</td>
 </tr>
 <tr class="even">
 <td align="left">inflation_rate</td>
-<td align="right">1.070415</td>
+<td align="right">1.113407</td>
 </tr>
 <tr class="odd">
-<td align="left">economic_crime_rate</td>
-<td align="right">1.373276</td>
+<td align="left">unemployment_rate</td>
+<td align="right">1.149280</td>
 </tr>
 <tr class="even">
-<td align="left">personnel_rate</td>
-<td align="right">1.240083</td>
+<td align="left">economic_crime_rate</td>
+<td align="right">1.677787</td>
 </tr>
 <tr class="odd">
-<td align="left">trafficked_victims</td>
-<td align="right">2.282920</td>
+<td align="left">personnel_rate</td>
+<td align="right">1.238342</td>
 </tr>
 <tr class="even">
 <td align="left">alcohol_consumption_rate</td>
-<td align="right">1.168675</td>
+<td align="right">1.396373</td>
 </tr>
 </tbody>
 </table>
@@ -1940,12 +1914,12 @@ multi-colinearity concerns.</p>
 <h4>Interpretation</h4>
 <p>The results from criterion-based procedures suggest that significant
 predictors for <code>violence_rate</code> are <code>gdp</code>,
-<code>inflation_rate</code>, <code>economic_crime_rate</code>,
-<code>personnel_rate</code>, <code>trafficked_victims</code> and
-<code>alcohol_consumption rate</code>, with a total of 6 predictors.
-This yields the most appropriate Cp value (5.363), which is
-approximately close to the number of predictors, and highest adjusted
-R-squared (0.510).</p>
+<code>inflation_rate</code>, <code>unemployment_rate</code>,
+<code>economic_crime_rate</code>, <code>personnel_rate</code>,
+<code>hdi</code> and <code>alcohol_consumption rate</code>, with a total
+of 7 predictors. This yields the most appropriate Cp value (6.94), which
+is approximately close to the number of predictors, and highest adjusted
+R-squared (0.46).</p>
 </div>
 </div>
 <div id="best-subset-regression-for-homicide" class="section level3">
@@ -1958,15 +1932,15 @@ R-squared (0.510).</p>
 
 homicide_best_subset_rsq</code></pre>
 <pre><code>## $Criterion
-## [1] 0.3367418
+## [1] 0.5660305
 ## 
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
-##                     TRUE                     TRUE                     TRUE 
+##                    FALSE                    FALSE                     TRUE 
 ##                      hdi      economic_crime_rate           personnel_rate 
 ##                     TRUE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
-##                    FALSE                     TRUE</code></pre>
+##                    FALSE                    FALSE</code></pre>
 </div>
 <div id="predict-homicide-rate-with-cp" class="section level4">
 <h4>Predict Homicide Rate with Cp</h4>
@@ -1976,21 +1950,22 @@ homicide_best_subset_rsq</code></pre>
 
 homicide_best_subset_Cp</code></pre>
 <pre><code>## $Criterion
-## [1] 6.511243
+## [1] 2.512865
 ## 
 ## $Variable_Selection
 ##                      gdp           inflation_rate        unemployment_rate 
-##                    FALSE                     TRUE                     TRUE 
+##                    FALSE                    FALSE                    FALSE 
 ##                      hdi      economic_crime_rate           personnel_rate 
-##                     TRUE                     TRUE                    FALSE 
+##                     TRUE                     TRUE                     TRUE 
 ##       trafficked_victims alcohol_consumption_rate 
 ##                    FALSE                    FALSE</code></pre>
 </div>
 <div id="collinearity-of-best-subset-homicide-model"
 class="section level4">
 <h4>Collinearity of Best-Subset Homicide Model</h4>
-<pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ inflation_rate + unemployment_rate +
-                           hdi + economic_crime_rate, data = homicide_df)
+<pre class="r"><code>subset_homicide_lm &lt;- lm(homicide_rate ~ unemployment_rate + hdi + 
+                           economic_crime_rate + personnel_rate, 
+                         data = homicide_df)
 
 subset_homicide_fitted &lt;- subset_homicide_lm[[&quot;fitted.values&quot;]]
 
@@ -2012,20 +1987,20 @@ vif_subset_homicide_model %&gt;%
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">inflation_rate</td>
-<td align="right">1.169288</td>
+<td align="left">unemployment_rate</td>
+<td align="right">1.042179</td>
 </tr>
 <tr class="even">
-<td align="left">unemployment_rate</td>
-<td align="right">1.034265</td>
+<td align="left">hdi</td>
+<td align="right">1.964320</td>
 </tr>
 <tr class="odd">
-<td align="left">hdi</td>
-<td align="right">1.468355</td>
+<td align="left">economic_crime_rate</td>
+<td align="right">2.127143</td>
 </tr>
 <tr class="even">
-<td align="left">economic_crime_rate</td>
-<td align="right">1.316883</td>
+<td align="left">personnel_rate</td>
+<td align="right">1.209558</td>
 </tr>
 </tbody>
 </table>
@@ -2035,13 +2010,15 @@ multi-colinearity concerns.</p>
 <div id="interpretation-1" class="section level4">
 <h4>Interpretation</h4>
 <p>For <code>homicide_rate</code>, the results are not as
-straightforward. The best model based on Cp and R-squared seems to be
-the model with 4 predictors because it has the lowest Cp (6.36), and a
-relatively high adjusted R-squared (0.331), indicating a good balance
-between fit and complexity. As more predictors are added, R-squared
-adjusts slightly but Cp levels off at around 6 predictors. The model
-with 4 predictors, which includes inflation_rate, unemployment_rate,
-hdi, personnel_rate, seems to be a better trade-off.</p>
+straightforward. The best model based on R-squared (0.57) is the model
+with <code>unemployment_rate</code>, <code>hdi</code>,
+<code>economic_crime_rate</code> and <code>personnel_rate</code> as
+predictors. Howeover, based on the Cp criterion (2.51), it’s the model
+with <code>hdi</code>, <code>economic_crime_rate</code> and
+<code>personnel_rate</code>.</p>
+<p>Subsequently, we will choose four predictors since it has a
+relatively high adjusted R-Squared (0.57) and we are interested in a
+model that can explain more variances of violence rates.</p>
 </div>
 </div>
 </div>
@@ -2076,7 +2053,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
   mutate(
     MLR_all_var = map(train, \(df) lm(violence_rate ~ ., data = df)),
     MLR_best_subset = map(train, \(df) lm(violence_rate ~ gdp + inflation_rate + 
-                           economic_crime_rate + personnel_rate + trafficked_victims +
+                          unemployment_rate + hdi + economic_crime_rate + personnel_rate +
                            alcohol_consumption_rate, data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;violence_rate&quot;, 
                                         alpha = 1,lambda = lambda))
@@ -2097,8 +2074,9 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
   cv_df_homicide %&gt;% 
   mutate(
     MLR_all_var = map(train, \(df) lm(homicide_rate ~ ., data = df)),
-    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ inflation_rate 
-                          + unemployment_rate + hdi + economic_crime_rate, data = df)),
+    MLR_best_subset = map(train, \(df) lm(homicide_rate ~ unemployment_rate + 
+                                            personnel_rate + hdi + economic_crime_rate, 
+                                          data = df)),
     lasso = map(train, \(df) fit_glmnet(df, outcome = &quot;homicide_rate&quot;, 
                                         alpha = 1,lambda = lambda))
   ) %&gt;% 
@@ -2135,8 +2113,7 @@ cv_df_homicide &lt;- cv_df_homicide %&gt;%
 <p>Examining the distribution of RMSEs for each of the 3 models for
 predicting violence rate, we see that they are relatively similar. It
 appears that the MLR including all predictor variables has greater
-spread than the other two distributions, as it has a higher upper bound
-in the violin plot.</p>
+spread in lower RMSE values compared to the other two models.</p>
 <p>The similarity in performance among all 3 models likely relates to
 the few number of predictor variables that exist in our studied dataset.
 In general, each of the 3 models will not differ by many predictor
@@ -2173,7 +2150,9 @@ similar, and the difference of 1 or 2 included predictors between each
 of the models does not produce a substantial change in model
 effectiveness. Comparing the 3 models, the best subset regression model
 may be considered the best as it reduces model complexity but maintains
-ease of interpretability of beta coefficients.</p>
+ease of interpretability of beta coefficients, having a slighlty greater
+spread in lower RMSE values compared to the other two models, which is
+not as noticeable.</p>
 </div>
 </div>
 </div>
@@ -2182,12 +2161,12 @@ ease of interpretability of beta coefficients.</p>
 <div id="all-variables-included-mlr" class="section level3">
 <h3>All Variables included MLR</h3>
 <pre class="r"><code>baseline_hom_resid_df = 
-  merged_violence_df |&gt;
+  homicide_df |&gt;
   add_residuals(baseline_MLR_hom) |&gt;
   add_predictions(baseline_MLR_hom) 
 
 baseline_viol_resid_df = 
-  merged_violence_df |&gt;
+  violence_df |&gt;
   add_residuals(baseline_MLR_viol) |&gt;
   add_predictions(baseline_MLR_viol) 
 
@@ -2211,12 +2190,12 @@ see both issues with heteroscedasticity and linearity.</p>
 <div id="best-subset-mlr" class="section level3">
 <h3>Best Subset MLR</h3>
 <pre class="r"><code>subset_homicide_resid_df = 
-  merged_violence_df |&gt;
+  homicide_df |&gt;
   add_residuals(subset_homicide_lm) |&gt;
   add_predictions(subset_homicide_lm) 
 
 subset_violence_resid_df = 
-  merged_violence_df |&gt;
+  violence_df |&gt;
   add_residuals(subset_violence_lm) |&gt;
   add_predictions(subset_violence_lm) 
 
@@ -2257,9 +2236,10 @@ check_model(lasso_homicide_resid_df, &quot;Lasso Homicide Rate&quot;)</code></pr
 models, lasso models for both homicide rate and violence rate show
 potential violations of the assumption of normality, as many lower-bound
 and upper-bound outlier residuals do not fall along the reference line.
-For the fitted versus residuals plot of homicide rate, we see possible
-heteroscedascity, while the equivalent plot for homicide rate shows both
-possible heteroscedascity and non-linearity.</p>
+For the fitted versus residuals plot of homicide and violence rates, we
+see a very low possibility of heteroscedascity and non-linearity, since
+the horizontal line crosses the value of zero, but this acceptable since
+this deviation is very insignificant.</p>
 </div>
 </div>
 <div id="conclusion" class="section level2">
@@ -2268,23 +2248,12 @@ possible heteroscedascity and non-linearity.</p>
 best-subset regression models are most accurate at predicting the
 outcomes: (1) Violence Rate and (2) Homicide Rate.</p>
 <p>The best-subset regression model for predicting violence rate yielded
-an adjusted r-squared of 0.51 and included the following variables a
-predictors: GDP, inflation rate, economic crime rate, personnel rate,
-trafficked victims, and alcohol consumption rate. The best-subset
-regression model for predicting homicide rate returned an r-squared of
-0.33. The variables included in this model were inflation rate,
-unemployment rate, HDI, and economic crime rate.</p>
-<p>Despite moderately high R-squared values for each of these models, we
-must acknowledge that the models’ performance and accuracy may suffer
-from certain drawbacks. In particular, model diagnostics revealed
-concerns regarding the normality, linearity, and homoscedascity of the
-dataset used to produce these models. Additionally, transformations
-applied to cope with the concerns regarding normality failed to produce
-more normalized distributions for any of the predictor variables. As a
-result, the R-squared values for our models may be inaccurate and
-different forms of modelling, such as a non-linear approach, may be
-better suited for exploring what variables predict violence and homicide
-rates.</p>
+an adjusted r-squared of 0.46 and included the following variables a
+predictors: GDP, inflation rate, economic crime rate, unemployment rate,
+personnel rate, and alcohol consumption rate. The best-subset regression
+model for predicting homicide rate returned an r-squared of 0.57. The
+variables included in this model were unemployment rate, HDI, economic
+crime rate and personnel rate.</p>
 </div>
 </div>
 <div id="discussion" class="section level1">
@@ -2323,9 +2292,9 @@ changing nature of global violence.</p>
 methods to determine the optimal model for predicting homicide and
 violence rates. We found that using <code>regsubset</code> yielded the
 best models, where important predictors for violence rate are GDP,
-inflation rate, economic crime rate, personnel rate, trafficked victims,
+inflation rate, unemployment rate, economic crime rate, personnel rate,
 and alcohol consumption rate, and important predictors for homicide rate
-are inflation rate, unemployment rate, HDI, and economic crime rate.</p>
+are unemployment rate, HDI, economic crime rate and personnel rate.</p>
 <p><strong>Significance of Findings</strong> The results of our
 regression analysis are consistent with global trends in violence,
 emphasizing the impact of socioeconomic factors and crime. Our model
