@@ -10,11 +10,11 @@ Welcome to our project! Meet our team members.
 
 # **My An Huynh**
 
-MS Biostatistics 
+My An is a first year MS Biostatistics student. 
 
 # **Jeffrey Lin**
 
-MS in Biostatistics
+Jeffrey is a first year MS Biostatistics student. 
 
 # **Soo Min You**
 
@@ -28,5 +28,5 @@ Biostatistics student.
 
 # **Malika Top**
 
-MS in Biostatistics
+Malika is a first year MS Biostatistics student. 
 
