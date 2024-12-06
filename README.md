@@ -1,4 +1,4 @@
-# P8105 Final Project: Determinants of Global Violence
+# P8105 Final Project: Global Violence
 
 ## Members:
 
