@@ -144,7 +144,7 @@ check_model = function(data, name) {
 }
 ```
 This is a plotting function to combine several different plot types that assess 
-the assumptions of linear models
+the assumptions of linear models.
 
 
 # *Descriptive Statistics*
@@ -218,18 +218,8 @@ boxcox_df |>
 
 ```
 
-Though the transformations were expected to improve the normality, the results 
-suggest that the transformations are not necessarily effective. In fact, we found 
-that the original data already provides a reasonable representation of the 
-underlying distribution. 
 
-While the natural logarithm helped with normality, the Box-Cox transformation 
-did not substantially improve the data's distribution. Box-Cox transformation
-requires shifting data to be strictly positive, which could introduce 
-unnecessary complexity.
-
-Since boxcox transformation substantially approved the shapes of the distributions, 
-we ultimately decided to use the boxcox data for regression.
+Since boxcox transformation substantially approved the shapes of the distributions, we decided to use the boxcox transformed data for regression.
 
 ## Multicolliniearity Diagnostics
 
@@ -252,9 +242,7 @@ ggcorrplot(cor_matrix,
 )
 ```
 
-There is moderate correlation between `hdi` and `alcohol_consumption_rate`, 
-corr = 0.56, and moderately high correlation between `trafficked_victims` and 
-`gdp`, corr = 0.77. 
+There is moderate correlation between `hdi` and `alcohol_consumption_rate` (corr = 0.56), `hdi` and `economic_crime_rate` (corr = 0.57), and `gdp` and `trafficked_victims` (corr - 0.51). 
 
 # *Data Pre-Processing*
 
@@ -325,9 +313,7 @@ baseline_MLR_hom %>%
   broom::tidy() %>% 
   knitr::kable()
 ```
-Results from baseline MLR show that that inflation rate, unemployment rate and 
-hdi are significant predictors of homicide rate at 
-alpha = 0.05. 
+Results from baseline MLR show that that HDI, economic crime rate and personnel rate are significant predictors of homicide.
 
 ## Collinearity of Baseline Homicide Model 
 ```{r }
@@ -342,7 +328,7 @@ vif_baseline_hom_MLR %>%
 
 ```
 
-Results from VIF show that there is no multicollinearity issue (VIF < 5).
+Results from VIF show that there is no serious multicollinearity issue (VIF < 5).
 
 ## Predict Violence Rates
 ```{r }
@@ -356,9 +342,7 @@ baseline_MLR_viol %>%
   broom::tidy() %>% 
   knitr::kable()
 ```
-Results from MLR show that gdp, inflation rate, economic crime rate, personnel rate, 
-number of trafficked victims per 100,000 and alcohol consumption rates are 
-significant predictors of violence rate at significance level alpha = 0.01. 
+Results from MLR show that gdp, inflation rate, unemployment rate, hdi, economic crime rate, and alcohol consumption rates are significant predictors of violence rate at significance level alpha = 0.01. 
 
 ## Collinearity of Baseline Violence Model
 ```{r }
@@ -371,7 +355,7 @@ vif_baseline_viol_MLR %>%
   select(variable, VIF) %>% 
   knitr::kable()
 ```
-Results from VIF show that there is no multicollinearity issue (VIF < 5).
+Results from VIF show that there is no serious multicollinearity issue (VIF < 5).
 
 # *Lasso*
 We used lasso to as a feature selection tool to find the most important 
@@ -486,12 +470,8 @@ All variables have VIF value below 5, suggesting that there is no
 multi-colinearity concerns.
 
 ### Interpretation
-The results from criterion-based procedures suggest that 
-significant predictors for `violence_rate` are `gdp`, `inflation_rate`, 
-`unemployment_rate`, `economic_crime_rate`, `personnel_rate`, `hdi` 
-and `alcohol_consumption rate`, with a total of 7 predictors. 
-This yields the most appropriate Cp value (6.94), which is approximately 
-close to the number of predictors, and highest adjusted R-squared (0.46).
+The results from criterion-based procedures suggest that, based on the highest adjusted R-squared, the significant predictors for `violence_rate` are `gdp`, `inflation_rate`, `unemployment_rate`, `economic_crime_rate`, `hdi`, `personnel_rate`and `alcohol_consumption rate`, with a total of 7 predictors. 
+The results from Cp, however, suggested a model that does not include personnel_rate. We ultimately decided to proceed with the model that includes personnel rate, because in the real-world context, personnel rate should explain some variation in violence rate. 
 
 ## Best Subset Regression for Homicide 
 
@@ -532,18 +512,14 @@ vif_subset_homicide_model %>%
   knitr::kable()
 ```
 All variables have VIF value below 5, suggesting that there is no 
-multi-colinearity concerns.
+multi-colinearity issue
 
 
 ## Interpretation
 For `homicide_rate`, the results are not as straightforward. 
-The best model based on R-squared (0.57) is the model with `unemployment_rate`, `hdi`, 
-`economic_crime_rate` and `personnel_rate` as predictors. Howeover, based on the 
-Cp criterion (2.51), it's the model with `hdi`, `economic_crime_rate` and `personnel_rate`.
+The best model based on R-squared (0.57) is the model with `unemployment_rate`, `hdi`, `economic_crime_rate` and `personnel_rate` as predictors. Howeover, based on the Cp criterion (2.51), it's the model with `hdi`, `economic_crime_rate` and `personnel_rate`.
 
-Subsequently, we will choose four predictors since it has a relatively high adjusted 
-R-Squared (0.57) and we are interested in a model that can explain more variances 
-of violence rates. 
+Subsequently, we will choose four predictors since it has a relatively high adjusted R-Squared (0.57) and we are interested in a model that can explain more variation in violence rates. 
 
 # *Model Comparison*
 
@@ -780,8 +756,7 @@ Homicide Rate.
 The best-subset regression model for predicting violence 
 rate yielded an adjusted r-squared of 
 `r round(violence_best_subset_rsq[["Criterion"]], 2)` and included 
-the following variables a predictors: GDP, inflation rate, economic crime rate, 
-unemployment rate, personnel rate, and alcohol consumption rate. The 
+the following variables a predictors: GDP, inflation rate, economic crime rate, hdi, unemployment rate, personnel rate, and alcohol consumption rate. The 
 best-subset regression model for predicting homicide rate returned an 
 r-squared of `r round(homicide_best_subset_rsq[["Criterion"]], 2)`. The 
 variables included in this model were unemployment rate, HDI, economic crime 
