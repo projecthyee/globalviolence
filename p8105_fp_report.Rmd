@@ -1410,6 +1410,37 @@ be inaccurate and different forms of modelling, such as a non-linear approach,
 may be better suited for exploring what variables predict violence and homicide 
 rates.
 
+# Discussion
+
+The findings from our project highlight several important observations:
+**Homicide Victim Rates:**
+As expected, the Americas have by far the highest rates of homicide victims with most victims being male. Over the last couple of years, there has been significant news coverage on conflicts of gang violence in South America, and issues of increasing crime across the United States. Asia has the second highest male victim rate, but interestingly, a sharp decrease occurred in 2022. Oceania, Africa and Europe have similarly low homicide rates in comparison. Africa did have a noticeable increase in homicides during the pandemic, which similar to the Americas, faced several military coups like in Niger and Gabon. 
+
+Looking closer at the high homicide rates of the Americas and Asia, the relationships between victim-perpetrators in the Americas were unknown. But in Asia, it was interestingly socio-political homicide.  Given the diversity of Asia’s ethnicities, races, religions, political/economic/social views though, this is not necessarily surprising. 
+
+**Violent Offence Rates**
+Oceania has the highest rate of violent offences for all years until 2022, where the Americas meets it. The most common offence category for Oceania (and in general) was serious assault. Acts intended to induce emotional fear or distress was the second highest. Given media coverage and our own preconceived notions, sexual violence rates being low was unexpected. Therefore, we wanted to look more in-depth into sexual violence trends since in comparison to the magnitude other violence categories, it may have been hidden. In that exploration, we see that there have been increasing rates of sexual violence against women across all regions except for Asia. This reflects what we know and is reiterated by UN reports on the changing nature of global violence.
+
+**Statistical Analyses**
+We employed several statistical methods to determine the optimal model for predicting homicide and violence rates. We found that using `regsubset` yielded the best models, where important predictors for violence rate are GDP, inflation rate, crime rate, personnel rate, trafficked victims, and alcohol consumption rate, and important predictors for homicide rate are inflation rate, unemployment rate, HDI, and crime rate.
+
+**Significance of Findings**
+The results of our regression analysis are consistent with global trends in violence, emphasizing the impact of socioeconomic factors and crime. Our model suggests that economic instability, indicated by inflation and unemployment rates, and socioeconomic development, indicated by HDI, are significant factors for homicide and violence. This makes sense, as economic crises exacerbate social tensions, leading to increased crime. The UN highlights that regions with high economic volatility and low development are more prone to conflict and violence, since unemployment and inflation create opportunity for criminal activities and homicides.
+
+Furthermore, our analysis shows crime rates as a predictor of homicide, reflecting the UN’s own observations that organized crime and gang violence drive violence, particularly in areas with weak governance and political instability. The UN has emphasized that non-state actors, like criminal organizations and militias, play a role in perpetuating violence in regions where state institutions are fragile. 
+
+Finally, our findings on the role of human development indicators and substance abuse, such as alcohol consumption and human trafficking, are also reflected by broader global trends. The UN reported that women and children are disproportionately affected by domestic violence and gender-based homicides, which are often exacerbated by substance abuse and human trafficking. These insights align with our model’s predictors, emphasizing the intersection of social inequality, substance abuse, and violence. 
+
+**Source: https://www.un.org/en/un75/new-era-conflict-and-violence**
+
+**Challenges and limitations**:
+External validity is compromised in our analysis due to the presence of NA values in our dataset since we may not be able to generalize our findings in a global context. Furthermore, data quality issues also pose a challenge to our analysis.  Missing data here may be due to national governments or regional law enforcement restricting the release of detailed data on violence to protect sensitive information, maintain political stability or hold on their citizens.  Furthermore, data collection methodologies vary based on countries - some countries may not have the proper infrastructure for data collection. The nuances of cultural context will also play a role here, as what is considered violence to one country may not be considered in other countries.
+
+Limitations to our methodology include not being able to account for temporality in our analysis, amd not being able to capture the variation in violence and homicide rates based on countries and regions. Further work includes building models specific for countries and regions while accounting for temporality.  It would also be very interesting to create visualizations for more specific crime data, by country. We can also include unsupervised learning methods such as clustering to identify region-specific predictors that contribute to violence. 
+
+
+
+
 # *Citation*
 
 * UNODC (2024), UNODC Research - Data Portal – Access and
