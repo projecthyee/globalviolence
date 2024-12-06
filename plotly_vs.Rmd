@@ -12,29 +12,51 @@ library(plotly)
 library(flexdashboard)
 
 merged_violence_df = 
-  read_csv("./data/merged_violence.csv")
+  read_csv("./data/merged_violence.csv") |>
+  mutate(
+    gdp = format(gdp, scientific = TRUE, digits = 4), 
+    gdp = as.numeric(gdp),
+    inflation_rate = round(inflation_rate, digits = 3), 
+    unemployment_rate = round(unemployment_rate, digits = 3), 
+    economic_crime_rate = round(economic_crime_rate, digits = 3),
+    personnel_rate = round(personnel_rate, digits = 3), 
+    alcohol_consumption_rate = round(alcohol_consumption_rate, digits = 3), 
+    homicide_rate = round(homicide_rate, digits = 3), 
+    violence_rate = round(violence_rate, digits = 3)
+  )
+  
 ```
 
 Column {data-width=650}
 -----------------------------------------------------------------------
  
-### Economic Predictors: Homicide vs. Violence Rate
+### Economic Predictors: Homicide vs. Violence Rate 
 
 ```{r message = FALSE, warning=FALSE}
 merged_violence_df |> 
   plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~gdp,
-          text = ~paste('Country', country, 
+          text = ~paste('Country:', country, 
+                        '<br>Violence Rate:', violence_rate, 
+                        '<br>Homicide Rate:', homicide_rate, 
                         '<br>Year:', year, 
                         '<br>HDI:', hdi,
                         '<br>GDP:', gdp, 
                         '<br>Inflation Rate:', inflation_rate,
                         '<br>Unemployment Rate:', unemployment_rate), 
+          hovertemplate = paste("%{text}<extra></extra>"),
           type = 'scatter', 
           mode = 'markers', 
           color = ~region,
           marker = list(symbol = 'circle', 
                         sizemode = 'diameter',
-                        line = list(width = 2, color = '#FFFFFF')))
+                        line = list(width = 2, color = '#FFFFFF'))) |>
+  layout(annotations = 
+           list(x = 250, 
+                y = -20, 
+                text = "The bubble size is relative to the GDP", 
+                showarrow = FALSE)
+         )
+
 ```
 
 Column {data-width=650}
@@ -45,18 +67,27 @@ Column {data-width=650}
 ```{r message = FALSE, warning=FALSE}
 merged_violence_df |> 
   plot_ly(x = ~violence_rate, y = ~homicide_rate, size = ~economic_crime_rate,
-          text = ~paste('Country', country, 
+          text = ~paste('Country:', country, 
+                        '<br>Violence Rate:', violence_rate, 
+                        '<br>Homicide Rate:', homicide_rate,
                         '<br>Year:', year, 
                         '<br>Economic Crime Rate:', economic_crime_rate,
                         '<br>Personnel Rate:', personnel_rate, 
                         '<br>Alcohol Consumption Rate:', alcohol_consumption_rate,
                         '<br>Trafficed Victims:', trafficked_victims), 
+          hovertemplate = paste("%{text}<extra></extra>"),
           type = 'scatter', 
           mode = 'markers', 
           color = ~region,
           marker = list(symbol = 'circle', 
                         sizemode = 'diameter',
-                        line = list(width = 2, color = '#FFFFFF')))
+                        line = list(width = 2, color = '#FFFFFF'))) |>
+   layout(annotations = 
+           list(x = 210, 
+                y = -20, 
+                text = "The bubble size is relative to the Economic Crime Rate", 
+                showarrow = FALSE)
+         )
 ```
 
 
