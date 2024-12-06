@@ -627,7 +627,7 @@ accordingly.</p>
   read_excel(path = &quot;data/unodc/corruption_economic_crime.xlsx&quot;, skip = 2) |&gt;
   janitor::clean_names() |&gt;
   filter(unit_of_measurement == &quot;Rate per 100,000 population&quot;) |&gt;
-  tidy_df(&quot;crime_rate&quot;,  average = TRUE)
+  tidy_df(&quot;economic_crime_rate&quot;,  average = TRUE)
 
 personnel_df =
   read_excel(path = &quot;data/unodc/criminal_justice_personnel.xlsx&quot;, skip = 2) |&gt;
@@ -729,7 +729,7 @@ head(merged_violence_df)</code></pre>
 ## 5 ALB       Albania Europe  2019          2.26          5.09 15401826127.
 ## 6 ALB       Albania Europe  2020          2.13          4.71 15162734205.
 ## # ℹ 7 more variables: inflation_rate &lt;dbl&gt;, unemployment_rate &lt;dbl&gt;, hdi &lt;dbl&gt;,
-## #   crime_rate &lt;dbl&gt;, personnel_rate &lt;dbl&gt;, trafficked_victims &lt;dbl&gt;,
+## #   economic_crime_rate &lt;dbl&gt;, personnel_rate &lt;dbl&gt;, trafficked_victims &lt;dbl&gt;,
 ## #   alcohol_consumption_rate &lt;dbl&gt;</code></pre>
 <pre class="r"><code>write.csv(merged_violence_df, file = &quot;./data/merged_violence.csv&quot;)</code></pre>
 <p>The final merged dataset includes 771 rows and 14 columns, including

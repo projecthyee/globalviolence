@@ -237,7 +237,7 @@ econ_crime_df =
   read_excel(path = "data/unodc/corruption_economic_crime.xlsx", skip = 2) |>
   janitor::clean_names() |>
   filter(unit_of_measurement == "Rate per 100,000 population") |>
-  tidy_df("crime_rate",  average = TRUE)
+  tidy_df("economic_crime_rate",  average = TRUE)
 
 personnel_df =
   read_excel(path = "data/unodc/criminal_justice_personnel.xlsx", skip = 2) |>
